@@ -1,34 +1,45 @@
 #!/usr/bin/perl -w
 
 package main;
-use XML::RSS::Feed; # libxml-rss-feed-perl
 use LWP::Simple qw(get);
+use XML::Feed;
+use Data::Dumper;
 use strict;
+use warnings;
+use diagnostics;
 
-use constant URL => 'http://xml.nfowars.net/Alex.rss';
+use constant URL              => 'http://xml.nfowars.net/Alex.rss';
+use constant LOCAL_STORE_PATH => '/home/overlord/infowars';
+
+sub FileFromURI($)
+{
+	my $Url = shift;
+	my @uri_parts = split('/', $Url);
+	return $uri_parts[-1];
+}
 
 sub ReadStream($)
 {
 	my $Url = shift;
-	printf("Reading %s\n", $Url);
-	my $feed = XML::RSS::Feed->new(
-		url    => $Url,
-		name   => 'The Alex Jones Show - Infowars.com',
-		delay  => 10,
-		debug  => 1,
-		#tmpdir => "/tmp", # optional caching
-	);
 
-	while (1) {
-		$feed->parse(get($feed->url));
-		#print $_->headline . "\n" for $feed->late_breaking_news;
-		#sleep($feed->delay); 
+	my $feed = XML::Feed->parse(URI->new($Url));
+
+	foreach my $podcast ($feed->entries) {
+		my $filename = FileFromURI($podcast->link);
+		my $local_podcast = LOCAL_STORE_PATH() . '/' . $filename;
+		if ( -f $local_podcast ) {
+			printf(STDERR "%s already exists\n", $local_podcast);
+			next;
+		}
+		warn "Would download";
 	}
+
 }
 
 sub main()
 {
 	ReadStream(URL());
+	return 0;
 }
 
 exit(main());
