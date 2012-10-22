@@ -13,7 +13,7 @@ sub ReadStream($)
 	printf("Reading %s\n", $Url);
 	my $feed = XML::RSS::Feed->new(
 		url    => $Url,
-		name   => "infowars",
+		name   => 'The Alex Jones Show - Infowars.com',
 		delay  => 10,
 		debug  => 1,
 		tmpdir => "/tmp", # optional caching
