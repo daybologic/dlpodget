@@ -12,8 +12,8 @@ sub ReadStream($)
 	my $Url = shift;
 	printf("Reading %s\n", $Url);
 	my $feed = XML::RSS::Feed->new(
-		url    => "http://www.jbisbee.com/rdf/",
-		name   => "jbisbee",
+		url    => $Url,
+		name   => "infowars",
 		delay  => 10,
 		debug  => 1,
 		tmpdir => "/tmp", # optional caching
