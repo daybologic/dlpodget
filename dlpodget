@@ -16,13 +16,13 @@ sub ReadStream($)
 		name   => 'The Alex Jones Show - Infowars.com',
 		delay  => 10,
 		debug  => 1,
-		tmpdir => "/tmp", # optional caching
+		#tmpdir => "/tmp", # optional caching
 	);
 
 	while (1) {
 		$feed->parse(get($feed->url));
-		print $_->headline . "\n" for $feed->late_breaking_news;
-		sleep($feed->delay); 
+		#print $_->headline . "\n" for $feed->late_breaking_news;
+		#sleep($feed->delay); 
 	}
 }
 
