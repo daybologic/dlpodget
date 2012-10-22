@@ -25,13 +25,24 @@ sub ReadStream($)
 	my $feed = XML::Feed->parse(URI->new($Url));
 
 	foreach my $podcast ($feed->entries) {
+		my $data;
 		my $filename = FileFromURI($podcast->link);
 		my $local_podcast = LOCAL_STORE_PATH() . '/' . $filename;
 		if ( -f $local_podcast ) {
 			printf(STDERR "%s already exists\n", $local_podcast);
 			next;
 		}
-		warn "Would download";
+		printf(STDERR "Downloading %s ... ", $podcast->link);
+		$data = get($podcast->link);
+		printf(STDERR "\nWriting %s ... ", $local_podcast);
+		if ( open(my $f, '>', $local_podcast) ) {
+			binmode($f);
+			print($f $data);
+			close($f);
+			print(STDERR "done.\n");
+		} else {
+			printf(STDERR "Failed -- %s\n", $!);
+		}
 	}
 
 }
