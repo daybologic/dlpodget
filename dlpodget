@@ -26,8 +26,6 @@ sub ReadStream($)
 	}
 }
 
-sub ReadStream($)
-{
 sub main()
 {
 	ReadStream(URL());
