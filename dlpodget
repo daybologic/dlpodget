@@ -7,12 +7,6 @@ use strict;
 
 use constant URL => 'http://xml.nfowars.net/Alex.rss';
 
-sub main()
-{
-	ReadStream(URL());
-}
-
-        
 sub ReadStream($)
 {
 	my $Url = shift;
@@ -34,5 +28,9 @@ sub ReadStream($)
 
 sub ReadStream($)
 {
+sub main()
+{
+	ReadStream(URL());
+}
 
 exit(main());
