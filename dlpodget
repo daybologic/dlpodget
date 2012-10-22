@@ -1,13 +1,32 @@
 #!/usr/bin/perl -w
 
 package main;
+use XML::RSS::Parser::Lite;
+use LWP::Simple;
 use strict;
 
 use constant URL => 'http://xml.nfowars.net/Alex.rss';
 
 sub main()
 {
-	printf("Reading %s\n", URL());
+	ReadStream(URL());
+}
+
+        
+sub ReadStream($)
+{
+	my $Url = shift;
+	my $xml = get($Url);
+	printf("Reading %s\n", $Url);
+	my $rp = new XML::RSS::Parser::Lite;
+	$rp->parse($xml);
+
+	print $rp->get('title') . " " . $rp->get('url') . " " . $rp->get('description') . "\n";
+
+	for ( my $i = 0; $i < $rp->count(); $i++ ) {
+		my $it = $rp->get($i);
+		print $it->get('title') . " " . $it->get('url') . " " . $it->get('description') . "\n";
+	}
 }
 
 exit(main());
