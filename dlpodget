@@ -8,9 +8,6 @@ use strict;
 use warnings;
 use diagnostics;
 
-use constant URL              => 'http://xml.nfowars.net/Alex.rss';
-use constant LOCAL_STORE_PATH => '/home/overlord/infowars';
-
 sub FileFromURI($)
 {
 	my $Url = shift;
