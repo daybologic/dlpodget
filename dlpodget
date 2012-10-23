@@ -53,15 +53,33 @@ sub main()
 	my $conf = Daybo::ConfReader->new();
 	my $conffile = "$ENV{HOME}/.dlpodget.rc";
 	if ( -f $conffile ) {
-		$conf->Reload() if ( $conf->SetFn($conffile) );
+		if ( $conf->SetFn($conffile) ) {
+			$conf->Reload();
+		}
+	} else {
+		$conf = undef;
 	}
-	if ( $conf->GetKeys(undef, \@defKeys) ) {
+
+	if ( $conf && $conf->GetKeys(undef, \@defKeys) ) {
 		if ( 'enable' ~~ @defKeys ) {
 			if ( !$conf->GetDatum(undef, 'enable') ) {
 				print(STDERR "Configuration disabled.\n");
+				$conf = undef;
 			}
 		}
 	}
+	if ( $conf ) {
+		my ( @sections, $secC );
+		$secC = $conf->GetSections(\@sections);
+		for ( my $secI = 0; $secI < $secC; $secI++ ) {
+			my @secKeys;
+			my $keyC = $conf->GetKeys($sections[$secI], \@secKeys);
+			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
+				warn $conf->GetDatum($sections[$secI], $secKeys[$keyI]);
+			}
+		}
+	}
+
 	#ReadStream(URL());
 	return 0;
 }
