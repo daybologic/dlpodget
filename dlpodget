@@ -4,6 +4,7 @@ package main;
 use LWP::Simple qw(get);
 use XML::Feed;
 use Data::Dumper;
+use Daybo::ConfReader;
 use strict;
 use warnings;
 use diagnostics;
@@ -48,7 +49,20 @@ sub ReadStream($)
 
 sub main()
 {
-	ReadStream(URL());
+	my @defKeys;
+	my $conf = Daybo::ConfReader->new();
+	my $conffile = "$ENV{HOME}/.dlpodget.rc";
+	if ( -f $conffile ) {
+		$conf->Reload() if ( $conf->SetFn($conffile) );
+	}
+	if ( $conf->GetKeys(undef, \@defKeys) ) {
+		if ( 'enable' ~~ @defKeys ) {
+			if ( !$conf->GetDatum(undef, 'enable') ) {
+				print(STDERR "Configuration disabled.\n");
+			}
+		}
+	}
+	#ReadStream(URL());
 	return 0;
 }
 
