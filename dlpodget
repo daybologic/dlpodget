@@ -75,7 +75,12 @@ sub main()
 			my @secKeys;
 			my $keyC = $conf->GetKeys($sections[$secI], \@secKeys);
 			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
-				warn $conf->GetDatum($sections[$secI], $secKeys[$keyI]);
+				printf(
+					'[%s] %s -> %s'."\n",
+					$sections[$secI],
+					$secKeys[$keyI],
+					$conf->GetDatum($sections[$secI], $secKeys[$keyI])
+				);
 			}
 		}
 	}
