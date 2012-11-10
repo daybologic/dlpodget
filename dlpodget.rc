@@ -1,0 +1,34 @@
+;
+; This configuration file holds the RSS feeds for the dlpodget application
+; the section is the nominal tag or name you want to assign the download,
+; the supported keys are:
+;
+;   localpath = <path to a directory whuich holds the downloads>
+;   rss       = <URI to RSS source>
+;   check     = <1|0>, default 1, whether to automatically check for new files on each run
+;   download  = <1|0>, default 1, whether to automatically download new files
+;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
+;
+; More generally, we have a default section, which contains the following options:
+;
+;   enable    = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
+;   localpfx  = <prefix which will be exported to sections as $LOCALPFX>
+;   noop      = <1|0>, default 0, set to 1 to disable modification of local files.
+
+enable    = 1
+localpfx  = $HOME/podcasts
+noop      = 1
+
+[infowars]
+localpath = $LOCALPFX/infowars
+rss       = http://xml.nfowars.net/Alex.rss
+check     = 1
+download  = 1
+enable    = 1
+
+[bsec]
+localpath = $LOCALPFX/bsec
+rss       = http://feeds.feedburner.com/BradleyStokeEvangelicalChurchSermons?format=xml
+check     = 1
+download  = 0
+enable    = 1
