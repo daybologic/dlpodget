@@ -110,9 +110,9 @@ sub main()
 				$feeds{_main}->{$mk} = $conf->GetDatum(undef, $mk);
 			}
 			# Set debug flag via config if it existed.
-			if ( defined($feeds{_main}->{debug}) ) {
+			if ( $feeds{_main}->{debug} ) {
 				$Debug = $feeds{_main}->{debug};
-				printf(STDERR "Set Debug via config: %s\n", $Debug) if ( $Debug );
+				printf(STDERR "Set Debug via config: %s\n", $Debug);
 			}
 		}
 
