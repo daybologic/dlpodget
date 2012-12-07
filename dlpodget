@@ -5,6 +5,7 @@ use LWP::Simple qw(get);
 use XML::Feed;
 use Data::Dumper;
 use Daybo::ConfReader;
+use Getopt::Std;
 use strict;
 use warnings;
 use diagnostics;
@@ -65,6 +66,10 @@ sub ProcessTags($$)
 
 sub main()
 {
+	my %opts = ( );
+	return 1 if ( !getopts('d', \%opts) );
+	$Debug = 1 if ( $opts{'d'} );
+	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 	my %feeds = ( );
 	my @defKeys;
 	my $conf = Daybo::ConfReader->new();
