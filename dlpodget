@@ -68,14 +68,20 @@ sub main()
 	my %feeds = ( );
 	my @defKeys;
 	my $conf = Daybo::ConfReader->new();
-	my $conffile = "$ENV{HOME}/.dlpodget.rc";
-	if ( -f $conffile ) {
-		if ( $conf->SetFn($conffile) ) {
+	my $confSeen = 0;
+	my @confFiles = (
+		'dlpodget.rc',
+		"$ENV{HOME}/.dlpodget.rc"
+	);
+	foreach my $confFile ( @confFiles ) {
+		next unless ( -f $confFile );
+		if ( $conf->SetFn($confFile) ) {
 			$conf->Reload();
+			$confSeen++;
+			last;
 		}
-	} else {
-		$conf = undef;
 	}
+	$conf = undef if ( !$confSeen );
 
 	if ( $conf && $conf->GetKeys(undef, \@defKeys) ) {
 		if ( 'enable' ~~ @defKeys ) {
