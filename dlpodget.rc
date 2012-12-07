@@ -32,3 +32,10 @@ rss       = http://feeds.feedburner.com/BradleyStokeEvangelicalChurchSermons?for
 check     = 1
 download  = 0
 enable    = 1
+
+[bbcaq]
+localpath = $LOCALPFX/bbcaq
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/bbcaq/rss.xml
+check     = 1
+download  = 1
+enable    = 1
