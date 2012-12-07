@@ -4,12 +4,15 @@ package main;
 use LWP::Simple qw(get);
 use XML::Feed;
 use Data::Dumper;
+use Getopt::Std;
 use strict;
 use warnings;
 use diagnostics;
 
 use constant URL              => 'http://xml.nfowars.net/Alex.rss';
 use constant LOCAL_STORE_PATH => '/home/overlord/infowars';
+
+my $Debug = 0;
 
 sub FileFromURI($)
 {
@@ -51,6 +54,10 @@ sub ReadStream($)
 
 sub main()
 {
+	my %opts = ( );
+	return 1 if ( !getopts('d', \%opts) );
+	$Debug = 1 if ( $opts{'d'} );
+	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 	ReadStream(URL());
 	return 0;
 }
