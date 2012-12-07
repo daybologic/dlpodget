@@ -9,6 +9,8 @@ use strict;
 use warnings;
 use diagnostics;
 
+use constant LOCAL_STORE_PATH => 'podcasts';
+
 sub FileFromURI($)
 {
 	my $Url = shift;
@@ -47,8 +49,21 @@ sub ReadStream($)
 
 }
 
+sub ProcessTags($$)
+{
+	my ( $Feeds, $V ) = @_;
+	foreach my $c ( keys(%{ $Feeds->{_main} }) ) {
+		my $ucc = '$' . uc($c);
+		while ( my $idx = index($V, $ucc) > -1 ) {
+			substr($V, $idx-1, length($ucc), $Feeds->{_main}->{$c});
+		}
+	}
+	return $V;
+}
+
 sub main()
 {
+	my %feeds = ( );
 	my @defKeys;
 	my $conf = Daybo::ConfReader->new();
 	my $conffile = "$ENV{HOME}/.dlpodget.rc";
@@ -69,23 +84,48 @@ sub main()
 		}
 	}
 	if ( $conf ) {
-		my ( @sections, $secC );
+		my ( @sections, $secC, @mainKeys );
 		$secC = $conf->GetSections(\@sections);
+
+		# First load the generation configuration information
+		$feeds{_main} = { %ENV }; # Include environment variables.
+		if ( $conf->GetKeys(undef, \@mainKeys) ) {
+			foreach my $mk ( @mainKeys ) {
+				$feeds{_main}->{$mk} = $conf->GetDatum(undef, $mk);
+			}
+		}
+
 		for ( my $secI = 0; $secI < $secC; $secI++ ) {
 			my @secKeys;
 			my $keyC = $conf->GetKeys($sections[$secI], \@secKeys);
 			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
+				#[bsec] enable -> 1
+				#[bsec] check -> 1
+				#[bsec] rss -> http://feeds.feedburner.com/BradleyStokeEvangelicalChurchSermons?format=xml
+				#[bsec] localpath -> $LOCALPFX/bsec
+				#[bsec] download -> 0
+				next if ( $sections[$secI] eq '_main' ); # Skip reserved section
+				my $v = $conf->GetDatum($sections[$secI], $secKeys[$keyI]);
+				$v = ProcessTags(\%feeds, $v);
 				printf(
 					'[%s] %s -> %s'."\n",
 					$sections[$secI],
 					$secKeys[$keyI],
-					$conf->GetDatum($sections[$secI], $secKeys[$keyI])
+					$v
 				);
+				$feeds{ $sections[$secI] }->{ $secKeys[$keyI] } = $v;
 			}
 		}
 	}
 
-	#ReadStream(URL());
+	foreach my $feedName ( keys(%feeds) ) {
+		my $feed = $feeds{$feedName};
+		next if ( !$feed->{enable} );
+		next if ( !$feed->{download} );
+		ReadStream($feed->{rss});
+	}
+
+	print Dumper \%feeds;
 	return 0;
 }
 
