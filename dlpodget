@@ -157,7 +157,6 @@ sub main()
 		}
 	}
 
-	print Dumper \%feeds;
 	return 0;
 }
 
