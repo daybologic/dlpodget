@@ -4,13 +4,11 @@ package main;
 use LWP::Simple qw(get);
 use XML::Feed;
 use Data::Dumper;
+use Daybo::ConfReader;
 use Getopt::Std;
 use strict;
 use warnings;
 use diagnostics;
-
-use constant URL              => 'http://xml.nfowars.net/Alex.rss';
-use constant LOCAL_STORE_PATH => '/home/overlord/infowars';
 
 my $Debug = 0;
 
@@ -21,10 +19,10 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
-sub ReadStream($)
+sub ReadStream($$$)
 {
 	my @entries = ( );
-	my $Url = shift;
+	my ( $Feeds, $Url, $Name ) = @_;
 	my $feed = XML::Feed->parse(URI->new($Url));
 	foreach my $entry ($feed->entries) {
 		my $filename = FileFromURI($entry->link);
@@ -40,11 +38,11 @@ sub ReadStream($)
 	return @entries;
 }
 
-sub DownloadStream($)
+sub DownloadStream($$$)
 {
 	my $data;
-	my $entry = shift;
-	my $local_podcast = LOCAL_STORE_PATH() . '/' . $entry->{filename};
+	my ( $Feeds, $entry, $Name ) = @_;
+	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		printf(STDERR "%s already exists\n", $local_podcast);
 		return;
@@ -52,6 +50,11 @@ sub DownloadStream($)
 	printf(STDERR "Downloading %s ... ", $entry->{uri});
 	$data = get($entry->{uri});
 	print(STDERR "done.\n");
+
+	if ( $Feeds->{_main}->{noop} ) {
+		printf(STDERR "\nSkipping write of %s (DRY-RUN).\n", $local_podcast);
+		return;
+	}
 
 	printf(STDERR "\nWriting %s ... ", $local_podcast);
 	if ( open(my $f, '>', $local_podcast) ) {
@@ -64,18 +67,101 @@ sub DownloadStream($)
 	}
 }
 
+sub ProcessTags($$)
+{
+	my ( $Feeds, $V ) = @_;
+	foreach my $c ( keys(%{ $Feeds->{_main} }) ) {
+		my $ucc = '$' . uc($c);
+		while ( my $idx = index($V, $ucc) > -1 ) {
+			substr($V, $idx-1, length($ucc), $Feeds->{_main}->{$c});
+		}
+	}
+	return $V;
+}
+
 sub main()
 {
+	my $conf;
 	my @entries = ( );
+	my @defKeys;
+	my %feeds = ( );
 	my %opts = ( );
+	my $confSeen = 0;
+	my @confFiles = (
+		'dlpodget.rc',
+		"$ENV{HOME}/.dlpodget.rc"
+	);
+
 	return 1 if ( !getopts('d', \%opts) );
 	$Debug = 1 if ( $opts{'d'} );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
-	@entries = ReadStream(URL());
-	foreach my $entry ( @entries ) {
-		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
-		DownloadStream($entry);
+
+	$conf = Daybo::ConfReader->new();
+	foreach my $confFile ( @confFiles ) {
+		next unless ( -f $confFile );
+		if ( $conf->SetFn($confFile) ) {
+			$conf->Reload();
+			$confSeen++;
+			last;
+		}
 	}
+	$conf = undef if ( !$confSeen );
+
+	if ( $conf && $conf->GetKeys(undef, \@defKeys) ) {
+		if ( 'enable' ~~ @defKeys ) {
+			if ( !$conf->GetDatum(undef, 'enable') ) {
+				print(STDERR "Configuration disabled.\n");
+				$conf = undef;
+			}
+		}
+	}
+	if ( $conf ) {
+		my ( @sections, $secC );
+		$secC = $conf->GetSections(\@sections);
+
+		# First load the generation configuration information
+		$feeds{_main} = { %ENV }; # Include environment variables.
+		if ( scalar(@defKeys) ) {
+			foreach my $mk ( @defKeys ) {
+				$feeds{_main}->{$mk} = $conf->GetDatum(undef, $mk);
+			}
+			# Set debug flag via config if it existed.
+			if ( $feeds{_main}->{debug} ) {
+				$Debug = $feeds{_main}->{debug};
+				printf(STDERR "Set Debug via config: %s\n", $Debug);
+			}
+		}
+
+		for ( my $secI = 0; $secI < $secC; $secI++ ) {
+			my @secKeys;
+			my $keyC = $conf->GetKeys($sections[$secI], \@secKeys);
+			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
+				next if ( $sections[$secI] eq '_main' ); # Skip reserved section
+				my $v = $conf->GetDatum($sections[$secI], $secKeys[$keyI]);
+				$v = ProcessTags(\%feeds, $v);
+				printf(
+					STDERR
+					'[%s] %s -> %s'."\n",
+					$sections[$secI],
+					$secKeys[$keyI],
+					$v
+				) if ( $Debug );
+				$feeds{ $sections[$secI] }->{ $secKeys[$keyI] } = $v;
+			}
+		}
+	}
+
+	foreach my $feedName ( keys(%feeds) ) {
+		my $feed = $feeds{$feedName};
+		next if ( !$feed->{enable} );
+		next if ( !$feed->{download} );
+		@entries = ReadStream(\%feeds, $feed->{rss}, $feedName);
+		foreach my $entry ( @entries ) {
+			print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
+			DownloadStream(\%feeds, $entry, $feedName);
+		}
+	}
+
 	return 0;
 }
 
