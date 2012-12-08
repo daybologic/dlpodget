@@ -21,7 +21,7 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
-sub ReadStreamNew($)
+sub ReadStream($)
 {
 	my @entries = ( );
 	my $Url = shift;
@@ -36,7 +36,7 @@ sub ReadStreamNew($)
 	return @entries;
 }
 
-sub DownloadStreamNew($)
+sub DownloadStream($)
 {
 	my $data;
 	my $entry = shift;
@@ -67,9 +67,9 @@ sub main()
 	return 1 if ( !getopts('d', \%opts) );
 	$Debug = 1 if ( $opts{'d'} );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
-	@entries = ReadStreamNew(URL());
+	@entries = ReadStream(URL());
 	foreach my $entry ( @entries ) {
-		DownloadStreamNew($entry);
+		DownloadStream($entry);
 	}
 	return 0;
 }
