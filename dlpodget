@@ -111,13 +111,13 @@ sub main()
 		}
 	}
 	if ( $conf ) {
-		my ( @sections, $secC, @mainKeys );
+		my ( @sections, $secC );
 		$secC = $conf->GetSections(\@sections);
 
 		# First load the generation configuration information
 		$feeds{_main} = { %ENV }; # Include environment variables.
-		if ( $conf->GetKeys(undef, \@mainKeys) ) {
-			foreach my $mk ( @mainKeys ) {
+		if ( scalar(@defKeys) ) {
+			foreach my $mk ( @defKeys ) {
 				$feeds{_main}->{$mk} = $conf->GetDatum(undef, $mk);
 			}
 			# Set debug flag via config if it existed.
