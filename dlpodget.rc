@@ -17,7 +17,7 @@
 
 enable    = 1
 localpfx  = $HOME/podcasts
-noop      = 1
+noop      = 0
 debug     = 0
 
 [infowars]
