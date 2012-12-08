@@ -38,11 +38,11 @@ sub ReadStream($$$)
 	return @entries;
 }
 
-sub DownloadStream($)
+sub DownloadStream($$$)
 {
 	my $data;
-	my $entry = shift;
-		my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
+	my ( $Feeds, $entry, $Name ) = @_;
+	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		printf(STDERR "%s already exists\n", $local_podcast);
 		return;
@@ -153,7 +153,7 @@ sub main()
 		@entries = ReadStream(\%feeds, $feed->{rss}, $feedName);
 		foreach my $entry ( @entries ) {
 			print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
-			DownloadStream($entry);
+			DownloadStream(\%feeds, $entry, $feedName);
 		}
 	}
 
