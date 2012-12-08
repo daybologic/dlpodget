@@ -73,6 +73,7 @@ sub main()
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 	@entries = ReadStream(URL());
 	foreach my $entry ( @entries ) {
+		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
 		DownloadStream($entry);
 	}
 	return 0;
