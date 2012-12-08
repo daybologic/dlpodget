@@ -21,33 +21,45 @@ sub FileFromURI($)
 
 sub ReadStream($$$)
 {
+	my @entries = ( );
 	my ( $Feeds, $Url, $Name ) = @_;
-
 	my $feed = XML::Feed->parse(URI->new($Url));
-
-	foreach my $podcast ($feed->entries) {
-		my $data;
-		my $filename = FileFromURI($podcast->link);
-		my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $filename;
-		if ( -f $local_podcast ) {
-			printf(STDERR "%s already exists\n", $local_podcast);
-			next;
-		}
-		printf(STDERR "Downloading %s ... ", $podcast->link);
-		$data = get($podcast->link);
-		print(STDERR "done.\n");
-
-		printf(STDERR "\nWriting %s ... ", $local_podcast);
-		if ( open(my $f, '>', $local_podcast) ) {
-			binmode($f);
-			print($f $data);
-			close($f);
-			print(STDERR "done.\n");
-		} else {
-			printf(STDERR "Failed -- %s\n", $!);
-		}
+	foreach my $entry ($feed->entries) {
+		my $filename = FileFromURI($entry->link);
+		my $enclosure = $entry->{'entry'}->{'enclosure'};
+		push(@entries, {
+			filename => $filename,
+			uri      => $entry->link,
+			title    => $entry->title,
+			type     => $enclosure->{'type'},
+			length   => $enclosure->{'length'}
+		});
 	}
+	return @entries;
+}
 
+sub DownloadStream($)
+{
+	my $data;
+	my $entry = shift;
+		my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
+	if ( -f $local_podcast ) {
+		printf(STDERR "%s already exists\n", $local_podcast);
+		return;
+	}
+	printf(STDERR "Downloading %s ... ", $entry->{uri});
+	$data = get($entry->{uri});
+	print(STDERR "done.\n");
+
+	printf(STDERR "\nWriting %s ... ", $local_podcast);
+	if ( open(my $f, '>', $local_podcast) ) {
+		binmode($f);
+		print($f $data);
+		close($f);
+		print(STDERR "done.\n");
+	} else {
+		printf(STDERR "Failed -- %s\n", $!);
+	}
 }
 
 sub ProcessTags($$)
@@ -65,6 +77,7 @@ sub ProcessTags($$)
 sub main()
 {
 	my $conf;
+	my @entries = ( );
 	my @defKeys;
 	my %feeds = ( );
 	my %opts = ( );
@@ -137,7 +150,11 @@ sub main()
 		my $feed = $feeds{$feedName};
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
-		ReadStream(\%feeds, $feed->{rss}, $feedName);
+		@entries = ReadStream(\%feeds, $feed->{rss}, $feedName);
+	foreach my $entry ( @entries ) {
+		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
+		DownloadStream($entry);
+	}
 	}
 
 	print Dumper \%feeds;
