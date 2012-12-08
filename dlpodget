@@ -21,44 +21,56 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
-sub ReadStream($)
+sub ReadStreamNew($)
 {
+	my @entries = ( );
 	my $Url = shift;
-
 	my $feed = XML::Feed->parse(URI->new($Url));
-
-	foreach my $podcast ($feed->entries) {
-		my $data;
-		my $filename = FileFromURI($podcast->link);
-		my $local_podcast = LOCAL_STORE_PATH() . '/' . $filename;
-		if ( -f $local_podcast ) {
-			printf(STDERR "%s already exists\n", $local_podcast);
-			next;
-		}
-		printf(STDERR "Downloading %s ... ", $podcast->link);
-		$data = get($podcast->link);
-		print(STDERR "done.\n");
-
-		printf(STDERR "\nWriting %s ... ", $local_podcast);
-		if ( open(my $f, '>', $local_podcast) ) {
-			binmode($f);
-			print($f $data);
-			close($f);
-			print(STDERR "done.\n");
-		} else {
-			printf(STDERR "Failed -- %s\n", $!);
-		}
+	foreach my $entry ($feed->entries) {
+		my $filename = FileFromURI($entry->link);
+		push(@entries, {
+			filename => $filename,
+			uri      => $entry->link
+		});
 	}
+	return @entries;
+}
 
+sub DownloadStreamNew($)
+{
+	my $data;
+	my $entry = shift;
+	my $local_podcast = LOCAL_STORE_PATH() . '/' . $entry->{filename};
+	if ( -f $local_podcast ) {
+		printf(STDERR "%s already exists\n", $local_podcast);
+		return;
+	}
+	printf(STDERR "Downloading %s ... ", $entry->{uri});
+	$data = get($entry->{uri});
+	print(STDERR "done.\n");
+
+	printf(STDERR "\nWriting %s ... ", $local_podcast);
+	if ( open(my $f, '>', $local_podcast) ) {
+		binmode($f);
+		print($f $data);
+		close($f);
+		print(STDERR "done.\n");
+	} else {
+		printf(STDERR "Failed -- %s\n", $!);
+	}
 }
 
 sub main()
 {
+	my @entries = ( );
 	my %opts = ( );
 	return 1 if ( !getopts('d', \%opts) );
 	$Debug = 1 if ( $opts{'d'} );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
-	ReadStream(URL());
+	@entries = ReadStreamNew(URL());
+	foreach my $entry ( @entries ) {
+		DownloadStreamNew($entry);
+	}
 	return 0;
 }
 
