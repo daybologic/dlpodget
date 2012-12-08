@@ -15,6 +15,7 @@ my $Debug = 0;
 sub FileFromURI($)
 {
 	my $Url = shift;
+	return $Url if ( !$Url );
 	my @uri_parts = split('/', $Url);
 	return $uri_parts[-1];
 }
