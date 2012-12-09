@@ -31,7 +31,7 @@ enable    = 1
 localpath = $LOCALPFX/bsec
 rss       = http://feeds.feedburner.com/BradleyStokeEvangelicalChurchSermons?format=xml
 check     = 1
-download  = 0
+download  = 1
 enable    = 1
 
 [bbcaq]
