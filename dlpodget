@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use LWP::Simple qw(get);
+use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
 use Daybo::ConfReader;
@@ -43,34 +43,35 @@ sub ReadStream($$$)
 
 sub DownloadStream($$$)
 {
-	my $data;
+	my ( $data, $ua, $f );
+	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
-		my $length = (stat($local_podcast))[7];
-		if ( $length == $entry->{length} ) {
+		$local_length = (stat($local_podcast))[7];
+		if ( $local_length == $entry->{length} ) {
 			printf(STDERR "%s already exists\n", $local_podcast);
 			return;
 		}
 	}
-	printf(STDERR "Downloading %s ... ", $entry->{uri});
-	$data = get($entry->{uri});
-	print(STDERR "done.\n");
-
-	if ( $Feeds->{_main}->{noop} ) {
-		printf(STDERR "\nSkipping write of %s (DRY-RUN).\n", $local_podcast);
-		return;
+	$ua = LWP::UserAgent->new( show_progress => 1 );
+	unless ( $Feeds->{_main}->{noop} ) {
+		if ( open($f, '>>:raw', $local_podcast) ) {
+			binmode($f);
+		} else {
+			printf(STDERR "Failed -- %s\n", $!);
+			return;
+		}
 	}
-
-	printf(STDERR "\nWriting %s ... ", $local_podcast);
-	if ( open(my $f, '>', $local_podcast) ) {
-		binmode($f);
-		print($f $data);
-		close($f);
-		print(STDERR "done.\n");
-	} else {
-		printf(STDERR "Failed -- %s\n", $!);
-	}
+	$ua->get(
+		$entry->{uri},
+		'Range' => "bytes=$local_length-",
+		':content_cb' => sub {
+			my ( $chunk ) = @_;
+			print $f $chunk unless ( $Feeds->{_main}->{noop} );
+		}
+	);
+	close($f) if ( !$Feeds->{_main}->{noop} );
 }
 
 sub ProcessTags($$)
