@@ -47,8 +47,11 @@ sub DownloadStream($$$)
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
-		printf(STDERR "%s already exists\n", $local_podcast);
-		return;
+		my $length = (stat($local_podcast))[7];
+		if ( $length == $entry->{length} ) {
+			printf(STDERR "%s already exists\n", $local_podcast);
+			return;
+		}
 	}
 	printf(STDERR "Downloading %s ... ", $entry->{uri});
 	$data = get($entry->{uri});
