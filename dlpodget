@@ -43,13 +43,13 @@ sub ReadStream($$$)
 
 sub DownloadStream($$$)
 {
-	my ( $ua, $f );
+	my ( $ua, $f, %get_params );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
-		if ( $local_length == $entry->{length} ) {
+		if ( !$entry->{length} || $local_length == $entry->{length} ) {
 			printf(STDERR "%s already exists\n", $local_podcast);
 			return;
 		}
@@ -63,9 +63,12 @@ sub DownloadStream($$$)
 			return;
 		}
 	}
+	%get_params = (
+		'Range' => "bytes=$local_length-"
+	) if ( $local_length );
 	$ua->get(
 		$entry->{uri},
-		'Range' => "bytes=$local_length-",
+		%get_params,
 		':content_cb' => sub {
 			my ( $chunk ) = @_;
 			print $f $chunk unless ( $Feeds->{_main}->{noop} );
