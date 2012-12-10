@@ -25,11 +25,11 @@ sub ReadStream($$$)
 	my ( $Feeds, $Url, $Name ) = @_;
 	my $feed = XML::Feed->parse(URI->new($Url));
 	foreach my $entry ($feed->entries) {
-		my $filename = FileFromURI($entry->link);
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
+		my $filename = FileFromURI($enclosure->{'url'});
 		push(@entries, {
 			filename => $filename,
-			uri      => $entry->link,
+			uri      => $enclosure->{'url'},
 			title    => $entry->title,
 			type     => $enclosure->{'type'},
 			length   => $enclosure->{'length'}
