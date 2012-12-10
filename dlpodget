@@ -1,11 +1,12 @@
 #!/usr/bin/perl -w
 
 package main;
-use LWP::Simple qw(get);
+use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
 use Daybo::ConfReader;
 use Getopt::Std;
+use URI::Escape;
 use strict;
 use warnings;
 use diagnostics;
@@ -15,6 +16,7 @@ my $Debug = 0;
 sub FileFromURI($)
 {
 	my $Url = shift;
+	return undef if ( !$Url );
 	my @uri_parts = split('/', $Url);
 	return $uri_parts[-1];
 }
@@ -25,46 +27,54 @@ sub ReadStream($$$)
 	my ( $Feeds, $Url, $Name ) = @_;
 	my $feed = XML::Feed->parse(URI->new($Url));
 	foreach my $entry ($feed->entries) {
-		my $filename = FileFromURI($entry->link);
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
+		my $uriDecoded = uri_unescape($enclosure->{'url'});
+		my $filename = FileFromURI($uriDecoded);
 		push(@entries, {
 			filename => $filename,
-			uri      => $entry->link,
+			uri      => $uriDecoded,
 			title    => $entry->title,
 			type     => $enclosure->{'type'},
 			length   => $enclosure->{'length'}
-		});
+		}) if ( $filename );
 	}
 	return @entries;
 }
 
 sub DownloadStream($$$)
 {
-	my $data;
+	my ( $ua, $f, %get_params );
+	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
-		printf(STDERR "%s already exists\n", $local_podcast);
-		return;
+		$local_length = (stat($local_podcast))[7];
+		if ( !$entry->{length} || $local_length == $entry->{length} ) {
+			printf(STDERR "%s already exists\n", $local_podcast);
+			return;
+		}
 	}
-	printf(STDERR "Downloading %s ... ", $entry->{uri});
-	$data = get($entry->{uri});
-	print(STDERR "done.\n");
-
-	if ( $Feeds->{_main}->{noop} ) {
-		printf(STDERR "\nSkipping write of %s (DRY-RUN).\n", $local_podcast);
-		return;
+	$ua = LWP::UserAgent->new( show_progress => 1 );
+	unless ( $Feeds->{_main}->{noop} ) {
+		if ( open($f, '>>:raw', $local_podcast) ) {
+			binmode($f);
+		} else {
+			printf(STDERR "Failed -- %s\n", $!);
+			return;
+		}
 	}
-
-	printf(STDERR "\nWriting %s ... ", $local_podcast);
-	if ( open(my $f, '>', $local_podcast) ) {
-		binmode($f);
-		print($f $data);
-		close($f);
-		print(STDERR "done.\n");
-	} else {
-		printf(STDERR "Failed -- %s\n", $!);
-	}
+	%get_params = (
+		'Range' => "bytes=$local_length-"
+	) if ( $local_length );
+	$ua->get(
+		$entry->{uri},
+		%get_params,
+		':content_cb' => sub {
+			my ( $chunk ) = @_;
+			print $f $chunk unless ( $Feeds->{_main}->{noop} );
+		}
+	);
+	close($f) if ( !$Feeds->{_main}->{noop} );
 }
 
 sub ProcessTags($$)

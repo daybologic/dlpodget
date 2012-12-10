@@ -1,0 +1,5 @@
+* Partial downloaded file recovery
+* Cached RSS XML files to avoid checking every run
+* Download progress and rate display
+* GUI
+* Unit testing
