@@ -16,6 +16,7 @@ my $Debug = 0;
 sub FileFromURI($)
 {
 	my $Url = shift;
+	return undef if ( !$Url );
 	my @uri_parts = split('/', $Url);
 	return $uri_parts[-1];
 }
@@ -35,7 +36,7 @@ sub ReadStream($$$)
 			title    => $entry->title,
 			type     => $enclosure->{'type'},
 			length   => $enclosure->{'length'}
-		});
+		}) if ( $filename );
 	}
 	return @entries;
 }
