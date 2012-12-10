@@ -47,3 +47,10 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[bsdtalk]
+localpath = $LOCALPFX/bsdtalk
+rss       = http://feeds.feedburner.com/Bsdtalk
+check     = 1
+download  = 1
+enable    = 1
