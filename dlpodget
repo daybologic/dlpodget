@@ -43,7 +43,7 @@ sub ReadStream($$$)
 
 sub DownloadStream($$$)
 {
-	my ( $data, $ua, $f );
+	my ( $ua, $f );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
