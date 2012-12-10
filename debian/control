@@ -11,7 +11,8 @@ Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends},
  libwww-perl,
  libxml-feed-perl,
- dl-libconfreader-perl
+ dl-libconfreader-perl,
+ liburi-perl
 Description: Podcast downloader and management system
  Daybo Logic's podcast system keeps track of new podcasts posted on an RSS
  feed and downloads whatever you do not yet have, checking file lengths
