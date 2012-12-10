@@ -6,6 +6,7 @@ use XML::Feed;
 use Data::Dumper;
 use Daybo::ConfReader;
 use Getopt::Std;
+use URI::Encode;
 use strict;
 use warnings;
 use diagnostics;
@@ -26,10 +27,11 @@ sub ReadStream($$$)
 	my $feed = XML::Feed->parse(URI->new($Url));
 	foreach my $entry ($feed->entries) {
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
-		my $filename = FileFromURI($enclosure->{'url'});
+		my $uriDecoded = uri_decode($enclosure->{'url'});
+		my $filename = FileFromURI($uriDecoded);
 		push(@entries, {
 			filename => $filename,
-			uri      => $enclosure->{'url'},
+			uri      => $uriDecoded,
 			title    => $entry->title,
 			type     => $enclosure->{'type'},
 			length   => $enclosure->{'length'}
