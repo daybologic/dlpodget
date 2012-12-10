@@ -43,7 +43,7 @@ enable    = 1
 
 [bbctoday]
 localpath = $LOCALPFX/bbctoday
-rss       = http://newsrss.bbc.co.uk/rss/today/today/rss.xml
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
 enable    = 1
