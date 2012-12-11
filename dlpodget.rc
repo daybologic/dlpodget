@@ -54,3 +54,10 @@ rss       = http://feeds.feedburner.com/Bsdtalk
 check     = 1
 download  = 1
 enable    = 1
+
+[thearchers]
+localpath = $LOCALPFX/thearchers
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/archers/rss.xml
+check     = 1
+download  = 1
+enable    = 1
