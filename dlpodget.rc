@@ -61,3 +61,10 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/archers/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[joerogan]
+localpath = $LOCALPFX/joerogan
+rss       = http://joeroganexp.joerogan.libsynpro.com/rss
+check     = 1
+download  = 1
+enable    = 1
