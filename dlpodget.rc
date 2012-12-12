@@ -64,7 +64,7 @@ enable    = 1
 
 [joerogan]
 localpath = $LOCALPFX/joerogan
-rss       = http://joeroganexp.joerogan.libsynpro.com/rss
+rss       = http://blog.joerogan.net/feed
 check     = 1
 download  = 1
 enable    = 1
