@@ -19,6 +19,7 @@ enable    = 1
 localpfx  = $HOME/podcasts
 noop      = 0
 debug     = 0
+children  = 5
 
 [infowars]
 localpath = $LOCALPFX/infowars
