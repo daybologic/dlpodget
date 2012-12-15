@@ -64,7 +64,7 @@ sub DownloadStream($$$)
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
 		} else {
-			printf(STDERR "Failed -- %s\n", $!);
+			printf(STDERR "Local failure on stream %s -- %s: %s\n", $Name, $local_podcast, $!);
 			return;
 		}
 	}
