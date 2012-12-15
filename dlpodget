@@ -27,6 +27,11 @@ sub ReadStream($$)
 	my ( $Feeds, $Feed ) = @_;
 	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
 	my $feed = XML::Feed->parse(URI->new($Url));
+	if ( !$feed ) {
+		printf(STDERR "Stream %s error: %s\n", $Name, $@);
+		return @entries;
+	}
+
 	foreach my $entry ($feed->entries) {
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
 		my $uriDecoded = uri_unescape($enclosure->{'url'});
