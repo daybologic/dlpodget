@@ -103,7 +103,6 @@ sub Child($$)
 		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
 		DownloadStream($Feeds, $entry, $Feed->{name});
 	}
-	exit(0); # Children should not return
 }
 
 sub main()
@@ -187,6 +186,7 @@ sub main()
 		die "cannot fork: $!" if ( !defined($pid) );
 		if ($pid == 0) { # Child process
 			Child(\%feeds, $feed);
+			exit(0); # Children should not return
 		} else {
 			# FIXME handle children
 		}
