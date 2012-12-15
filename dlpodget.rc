@@ -68,3 +68,10 @@ rss       = http://blog.joerogan.net/feed
 check     = 1
 download  = 1
 enable    = 1
+
+[fricomedy]
+localpath = $LOCALPFX/r4comedy
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/fricomedy/rss.xml
+check     = 1
+download  = 1
+enable    = 1
