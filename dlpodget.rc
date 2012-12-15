@@ -67,7 +67,7 @@ localpath = $LOCALPFX/joerogan
 rss       = http://blog.joerogan.net/feed
 check     = 1
 download  = 1
-enable    = 1
+enable    = 0
 
 [fricomedy]
 localpath = $LOCALPFX/r4comedy
