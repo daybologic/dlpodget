@@ -9,6 +9,7 @@
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
 ;   timeout   = <secs>, default 30, set to 0 to move back to library defined defaults (180)
+;   maxtries  = <n>, The number of times to attempt to download a specific podcast
 ;
 ; More generally, we have a default section, which contains the following options:
 ;
@@ -21,6 +22,7 @@ localpfx  = $HOME/podcasts
 noop      = 0
 debug     = 0
 timeout   = 10
+maxtries  = 5
 
 [infowars]
 localpath = $LOCALPFX/infowars

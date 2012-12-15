@@ -43,7 +43,7 @@ sub ReadStream($$$)
 
 sub DownloadStream($$$)
 {
-	my ( $ua, $f, %get_params );
+	my ( $ua, $f, %get_params, $tries );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
@@ -56,6 +56,7 @@ sub DownloadStream($$$)
 	}
 	$ua = LWP::UserAgent->new( show_progress => 1 );
 	$ua->timeout($Feeds->{_main}->{timeout});
+	$tries = $Feeds->{_main}->{maxtries};
 	unless ( $Feeds->{_main}->{noop} ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
@@ -67,14 +68,16 @@ sub DownloadStream($$$)
 	%get_params = (
 		'Range' => "bytes=$local_length-"
 	) if ( $local_length );
-	$ua->get(
-		$entry->{uri},
-		%get_params,
-		':content_cb' => sub {
-			my ( $chunk ) = @_;
-			print $f $chunk unless ( $Feeds->{_main}->{noop} );
-		}
-	);
+	while ( $tries-- ) {
+		last if $ua->get(
+			$entry->{uri},
+			%get_params,
+			':content_cb' => sub {
+				my ( $chunk ) = @_;
+				print $f $chunk unless ( $Feeds->{_main}->{noop} );
+			}
+		);
+	}
 	close($f) if ( !$Feeds->{_main}->{noop} );
 }
 
