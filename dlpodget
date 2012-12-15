@@ -55,6 +55,7 @@ sub DownloadStream($$$)
 		}
 	}
 	$ua = LWP::UserAgent->new( show_progress => 1 );
+	$ua->timeout(10);
 	unless ( $Feeds->{_main}->{noop} ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
