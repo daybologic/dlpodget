@@ -21,6 +21,28 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
+sub InitConfigDefaults($)
+{
+	my $Feeds = shift;
+	my $confmain = $Feeds->{_main};
+	die 'Assertion failure' unless $confmain;
+
+	$confmain->{TMPDIR} = '/tmp' unless ( $confmain->{TMPDIR} );
+	$confmain->{HOME} = $confmain->{TMPDIR} unless ( $confmain->{HOME} );
+	$confmain->{localpfx} = $confmain->{HOME} unless ( $confmain->{localpfx} );
+
+	my %defaults = (
+		'enable' => 1,
+		'noop'   => 0,
+		'debug'  => 0
+	);
+
+	foreach my $opt ( keys(%defaults) ) {
+		next if ( defined($confmain->{$opt}) && $confmain->{$opt} =~ m/\d$/ );
+		$confmain->{$opt} = $defaults{$opt};
+	}
+}
+
 sub InitFeedDefaults($)
 {
 	my $Feed = shift;
@@ -141,6 +163,7 @@ sub main()
 			}
 		}
 	}
+
 	if ( $conf ) {
 		my ( @sections, $secC );
 		$secC = $conf->GetSections(\@sections);
@@ -176,6 +199,7 @@ sub main()
 			}
 		}
 	}
+	InitConfigDefaults(\%feeds);
 
 	foreach my $feedName ( keys(%feeds) ) {
 		my $feed = $feeds{$feedName};
