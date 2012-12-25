@@ -176,6 +176,10 @@ sub main()
 			DownloadStream(\%feeds, $entry, $feedName);
 		}
 	}
+	unless ( scalar(keys(%feeds)) ) {
+		print "No valid streams defined.\n";
+		return 1;
+	}
 
 	return 0;
 }
