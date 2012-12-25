@@ -102,7 +102,7 @@ sub main()
 	my %feeds = ( );
 	my %opts = ( );
 	my $confSeen = 0;
-	my $streamsEnabledCount = 0;
+	my ( $streamsEnabledCount, $streamsDefinedCount ) = ( 0, 0 );
 	my @confFiles = (
 		'dlpodget.rc',
 		"$ENV{HOME}/.dlpodget.rc"
@@ -169,6 +169,7 @@ sub main()
 
 	foreach my $feedName ( keys(%feeds) ) {
 		my $feed = $feeds{$feedName};
+		$streamsDefinedCount++ if ( $feed->{rss} );
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
 		@entries = ReadStream(\%feeds, $feed->{rss}, $feedName);
@@ -178,7 +179,7 @@ sub main()
 			DownloadStream(\%feeds, $entry, $feedName);
 		}
 	}
-	unless ( scalar(keys(%feeds))-1 ) { # (Ignoring _main)
+	unless ( $streamsDefinedCount ) {
 		print "No valid streams defined.\n";
 		return 1;
 	}
