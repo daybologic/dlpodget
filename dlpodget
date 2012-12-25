@@ -170,15 +170,15 @@ sub main()
 	foreach my $feedName ( keys(%feeds) ) {
 		my $feed = $feeds{$feedName};
 		next if ( !$feed->{enable} );
-		$streamsEnabledCount++;
 		next if ( !$feed->{download} );
 		@entries = ReadStream(\%feeds, $feed->{rss}, $feedName);
 		foreach my $entry ( @entries ) {
+			$streamsEnabledCount++;
 			print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
 			DownloadStream(\%feeds, $entry, $feedName);
 		}
 	}
-	unless ( scalar(keys(%feeds)) ) {
+	unless ( scalar(keys(%feeds))-1 ) { # (Ignoring _main)
 		print "No valid streams defined.\n";
 		return 1;
 	}
