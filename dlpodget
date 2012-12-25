@@ -21,6 +21,16 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
+sub InitFeedDefaults($)
+{
+	my $Feed = shift;
+	$Feed->{localpath} = 'FIXME' unless ( $Feed->{localpath} ); # FIXME: Need to get $LOCALPFX from _main!
+	$Feed->{rss} = '' unless ( $Feed->{rss} );
+	foreach my $chk ( 'check', 'download', 'enable' ) {
+		$Feed->{$chk} = 1 if ( !$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/ );
+	}
+}
+
 sub ReadStream($$$)
 {
 	my @entries = ( );
@@ -169,6 +179,7 @@ sub main()
 
 	foreach my $feedName ( keys(%feeds) ) {
 		my $feed = $feeds{$feedName};
+		InitFeedDefaults($feed);
 		$streamsDefinedCount++ if ( $feed->{rss} );
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
