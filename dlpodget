@@ -43,10 +43,10 @@ sub InitConfigDefaults($)
 	}
 }
 
-sub InitFeedDefaults($)
+sub InitFeedDefaults($$)
 {
-	my $Feed = shift;
-	$Feed->{localpath} = 'FIXME' unless ( $Feed->{localpath} ); # FIXME: Need to get $LOCALPFX from _main!
+	my ( $Feeds, $Feed ) = @_;
+	$Feed->{localpath} = $Feeds->{_main}->{localpfx} unless ( $Feed->{localpath} );
 	$Feed->{rss} = '' unless ( $Feed->{rss} );
 	foreach my $chk ( 'check', 'download', 'enable' ) {
 		$Feed->{$chk} = 1 if ( !$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/ );
@@ -203,7 +203,7 @@ sub main()
 
 	foreach my $feedName ( keys(%feeds) ) {
 		my $feed = $feeds{$feedName};
-		InitFeedDefaults($feed);
+		InitFeedDefaults(\%feeds, $feed);
 		$streamsDefinedCount++ if ( $feed->{rss} );
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
