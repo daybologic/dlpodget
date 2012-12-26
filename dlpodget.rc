@@ -75,3 +75,10 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/fricomedy/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[bbcwitness]
+localpath = $LOCALPFX/bbcwitness
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/witness/rss.xml
+check     = 1
+download  = 1
+enable    = 1
