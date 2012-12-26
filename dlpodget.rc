@@ -82,3 +82,10 @@ rss       = http://downloads.bbc.co.uk/podcasts/worldservice/witness/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[bbchardtalk]
+localpath = $LOCALPFX/bbchardtalk
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/ht/rss.xml
+check     = 1
+download  = 1
+enable    = 1
