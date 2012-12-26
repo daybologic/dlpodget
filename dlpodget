@@ -181,6 +181,7 @@ sub main()
 			}
 		}
 
+		InitConfigDefaults(\%feeds);
 		for ( my $secI = 0; $secI < $secC; $secI++ ) {
 			my @secKeys;
 			my $keyC = $conf->GetKeys($sections[$secI], \@secKeys);
@@ -199,7 +200,6 @@ sub main()
 			}
 		}
 	}
-	InitConfigDefaults(\%feeds);
 
 	foreach my $feedName ( keys(%feeds) ) {
 		my $feed = $feeds{$feedName};
