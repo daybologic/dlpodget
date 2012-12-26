@@ -16,19 +16,19 @@ sub t_FileFromURI()
 	is(FileFromURI(undef), undef, "$F test3");
 }
 
-sub t_ReadStream()
+sub t_ReadFeed()
 {
 	my %feeds = (
 		_main => { },
 		dummy => { }
 	);
-	ReadStream(\%feeds, 'http://blah', 'dummy');
+	ReadFeed(\%feeds, 'http://blah', 'dummy');
 }
 
 sub t_main()
 {
 	t_FileFromURI();
-	t_ReadStream();
+	t_ReadFeed();
 	return 0;
 }
 
