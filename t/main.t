@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 6;
+use Test::More tests => 7;
 use strict;
 use warnings;
 use diagnostics;
@@ -46,10 +46,24 @@ sub t_ReadFeed()
 	is_deeply(\%seenKeys, \%expectedKeys, 'Only expected keys returned');
 }
 
+sub t_ProcessTags()
+{
+	my $F = 'ProcessTags';
+	my %testData = (
+		_main => {
+			'dummya' => '/tmp/1',
+			'dummyb' => '/tmp/2',
+			'dummyc' => '/tmp/3'
+		}
+	);
+	is(ProcessTags(\%testData, 'blah$DUMMYAbleh'), 'blah/tmp/1bleh', "$F: A");
+}
+
 sub t_main()
 {
 	t_FileFromURI();
 	t_ReadFeed();
+	t_ProcessTags();
 	return 0;
 }
 
