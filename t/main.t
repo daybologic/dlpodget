@@ -1,12 +1,14 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 3;
+use Test::More tests => 4;
 use strict;
 use warnings;
 use diagnostics;
 
 require 'dlpodget';
+
+use constant MIN_FEED_STREAMS => (10);
 
 sub t_FileFromURI()
 {
@@ -18,11 +20,13 @@ sub t_FileFromURI()
 
 sub t_ReadFeed()
 {
+	my $F = 'ReadFeed';
 	my %feeds = (
 		_main => { },
 		dummy => { }
 	);
-	ReadFeed(\%feeds, 'http://blah', 'dummy');
+	my @arr = ReadFeed(\%feeds, 'http://xml.nfowars.net/Alex.rss', 'dummy');
+	cmp_ok(scalar(@arr), '>=', MIN_FEED_STREAMS(), sprintf('%s: At least %u feeds', $F, MIN_FEED_STREAMS()));
 }
 
 sub t_main()
