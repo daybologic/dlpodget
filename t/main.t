@@ -9,6 +9,7 @@ use diagnostics;
 require 'dlpodget';
 
 use constant MIN_FEED_STREAMS => (10);
+use constant TEST_FEED        => 'http://xml.nfowars.net/Alex.rss';
 
 sub t_FileFromURI()
 {
@@ -25,7 +26,7 @@ sub t_ReadFeed()
 		_main => { },
 		dummy => { }
 	);
-	my @arr = ReadFeed(\%feeds, 'http://xml.nfowars.net/Alex.rss', 'dummy');
+	my @arr = ReadFeed(\%feeds, TEST_FEED(), 'dummy');
 	cmp_ok(scalar(@arr), '>=', MIN_FEED_STREAMS(), sprintf('%s: At least %u feeds', $F, MIN_FEED_STREAMS()));
 }
 
