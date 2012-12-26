@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 4;
+use Test::More tests => 6;
 use strict;
 use warnings;
 use diagnostics;
@@ -21,13 +21,29 @@ sub t_FileFromURI()
 
 sub t_ReadFeed()
 {
+	my %types = ( );
 	my $F = 'ReadFeed';
+	my %seenKeys = ( );
+	my %expectedKeys = (
+		length => 1,
+		filename => 1,
+		title => 1,
+		type => 1,
+		uri => 1
+	);
 	my %feeds = (
 		_main => { },
 		dummy => { }
 	);
 	my @arr = ReadFeed(\%feeds, TEST_FEED(), 'dummy');
 	cmp_ok(scalar(@arr), '>=', MIN_FEED_STREAMS(), sprintf('%s: At least %u feeds', $F, MIN_FEED_STREAMS()));
+	foreach my $hashref ( @arr ) {
+		my $t = ref($hashref);
+		$types{$t} = 1;
+		foreach my $k ( keys(%$hashref) ) { $seenKeys{$k} = 1; }
+	}
+	is(scalar(keys(%types)), 1, "$F: Only one type of return type");
+	is_deeply(\%seenKeys, \%expectedKeys, 'Only expected keys returned');
 }
 
 sub t_main()
