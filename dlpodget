@@ -13,6 +13,13 @@ use diagnostics;
 
 my $Debug = 0;
 
+=head2 FileFromURI
+
+This simple function returns the filename from a URI, eg.
+http://host.domain.dom/path/file.html would return file.html
+If no URL, or an invalid path is passed, undef is returned.
+
+=cut
 sub FileFromURI($)
 {
 	my $Url = shift;
