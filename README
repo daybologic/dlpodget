@@ -1,1 +1,6 @@
-Placeholder; one day we will write something good about this package.
+Daybo Logic Podget -- Add grabbing your favourite RSS Podcast feeds to cron.
+
+This tool will allow you to maintain a simple config file in your home directory,
+and then add running the dlpodget script to your personal crontab.  You can then
+forget about missing your favourite feeds or religious sermons before they expire
+upstream.
