@@ -96,3 +96,10 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/belief/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[iot]
+localpath = $LOCALPFX/bbc/iot
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/iot/rss.xml
+check     = 1
+download  = 1
+enable    = 1
