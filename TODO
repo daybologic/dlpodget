@@ -3,3 +3,4 @@
 * Unit testing
 * Process forking (download multiple streams at once)
 * Download rate limiting (on a per-feed basis)
+* Emnail notifications
