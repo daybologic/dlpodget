@@ -117,8 +117,8 @@ sub ProcessTags($$)
 	my ( $Feeds, $V ) = @_;
 	foreach my $c ( keys(%{ $Feeds->{_main} }) ) {
 		my $ucc = '$' . uc($c);
-		while ( my $idx = index($V, $ucc) > -1 ) {
-			substr($V, $idx-1, length($ucc), $Feeds->{_main}->{$c});
+		while ( (my $idx = index($V, $ucc)) > -1 ) {
+			substr($V, $idx, length($ucc), $Feeds->{_main}->{$c});
 		}
 	}
 	return $V;
