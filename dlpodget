@@ -116,11 +116,17 @@ sub ProcessTags($$)
 {
 	my ( $Feeds, $V ) = @_;
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
-	while ( (my $idx = index($V, '$')) > -1 ) { # Find remaining user-variable references
+	my $avoid = 0;
+	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
+		$avoid = 0;
 		my $var = substr($V, $idx);
 		if ( $var =~ $tagRx ) {
 			my $v = $Feeds->{_main}->{ uc($1) };
 			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $Debug );
+			if ( defined($v) ) {
+				$avoid = $idx+1;
+				next;
+			}
 			die Dumper $Feeds->{_main} if ( !defined($v) );
 			next if ( !defined($v) );
 			substr($V, $idx, length($1)+1, $v);
