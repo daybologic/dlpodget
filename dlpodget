@@ -115,10 +115,14 @@ sub DownloadStream($$$)
 sub ProcessTags($$)
 {
 	my ( $Feeds, $V ) = @_;
-	foreach my $c ( keys(%{ $Feeds->{_main} }) ) {
-		my $ucc = '$' . uc($c);
-		while ( (my $idx = index($V, $ucc)) > -1 ) {
-			substr($V, $idx, length($ucc), $Feeds->{_main}->{$c});
+	my $tagRx = qr/^\$([A-Z0-9]+)/o;
+	while ( (my $idx = index($V, '$')) > -1 ) { # Find remaining user-variable references
+		my $var = substr($V, $idx);
+		if ( $var =~ $tagRx ) {
+			warn $1 . '/' . $Feeds->{_main}->{ lc($1) } if ( $Debug );
+			my $v = $Feeds->{_main}->{ lc($1) };
+			next if ( !defined($v) );
+			substr($V, $idx, length($1)+1, $v);
 		}
 	}
 	return $V;
