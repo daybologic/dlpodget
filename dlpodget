@@ -1,4 +1,34 @@
 #!/usr/bin/perl -w
+#
+# Daybo Logic Podcast downloader
+# Copyright (c) 2012-2013, David Duncan Ross Palmer, Daybo Logic
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+#     * Neither the name of the Daybo Logic nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 
 package main;
 use LWP::UserAgent;
@@ -21,11 +51,16 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
-sub ReadStream($$$)
+sub ReadFeed($$$)
 {
 	my @entries = ( );
 	my ( $Feeds, $Url, $Name ) = @_;
 	my $feed = XML::Feed->parse(URI->new($Url));
+	if ( !$feed ) {
+		printf(STDERR "Stream %s error: %s\n", $Name, $@);
+		return @entries;
+	}
+
 	foreach my $entry ($feed->entries) {
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
 		my $uriDecoded = uri_unescape($enclosure->{'url'});
@@ -59,7 +94,7 @@ sub DownloadStream($$$)
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
 		} else {
-			printf(STDERR "Failed -- %s\n", $!);
+			printf(STDERR "Local failure on stream %s -- %s: %s\n", $Name, $local_podcast, $!);
 			return;
 		}
 	}
@@ -80,10 +115,21 @@ sub DownloadStream($$$)
 sub ProcessTags($$)
 {
 	my ( $Feeds, $V ) = @_;
-	foreach my $c ( keys(%{ $Feeds->{_main} }) ) {
-		my $ucc = '$' . uc($c);
-		while ( my $idx = index($V, $ucc) > -1 ) {
-			substr($V, $idx-1, length($ucc), $Feeds->{_main}->{$c});
+	my $tagRx = qr/^\$([A-Z0-9]+)/o;
+	my $avoid = 0;
+	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
+		$avoid = 0;
+		my $var = substr($V, $idx);
+		if ( $var =~ $tagRx ) {
+			my $v = $Feeds->{_main}->{ uc($1) };
+			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $Debug );
+			if ( !defined($v) ) {
+				$avoid = $idx+1;
+				next;
+			}
+			substr($V, $idx, length($1)+1, $v);
+		} else {
+			$avoid++;
 		}
 	}
 	return $V;
@@ -130,10 +176,13 @@ sub main()
 		$secC = $conf->GetSections(\@sections);
 
 		# First load the generation configuration information
-		$feeds{_main} = { %ENV }; # Include environment variables.
+		# Include environment variables.
+		foreach my $ek ( keys(%ENV) ) {
+			$feeds{_main}->{ uc($ek) } = $ENV{$ek};
+		}
 		if ( scalar(@defKeys) ) {
 			foreach my $mk ( @defKeys ) {
-				$feeds{_main}->{$mk} = $conf->GetDatum(undef, $mk);
+				$feeds{_main}->{ uc($mk) } = $conf->GetDatum(undef, $mk);
 			}
 			# Set debug flag via config if it existed.
 			if ( $feeds{_main}->{debug} ) {
@@ -165,7 +214,7 @@ sub main()
 		my $feed = $feeds{$feedName};
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
-		@entries = ReadStream(\%feeds, $feed->{rss}, $feedName);
+		@entries = ReadFeed(\%feeds, $feed->{rss}, $feedName);
 		foreach my $entry ( @entries ) {
 			print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
 			DownloadStream(\%feeds, $entry, $feedName);
