@@ -128,6 +128,8 @@ sub ProcessTags($$)
 				next;
 			}
 			substr($V, $idx, length($1)+1, $v);
+		} else {
+			$avoid++;
 		}
 	}
 	return $V;
