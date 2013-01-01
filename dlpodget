@@ -115,10 +115,19 @@ sub DownloadStream($$$)
 sub ProcessTags($$)
 {
 	my ( $Feeds, $V ) = @_;
-	foreach my $c ( keys(%{ $Feeds->{_main} }) ) {
-		my $ucc = '$' . uc($c);
-		while ( (my $idx = index($V, $ucc)) > -1 ) {
-			substr($V, $idx, length($ucc), $Feeds->{_main}->{$c});
+	my $tagRx = qr/^\$([A-Z0-9]+)/o;
+	my $avoid = 0;
+	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
+		$avoid = 0;
+		my $var = substr($V, $idx);
+		if ( $var =~ $tagRx ) {
+			my $v = $Feeds->{_main}->{ uc($1) };
+			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $Debug );
+			if ( !defined($v) ) {
+				$avoid = $idx+1;
+				next;
+			}
+			substr($V, $idx, length($1)+1, $v);
 		}
 	}
 	return $V;
@@ -165,10 +174,13 @@ sub main()
 		$secC = $conf->GetSections(\@sections);
 
 		# First load the generation configuration information
-		$feeds{_main} = { %ENV }; # Include environment variables.
+		# Include environment variables.
+		foreach my $ek ( keys(%ENV) ) {
+			$feeds{_main}->{ uc($ek) } = $ENV{$ek};
+		}
 		if ( scalar(@defKeys) ) {
 			foreach my $mk ( @defKeys ) {
-				$feeds{_main}->{$mk} = $conf->GetDatum(undef, $mk);
+				$feeds{_main}->{ uc($mk) } = $conf->GetDatum(undef, $mk);
 			}
 			# Set debug flag via config if it existed.
 			if ( $feeds{_main}->{debug} ) {
