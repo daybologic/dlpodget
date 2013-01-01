@@ -123,7 +123,7 @@ sub ProcessTags($$)
 		if ( $var =~ $tagRx ) {
 			my $v = $Feeds->{_main}->{ uc($1) };
 			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $Debug );
-			if ( defined($v) ) {
+			if ( !defined($v) ) {
 				$avoid = $idx+1;
 				next;
 			}
