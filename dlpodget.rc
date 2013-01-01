@@ -8,17 +8,21 @@
 ;   check     = <1|0>, default 1, whether to automatically check for new files on each run
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
+;   notify    = <1|0>, or a mailto:, ftp: or an http: link
+;   attach    = <1|0>, Send the downloaded file (optional for mailto:, http:, ftp: is pretty useless without it)
 ;
 ; More generally, we have a default section, which contains the following options:
 ;
 ;   enable    = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
 ;   localpfx  = <prefix which will be exported to sections as $LOCALPFX>
 ;   noop      = <1|0>, default 0, set to 1 to disable modification of local files.
+;   notify    = a mailto:, ftp: or http: link
 
 enable    = 1
 localpfx  = $HOME/podcasts
 noop      = 0
 debug     = 0
+notify    = mailto:palmer@overchat.org
 
 [infowars]
 localpath = $LOCALPFX/infowars
@@ -26,6 +30,7 @@ rss       = http://xml.nfowars.net/Alex.rss
 check     = 1
 download  = 1
 enable    = 1
+notify    = 1
 
 [bsec]
 localpath = $LOCALPFX/bsec
@@ -47,6 +52,8 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+notify    = 1
+attach    = 1
 
 [bsdtalk]
 localpath = $LOCALPFX/bsdtalk
