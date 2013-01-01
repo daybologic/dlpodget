@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 8;
+use Test::More tests => 9;
 use strict;
 use warnings;
 use diagnostics;
@@ -58,6 +58,7 @@ sub t_ProcessTags()
 	);
 	is(ProcessTags(\%testData, 'blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
 	is(ProcessTags(\%testData, 'blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
+	is(ProcessTags(\%testData, '$'), '$', "$F: Illegal variable");
 }
 
 sub t_main()
