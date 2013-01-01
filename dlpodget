@@ -127,8 +127,6 @@ sub ProcessTags($$)
 				$avoid = $idx+1;
 				next;
 			}
-			die Dumper $Feeds->{_main} if ( !defined($v) );
-			next if ( !defined($v) );
 			substr($V, $idx, length($1)+1, $v);
 		}
 	}
