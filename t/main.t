@@ -51,12 +51,12 @@ sub t_ProcessTags()
 	my $F = 'ProcessTags';
 	my %testData = (
 		_main => {
-			'dummya' => '/tmp/1',
+			'dummya' => '$DUMMYC',
 			'dummyb' => '/tmp/2',
 			'dummyc' => '/tmp/3'
 		}
 	);
-	is(ProcessTags(\%testData, 'blah$DUMMYAbleh'), 'blah/tmp/1bleh', "$F: A");
+	is(ProcessTags(\%testData, 'blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
 }
 
 sub t_main()
