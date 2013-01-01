@@ -8,6 +8,7 @@
 ;   check     = <1|0>, default 1, whether to automatically check for new files on each run
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
+;   codec     = <name>, Name of a file format to convert to
 ;
 ; More generally, we have a default section, which contains the following options:
 ;
@@ -47,6 +48,7 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+codec     = ogg
 
 [bsdtalk]
 localpath = $LOCALPFX/bsdtalk
