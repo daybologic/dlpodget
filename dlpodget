@@ -138,6 +138,10 @@ sub ProcessTags($$)
 
 sub DB() {
 	my $dbh = DBI->connect("DBI:SQLite:$ENV{HOME}/.dlpodget.db");
+	if ( $dbh ) {
+		$dbh->do('CREATE TABLE feeds (id INTEGER PRIMARY KEY, name char(16), last_check_t DATETIME)');
+		$dbh->do('CREATE TABLE streams (id INTEGER PRIMARY KEY, feed_id INTEGER, remotefn CHAR(32), localfn CHAR(32), INTEGER remotelen)');
+	}
 	return $dbh;
 }
 
