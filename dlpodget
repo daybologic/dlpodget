@@ -37,6 +37,7 @@ use Data::Dumper;
 use Daybo::ConfReader;
 use Getopt::Std;
 use URI::Escape;
+use DBI;
 use strict;
 use warnings;
 use diagnostics;
@@ -135,6 +136,11 @@ sub ProcessTags($$)
 	return $V;
 }
 
+sub DB() {
+	my $dbh = DBI->connect("DBI:SQLite:$ENV{HOME}/.dlpodget.db");
+	die Dumper $dbh;
+}
+
 sub main()
 {
 	my $conf;
@@ -210,6 +216,7 @@ sub main()
 		}
 	}
 
+	my $db = DB();
 	foreach my $feedName ( keys(%feeds) ) {
 		my $feed = $feeds{$feedName};
 		next if ( !$feed->{enable} );
