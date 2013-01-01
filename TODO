@@ -1,3 +1,6 @@
-* Cached RSS XML files to avoid checking every run
-* GUI
-* Unit testing
+  * Cached RSS XML files to avoid checking every run
+  * GUI
+  * Unit testing
+  * Process forking (download multiple streams at once)
+  * Download rate limiting (on a per-feed basis)
+  * Emnail notifications
