@@ -1,5 +1,41 @@
+dlpodget (0.2.1) stable; urgency=low
+
+  * 02d693494837: Add BBC Radio 4 "The Archers"
+  * b475b9050524: Add the Joe Rogan Experience podcast
+  * 00fd65434454: Possibly a more 'standard' link for the Joe Rogan Experience
+  * 8634466662b4: Handle connection refused and similar errors reading the stream.
+  * addb377ccd70: Add BBC Friday comedy
+  * 9db63a16b9cf: Disable Joe Rogan until timeout issues can be addressed
+  * 5535724d2123: Better error when local directories are missing etc
+  * ef0df5b736e3: Rename the ReadStream() function ReadFeed()
+  * 4fe6a9821a61: Add BBC World Service Witness to RSS feed list
+  * 0cfb72a3cccb: Add the BBC 'HardTalk' programme
+  * 5fbcda2c1e80: Note down a couple more ideas in the TODO file
+  * d7d1334e44c2: Write a simple README
+  * 4abb474507fd: Add BSD license to dlpodget file
+  * 95c6f16dff33: Just a spacing between BSD banner and shbang
+  * 9138a6d311e2: Move from /opt/bin to /usr/bin and support non-admin installs
+  * afa4fbd5a207: Add email notifications to the TODO list
+  * 14443bfa90ba: Standard TODO indentation (two spaces)
+  * 242b2f6a58d7: Mark script executable
+  * 2a32d1d8ee1b: Added BBC Beyond Belief
+  * 277a08b5fecc: More BBC productions are a specific bbc/ subdirectory
+  * b74cfe290b7a: Add the BBC "In Our Time" programme
+  * 425ed27adf17: Update copyright year to 2013
+  * 363cace517b5: Bugs discovered in tag parser
+  * 9f5d21d26c11: Re-written ProcessTags due to ordering problems, where tags reference other tags
+  * 0203d5270448: Ensure that all environment variables and config defined globals are upper-case
+  * 355875ed3025: Avoidance of non-resolving variables
+  * 563f3f6df0bc: Wrong logic, reversed.
+  * eb224348f241: Eliminate dead-code.
+  * d37242dfc095: Ensure that an empty tag name doesn't cause an infinite loop
+  * 10da18ca5027: Update copyright year in Makefile
+
+ -- David Duncan Ross Palmer <palmer@overchat.org>  Wed, 02 Jan 2013 22:26:38 +0000
+
 dlpodget (0.2.0) stable; urgency=low
 
-  * Initial release
+  * DDRP: Partial downloaded file recovery
+  * DDRP: Download progress and rate display
 
  -- David Duncan Ross Palmer <palmer@overchat.org>  Mon, 10 Dec 2012 22:18:20 +0000
