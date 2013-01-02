@@ -33,9 +33,9 @@
 
 0.2.0
 -----
-DDRP: Partial downloaded file recovery
-DDRP: Download progress and rate display
+  * DDRP: Partial downloaded file recovery
+  * DDRP: Download progress and rate display
 
 0.1.0
 -----
-DDRP: Initial release.
+  * DDRP: Initial release.
