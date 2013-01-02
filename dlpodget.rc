@@ -35,14 +35,14 @@ download  = 1
 enable    = 1
 
 [bbcaq]
-localpath = $LOCALPFX/bbcaq
+localpath = $LOCALPFX/bbc/aq
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/bbcaq/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbctoday]
-localpath = $LOCALPFX/bbctoday
+localpath = $LOCALPFX/bbc/today
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
@@ -51,6 +51,55 @@ enable    = 1
 [bsdtalk]
 localpath = $LOCALPFX/bsdtalk
 rss       = http://feeds.feedburner.com/Bsdtalk
+check     = 1
+download  = 1
+enable    = 1
+
+[thearchers]
+localpath = $LOCALPFX/bbc/thearchers
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/archers/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[joerogan]
+localpath = $LOCALPFX/joerogan
+rss       = http://blog.joerogan.net/feed
+check     = 1
+download  = 1
+enable    = 0
+
+[fricomedy]
+localpath = $LOCALPFX/bbc/r4comedy
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/fricomedy/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[bbcwitness]
+localpath = $LOCALPFX/bbc/witness
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/witness/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[bbchardtalk]
+localpath = $LOCALPFX/bbc/hardtalk
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/ht/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[beyondbelief]
+localpath = $LOCALPFX/bbc/beyondbelief
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/belief/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[iot]
+localpath = $LOCALPFX/bbc/iot
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/iot/rss.xml
 check     = 1
 download  = 1
 enable    = 1
