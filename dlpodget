@@ -42,6 +42,7 @@ use warnings;
 use diagnostics;
 
 my $Debug = 0;
+my $OutputHandle = undef;
 
 sub FileFromURI($)
 {
@@ -76,12 +77,21 @@ sub ReadFeed($$$)
 	return @entries;
 }
 
-sub DownloadStream($$$)
-{
-	my ( $ua, $f, %get_params );
+sub Chunk {
+	my ( $chunk ) = @_;
+	print $OutputHandle $chunk;
+}
+
+sub NullChunk {
+	return;
+}
+
+sub DownloadStream($$$) {
+	my ( $ua, %get_params );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
+	my $chunkCB = \&Chunk;
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
 		if ( !$entry->{length} || $local_length == $entry->{length} ) {
@@ -91,25 +101,24 @@ sub DownloadStream($$$)
 	}
 	$ua = LWP::UserAgent->new( show_progress => 1 );
 	unless ( $Feeds->{_main}->{noop} ) {
-		if ( open($f, '>>:raw', $local_podcast) ) {
-			binmode($f);
+		if ( open($OutputHandle, '>>:raw', $local_podcast) ) {
+			binmode($OutputHandle);
 		} else {
 			printf(STDERR "Local failure on stream %s -- %s: %s\n", $Name, $local_podcast, $!);
 			return;
 		}
 	}
+	$chunkCB = \&NullChunk if ( $Feeds->{_main}->{noop} );
 	%get_params = (
 		'Range' => "bytes=$local_length-"
 	) if ( $local_length );
 	$ua->get(
 		$entry->{uri},
 		%get_params,
-		':content_cb' => sub {
-			my ( $chunk ) = @_;
-			print $f $chunk unless ( $Feeds->{_main}->{noop} );
-		}
+		':content_cb' => $chunkCB
 	);
-	close($f) if ( !$Feeds->{_main}->{noop} );
+	close($OutputHandle) if ( !$Feeds->{_main}->{noop} );
+	$OutputHandle = undef;
 }
 
 sub ProcessTags($$)
