@@ -41,6 +41,8 @@ use strict;
 use warnings;
 use diagnostics;
 
+use constant RATE_LIMIT => 4; # Limit to 4KB per second
+
 my $Debug = 0;
 my $OutputHandle = undef;
 
