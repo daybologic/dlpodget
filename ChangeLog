@@ -35,6 +35,7 @@
 -----
   * DDRP: Partial downloaded file recovery
   * DDRP: Download progress and rate display
+  * DDRP: Debian packaging
 
 0.1.0
 -----
