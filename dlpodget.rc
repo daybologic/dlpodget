@@ -166,3 +166,17 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/rla76/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[reitharc2]
+localpath = $LOCALPFX/bbc/reith
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/rla48/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[bbctftd]
+localpath = $LOCALPFX/bbc/tftd
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/thought/rss.xml
+check     = 1
+download  = 1
+enable    = 1
