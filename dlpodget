@@ -51,11 +51,35 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
+sub FeedCache($$) {
+	my ( $Name, $Url ) = @_;
+	my $ret;
+	my $ua;
+	my $cacheFileName = "$ENV{HOME}/.cache/dlpodget/$Name.rss";
+	return $cacheFileName if ( -f $cacheFileName ); # Already cached.
+
+	$Url = URI->new($Url);
+	$ua = LWP::UserAgent->new();
+	if ( open(my $f, '>', $cacheFileName) ) {
+		my $resp = $ua->get($Url);
+		if ( $resp->is_success() ) {
+			print $f $resp->decoded_content;
+		} else {
+			warn $resp->status_line;
+		}
+		close($f);
+	} else {
+		printf(STDERR "Local failure on feed %s -- %s: %s\n", $Name, $cacheFileName, $!);
+		$cacheFileName = undef;
+	}
+	return $cacheFileName || $Url;
+}
+
 sub ReadFeed($$$)
 {
 	my @entries = ( );
 	my ( $Feeds, $Url, $Name ) = @_;
-	my $feed = XML::Feed->parse(URI->new($Url));
+	my $feed = XML::Feed->parse(FeedCache($Name, $Url));
 	if ( !$feed ) {
 		printf(STDERR "Stream %s error: %s\n", $Name, $@);
 		return @entries;
