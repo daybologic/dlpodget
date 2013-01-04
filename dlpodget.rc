@@ -83,6 +83,13 @@ check     = 1
 download  = 1
 enable    = 1
 
+[bbcwitness_2011]
+localpath = $LOCALPFX/bbc/witness
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/w2011/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
 [bbchardtalk]
 localpath = $LOCALPFX/bbc/hardtalk
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/ht/rss.xml
