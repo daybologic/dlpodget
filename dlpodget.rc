@@ -110,3 +110,10 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/fooc/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[bbcclick]
+localpath = $LOCALPFX/bbc/click
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/digitalp/rss.xml
+check     = 1
+download  = 1
+enable    = 1
