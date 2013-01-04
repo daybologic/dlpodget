@@ -124,3 +124,10 @@ rss       = http://downloads.bbc.co.uk/podcasts/worldservice/heartsoul/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[bbctbl]
+localpath = $LOCALPFX/bbc/tbl
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/bottomline/rss.xml
+check     = 1
+download  = 1
+enable    = 1
