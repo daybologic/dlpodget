@@ -131,3 +131,10 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/bottomline/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+
+[acooke]  ; Letter From America
+localpath = $LOCALPFX/bbc/acooke
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/acooke/rss.xml
+check     = 1
+download  = 1
+enable    = 1
