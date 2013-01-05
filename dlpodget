@@ -53,9 +53,12 @@ sub FileFromURI($)
 
 sub FeedCache($$) {
 	my ( $Name, $Url ) = @_;
-	my ( $resp, $ret, $ua );
+	my ( $resp, $ua );
 	my $cacheFileName = "$ENV{HOME}/.cache/dlpodget/$Name.rss";
-	return $cacheFileName if ( -f $cacheFileName ); # Already cached.
+	if ( -f $cacheFileName ) { # Already cached.
+		warn "Feed $Name has been satisfied by existing cache - $cacheFileName" if ( $Debug );
+		return $cacheFileName;
+	}
 
 	$Url = URI->new($Url);
 	$ua = LWP::UserAgent->new();
@@ -73,7 +76,12 @@ sub FeedCache($$) {
 		warn $resp->status_line;
 		$cacheFileName = undef;
 	}
-	return $cacheFileName || $Url;
+	if ( $cacheFileName ) {
+		warn "Feed $Name has been satisfied by newly written cache file - $cacheFileName" if ( $Debug );
+		return $cacheFileName;
+	}
+	warn "Feed $Name has no cache available" if ( $Debug );
+	return $Url;
 }
 
 sub ReadFeed($$$)
