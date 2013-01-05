@@ -1,4 +1,4 @@
-  * Cached RSS XML files to avoid checking every run (https://bitbucket.org/daybologic/dlpodget.rsscache)
+  * Cached RSS XML files to avoid checking every run (https://bitbucket.org/daybologic/dlpodget.arc)
   * GUI
   * Unit testing (https://bitbucket.org/daybologic/dlpodget.ut)
   * Process forking - download multiple streams at once (https://bitbucket.org/daybologic/dlpodget.forking)
@@ -13,3 +13,4 @@
   * Graceful timeout handling (https://bitbucket.org/daybologic/dlpodget.timeouts)
   * OOP re-write (https://bitbucket.org/daybologic/dlpodget.perloop)
   * C++ re-write
+  * Archive support - frozen feeds (https://bitbucket.org/daybologic/dlpodget.arc)
