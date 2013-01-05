@@ -60,10 +60,10 @@ sub FeedCache($$) {
 
 	$Url = URI->new($Url);
 	$ua = LWP::UserAgent->new();
-	if ( open(my $f, '>', $cacheFileName) ) {
+	if ( open(my $f, '>:raw', $cacheFileName) ) {
 		my $resp = $ua->get($Url);
 		if ( $resp->is_success() ) {
-			print $f $resp->decoded_content;
+			print $f $resp->content;
 		} else {
 			warn $resp->status_line;
 		}
