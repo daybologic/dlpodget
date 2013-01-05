@@ -53,23 +53,24 @@ sub FileFromURI($)
 
 sub FeedCache($$) {
 	my ( $Name, $Url ) = @_;
-	my $ret;
-	my $ua;
+	my ( $resp, $ret, $ua );
 	my $cacheFileName = "$ENV{HOME}/.cache/dlpodget/$Name.rss";
 	return $cacheFileName if ( -f $cacheFileName ); # Already cached.
 
 	$Url = URI->new($Url);
 	$ua = LWP::UserAgent->new();
-	if ( open(my $f, '>:raw', $cacheFileName) ) {
-		my $resp = $ua->get($Url);
-		if ( $resp->is_success() ) {
-			print $f $resp->content;
+
+	$resp = $ua->get($Url);
+	if ( $resp->is_success() ) {
+		if ( open(my $f, '>:raw', $cacheFileName) ) {
+			print $f $resp->content();
+			close($f);
 		} else {
-			warn $resp->status_line;
+			printf(STDERR "Local failure on feed %s -- %s: %s\n", $Name, $cacheFileName, $!);
+			$cacheFileName = undef; # Force URL instead
 		}
-		close($f);
 	} else {
-		printf(STDERR "Local failure on feed %s -- %s: %s\n", $Name, $cacheFileName, $!);
+		warn $resp->status_line;
 		$cacheFileName = undef;
 	}
 	return $cacheFileName || $Url;
