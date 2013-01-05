@@ -153,6 +153,55 @@ check     = 1
 download  = 1
 enable    = 1
 
+[acooke_lfabushjr]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfabushjr/rss.xml
+localpath = $LOCALPFX/bbc/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfaclintonpt2]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaclintonpt2/rss.xml
+localpath = $LOCALPFX/bbc/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfaclinton]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaclinton/rss.xml
+localpath = $LOCALPFX/bbc/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfabushsr]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfabushsr/rss.xml
+localpath = $LOCALPFX/bbc/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfaregan]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaregan/rss.xml
+localpath = $LOCALPFX/bbc/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfanixoncarter]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfanixoncarter/rss.xml
+localpath = $LOCALPFX/bbc/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfaearlyyrs]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaearlyyrs/rss.xml
+localpath = $LOCALPFX/bbc/acooke
+check     = 1
+download  = 1
+enable    = 1
+
 [reith]
 localpath = $LOCALPFX/bbc/reith
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/reith/rss.xml
