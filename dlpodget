@@ -37,6 +37,7 @@ use Data::Dumper;
 use Daybo::ConfReader;
 use Getopt::Std;
 use URI::Escape;
+use IO::Interactive qw(is_interactive);
 use strict;
 use warnings;
 use diagnostics;
@@ -89,7 +90,7 @@ sub DownloadStream($$$)
 			return;
 		}
 	}
-	$ua = LWP::UserAgent->new( show_progress => 1 );
+	$ua = LWP::UserAgent->new( show_progress => is_interactive() );
 	unless ( $Feeds->{_main}->{noop} ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
