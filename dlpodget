@@ -37,6 +37,7 @@ use Data::Dumper;
 use Daybo::ConfReader;
 use Getopt::Std;
 use URI::Escape;
+use IO::Interactive qw(is_interactive);
 use strict;
 use warnings;
 use diagnostics;
@@ -78,7 +79,7 @@ sub ReadFeed($$$)
 
 sub DownloadStream($$$)
 {
-	my ( $ua, $f, %get_params );
+	my ( $ua, $f, %get_params, $is_interactive );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
@@ -89,7 +90,10 @@ sub DownloadStream($$$)
 			return;
 		}
 	}
-	$ua = LWP::UserAgent->new( show_progress => 1 );
+	$is_interactive = is_interactive();
+	$ua = LWP::UserAgent->new( show_progress => $is_interactive );
+	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive );
+
 	unless ( $Feeds->{_main}->{noop} ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
@@ -110,6 +114,7 @@ sub DownloadStream($$$)
 		}
 	);
 	close($f) if ( !$Feeds->{_main}->{noop} );
+	printf(STDERR "done.\n") if ( !$is_interactive );
 }
 
 sub ProcessTags($$)

@@ -1,40 +1,41 @@
 0.2.1
 -----
-  * 02d693494837: Add BBC Radio 4 "The Archers"
-  * b475b9050524: Add the Joe Rogan Experience podcast
-  * 00fd65434454: Possibly a more 'standard' link for the Joe Rogan Experience
-  * 8634466662b4: Handle connection refused and similar errors reading the stream.
-  * addb377ccd70: Add BBC Friday comedy
-  * 9db63a16b9cf: Disable Joe Rogan until timeout issues can be addressed
-  * 5535724d2123: Better error when local directories are missing etc
-  * ef0df5b736e3: Rename the ReadStream() function ReadFeed()
-  * 4fe6a9821a61: Add BBC World Service Witness to RSS feed list
-  * 0cfb72a3cccb: Add the BBC 'HardTalk' programme
-  * 5fbcda2c1e80: Note down a couple more ideas in the TODO file
-  * d7d1334e44c2: Write a simple README
-  * 4abb474507fd: Add BSD license to dlpodget file
-  * 95c6f16dff33: Just a spacing between BSD banner and shbang
-  * 9138a6d311e2: Move from /opt/bin to /usr/bin and support non-admin installs
-  * afa4fbd5a207: Add email notifications to the TODO list
-  * 14443bfa90ba: Standard TODO indentation (two spaces)
-  * 242b2f6a58d7: Mark script executable
-  * 2a32d1d8ee1b: Added BBC Beyond Belief
-  * 277a08b5fecc: More BBC productions are a specific bbc/ subdirectory
-  * b74cfe290b7a: Add the BBC "In Our Time" programme
-  * 425ed27adf17: Update copyright year to 2013
-  * 363cace517b5: Bugs discovered in tag parser
-  * 9f5d21d26c11: Re-written ProcessTags due to ordering problems, where tags reference other tags
-  * 0203d5270448: Ensure that all environment variables and config defined globals are upper-case
-  * 355875ed3025: Avoidance of non-resolving variables
-  * 563f3f6df0bc: Wrong logic, reversed.
-  * eb224348f241: Eliminate dead-code.
-  * d37242dfc095: Ensure that an empty tag name doesn't cause an infinite loop
   * 10da18ca5027: Update copyright year in Makefile
+  * d37242dfc095: Ensure that an empty tag name doesn't cause an infinite loop
+  * eb224348f241: Eliminate dead-code.
+  * 563f3f6df0bc: Wrong logic, reversed.
+  * 355875ed3025: Avoidance of non-resolving variables
+  * 0203d5270448: Ensure that all environment variables and config defined globals are upper-case
+  * 9f5d21d26c11: Re-written ProcessTags due to ordering problems, where tags reference other tags
+  * 363cace517b5: Bugs discovered in tag parser
+  * 425ed27adf17: Update copyright year to 2013
+  * b74cfe290b7a: Add the BBC "In Our Time" programme
+  * 277a08b5fecc: More BBC productions are a specific bbc/ subdirectory
+  * 2a32d1d8ee1b: Added BBC Beyond Belief
+  * 242b2f6a58d7: Mark script executable
+  * 14443bfa90ba: Standard TODO indentation (two spaces)
+  * afa4fbd5a207: Add email notifications to the TODO list
+  * 9138a6d311e2: Move from /opt/bin to /usr/bin and support non-admin installs
+  * 95c6f16dff33: Just a spacing between BSD banner and shbang
+  * 4abb474507fd: Add BSD license to dlpodget file
+  * d7d1334e44c2: Write a simple README
+  * 5fbcda2c1e80: Note down a couple more ideas in the TODO file
+  * 0cfb72a3cccb: Add the BBC 'HardTalk' programme
+  * 4fe6a9821a61: Add BBC World Service Witness to RSS feed list
+  * ef0df5b736e3: Rename the ReadStream() function ReadFeed()
+  * 5535724d2123: Better error when local directories are missing etc
+  * 9db63a16b9cf: Disable Joe Rogan until timeout issues can be addressed
+  * addb377ccd70: Add BBC Friday comedy
+  * 8634466662b4: Handle connection refused and similar errors reading the stream.
+  * 00fd65434454: Possibly a more 'standard' link for the Joe Rogan Experience
+  * b475b9050524: Add the Joe Rogan Experience podcast
+  * 02d693494837: Add BBC Radio 4 "The Archers"
 
 0.2.0
 -----
-  * DDRP: Partial downloaded file recovery
+  * DDRP: Debian packaging
   * DDRP: Download progress and rate display
+  * DDRP: Partial downloaded file recovery
 
 0.1.0
 -----
