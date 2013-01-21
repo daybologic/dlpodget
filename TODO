@@ -14,3 +14,4 @@
   * OOP re-write (https://bitbucket.org/daybologic/dlpodget.perloop)
   * C++ re-write
   * Archive support - frozen feeds (https://bitbucket.org/daybologic/dlpodget.arc)
+  * Quiet mode (-q) for use from crontab
