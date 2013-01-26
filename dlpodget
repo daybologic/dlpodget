@@ -153,7 +153,7 @@ sub main()
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('d', \%opts) );
+	return 1 if ( !getopts('dn:', \%opts) );
 	$Debug = 1 if ( $opts{'d'} );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 
@@ -211,6 +211,7 @@ sub main()
 
 		for ( my $secI = 0; $secI < $secC; $secI++ ) {
 			my @secKeys;
+			next if ( $opts{'n'} && $sections[$secI] ne $opts{'n'} );
 			my $keyC = $conf->GetKeys($sections[$secI], \@secKeys);
 			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
 				next if ( $reserveSec{$sections[$secI]} ); # Skip reserved sections
