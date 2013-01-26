@@ -238,7 +238,7 @@ download  = 1
 enable    = 1
 
 [christian.org.uk]
-localpath = $LOCALPFX/christian.org.uk
+localpath = $RELIGION/christian.org.uk
 rss       = http://www.christian.org.uk/downloads/audio/seriespodcast.xml
 check     = 1
 download  = 1
