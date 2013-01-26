@@ -177,6 +177,7 @@ sub main()
 		}
 	}
 	if ( $conf ) {
+		my %reserveSec = map {  $_ => 1 } ( '_main', 'paths' ); # Reserved section names
 		my ( @sections, $secC );
 		$secC = $conf->GetSections(\@sections);
 
@@ -196,11 +197,23 @@ sub main()
 			}
 		}
 
+		if ( 'paths' ~~ @sections ) { # Has a paths section?
+			my @secKeys;
+			if ( $conf->GetKeys('paths', \@secKeys) ) {
+				foreach my $pk ( @secKeys ) {
+					$feeds{_main}->{ uc($pk) } = $conf->GetDatum('paths', $pk);
+				}
+				# For backward compatibility, set localpfx with [paths] root
+				$feeds{_main}->{'LOCALPFX'} = $feeds{_main}->{'ROOT'}
+					if ( $feeds{_main}->{'ROOT'} );
+			}
+		}
+
 		for ( my $secI = 0; $secI < $secC; $secI++ ) {
 			my @secKeys;
 			my $keyC = $conf->GetKeys($sections[$secI], \@secKeys);
 			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
-				next if ( $sections[$secI] eq '_main' ); # Skip reserved section
+				next if ( $reserveSec{$sections[$secI]} ); # Skip reserved sections
 				my $v = $conf->GetDatum($sections[$secI], $secKeys[$keyI]);
 				$v = ProcessTags(\%feeds, $v);
 				printf(

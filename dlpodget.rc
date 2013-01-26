@@ -16,138 +16,145 @@
 ;   noop      = <1|0>, default 0, set to 1 to disable modification of local files.
 
 enable    = 1
-localpfx  = $HOME/podcasts
 noop      = 0
 debug     = 0
 
+[paths]
+root      = $HOME/podcasts
+bbc       = $LOCALPFX/bbc
+religion  = $LOCALPFX/religion
+politics  = $LOCALPFX/politics
+tech      = $LOCALPFX/tech
+comedy    = $LOCALPFX/comedy
+
 [infowars]
-localpath = $LOCALPFX/infowars
+localpath = $POLITICS/infowars
 rss       = http://xml.nfowars.net/Alex.rss
 check     = 1
 download  = 1
 enable    = 1
 
 [bsec]
-localpath = $LOCALPFX/bsec
+localpath = $RELIGION/bsec
 rss       = http://feeds.feedburner.com/BradleyStokeEvangelicalChurchSermons?format=xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbcaq]
-localpath = $LOCALPFX/bbc/aq
+localpath = $POLITICS/aq
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/bbcaq/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbctoday]
-localpath = $LOCALPFX/bbc/today
+localpath = $BBC/today
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bsdtalk]
-localpath = $LOCALPFX/bsdtalk
+localpath = $TECH/bsdtalk
 rss       = http://feeds.feedburner.com/Bsdtalk
 check     = 1
 download  = 1
 enable    = 1
 
 [thearchers]
-localpath = $LOCALPFX/bbc/thearchers
+localpath = $BBC/thearchers
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/archers/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [joerogan]
-localpath = $LOCALPFX/joerogan
+localpath = $COMEDY/joerogan
 rss       = http://blog.joerogan.net/feed
 check     = 1
 download  = 1
 enable    = 0
 
 [fricomedy]
-localpath = $LOCALPFX/bbc/r4comedy
+localpath = $COMEDY/r4comedy
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/fricomedy/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbcwitness]
-localpath = $LOCALPFX/bbc/witness
+localpath = $BBC/witness
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/witness/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbcwitness_2011]
-localpath = $LOCALPFX/bbc/witness
+localpath = $BBC/witness
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/w2011/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbcwitness_2010]
-localpath = $LOCALPFX/bbc/witness
+localpath = $BBC/witness
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/w2010/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbchardtalk]
-localpath = $LOCALPFX/bbc/hardtalk
+localpath = $POLITICS/hardtalk
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/ht/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [beyondbelief]
-localpath = $LOCALPFX/bbc/beyondbelief
+localpath = $RELIGION/beyondbelief
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/belief/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [iot]
-localpath = $LOCALPFX/bbc/iot
+localpath = $BBC/iot
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/iot/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [fooc]
-localpath = $LOCALPFX/bbc/fooc
+localpath = $BBC/fooc
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/fooc/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbcclick]
-localpath = $LOCALPFX/bbc/click
+localpath = $TECH/click
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/digitalp/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [heartsoul]
-localpath = $LOCALPFX/bbc/heartsoul
+localpath = $RELIGION/heartsoul
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/heartsoul/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbctbl]
-localpath = $LOCALPFX/bbc/tbl
+localpath = $BBC/tbl
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/bottomline/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [acooke]  ; Letter From America
-localpath = $LOCALPFX/bbc/acooke
+localpath = $BBC/acooke
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/acooke/rss.xml
 check     = 1
 download  = 1
@@ -155,76 +162,76 @@ enable    = 1
 
 [acooke_lfabushjr]
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfabushjr/rss.xml
-localpath = $LOCALPFX/bbc/acooke
+localpath = $BBC/acooke
 check     = 1
 download  = 1
 enable    = 1
 
 [acooke_lfaclintonpt2]
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaclintonpt2/rss.xml
-localpath = $LOCALPFX/bbc/acooke
+localpath = $BBC/acooke
 check     = 1
 download  = 1
 enable    = 1
 
 [acooke_lfaclinton]
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaclinton/rss.xml
-localpath = $LOCALPFX/bbc/acooke
+localpath = $BBC/acooke
 check     = 1
 download  = 1
 enable    = 1
 
 [acooke_lfabushsr]
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfabushsr/rss.xml
-localpath = $LOCALPFX/bbc/acooke
+localpath = $BBC/acooke
 check     = 1
 download  = 1
 enable    = 1
 
 [acooke_lfaregan]
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaregan/rss.xml
-localpath = $LOCALPFX/bbc/acooke
+localpath = $BBC/acooke
 check     = 1
 download  = 1
 enable    = 1
 
 [acooke_lfanixoncarter]
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfanixoncarter/rss.xml
-localpath = $LOCALPFX/bbc/acooke
+localpath = $BBC/acooke
 check     = 1
 download  = 1
 enable    = 1
 
 [acooke_lfaearlyyrs]
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaearlyyrs/rss.xml
-localpath = $LOCALPFX/bbc/acooke
+localpath = $BBC/acooke
 check     = 1
 download  = 1
 enable    = 1
 
 [reith]
-localpath = $LOCALPFX/bbc/reith
+localpath = $BBC/reith
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/reith/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [reitharc]
-localpath = $LOCALPFX/bbc/reith
+localpath = $BBC/reith
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/rla76/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [reitharc2]
-localpath = $LOCALPFX/bbc/reith
+localpath = $BBC/reith
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/rla48/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbctftd]
-localpath = $LOCALPFX/bbc/tftd
+localpath = $RELIGION/tftd
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/thought/rss.xml
 check     = 1
 download  = 1
