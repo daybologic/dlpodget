@@ -227,7 +227,7 @@ sub main()
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
 		$feed->{name} = $feedName;
-		if ( scalar(@pids) < $feeds{_main}->{maxchildren} ) {
+		if ( scalar(@pids) < $feeds{_main}->{MAXCHILDREN} ) {
 			my $pid = fork();
 			die "cannot fork: $!" if ( !defined($pid) );
 			if ( $pid == 0 ) { # Child process
