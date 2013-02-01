@@ -276,6 +276,8 @@ sub main()
 		# A child returned, remove it from the PID list
 		die 'Internal error' if ( !exists($pids{$reaped_pid}) );
 		delete($pids{$reaped_pid});
+
+		redo if ( $child_limit_reached );
 	}
 	while ( scalar(keys(%pids)) ) {
 		my $pid = wait();
