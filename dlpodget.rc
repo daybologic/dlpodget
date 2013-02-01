@@ -11,9 +11,11 @@
 ;
 ; More generally, we have a default section, which contains the following options:
 ;
-;   enable    = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
-;   localpfx  = <prefix which will be exported to sections as $LOCALPFX>
-;   noop      = <1|0>, default 0, set to 1 to disable modification of local files.
+;   enable      = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
+;   localpfx    = <prefix which will be exported to sections as $LOCALPFX>
+;   noop        = <1|0>, default 0, set to 1 to disable modification of local files.
+;   maxchildren = <0-n>, default 0, max concurrent downloads. nb. setting this to 1
+;                 is less efficient than 0, since a dedicated child is cloned for each stream.
 
 enable    = 1
 noop      = 0
