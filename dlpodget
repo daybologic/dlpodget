@@ -52,10 +52,11 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
-sub ReadFeed($$$)
+sub ReadFeed($$)
 {
 	my @entries = ( );
-	my ( $Feeds, $Url, $Name ) = @_;
+	my ( $Feeds, $Feed ) = @_;
+	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
 	my $feed = XML::Feed->parse(URI->new($Url));
 	if ( !$feed ) {
 		printf(STDERR "Stream %s error: %s\n", $Name, $@);
@@ -140,6 +141,16 @@ sub ProcessTags($$)
 	return $V;
 }
 
+sub Child($$)
+{
+	my ( $Feeds, $Feed ) = @_;
+	my @entries = ReadFeed($Feeds, $Feed);
+	foreach my $entry ( @entries ) {
+		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
+		DownloadStream($Feeds, $entry, $Feed->{name});
+	}
+}
+
 sub main()
 {
 	my $conf;
@@ -147,6 +158,7 @@ sub main()
 	my @defKeys;
 	my %feeds = ( );
 	my %opts = ( );
+	my @pids;
 	my $confSeen = 0;
 	my @confFiles = (
 		'dlpodget.rc',
@@ -233,10 +245,19 @@ sub main()
 		my $feed = $feeds{$feedName};
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
-		@entries = ReadFeed(\%feeds, $feed->{rss}, $feedName);
-		foreach my $entry ( @entries ) {
-			print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
-			DownloadStream(\%feeds, $entry, $feedName);
+		$feed->{name} = $feedName;
+		if ( scalar(@pids) < $feeds{_main}->{MAXCHILDREN} ) {
+			my $pid = fork();
+			die "cannot fork: $!" if ( !defined($pid) );
+			if ( $pid == 0 ) { # Child process
+				Child(\%feeds, $feed);
+				exit(0); # Children should not return
+			} else {
+				push(@pids, $pid);
+			}
+		} else {
+			warn "Not enough children";
+			Child(\%feeds, $feed);
 		}
 	}
 

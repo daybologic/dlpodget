@@ -18,6 +18,7 @@
 enable    = 1
 noop      = 0
 debug     = 0
+maxchildren  = 5
 
 [paths]
 root      = $HOME/podcasts
@@ -31,7 +32,7 @@ comedy    = $LOCALPFX/comedy
 localpath = $POLITICS/infowars
 rss       = http://xml.nfowars.net/Alex.rss
 check     = 1
-download  = 1
+download  = 0
 enable    = 1
 
 [bsec]
