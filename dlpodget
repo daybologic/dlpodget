@@ -154,6 +154,7 @@ sub Child($$)
 
 sub main()
 {
+	my $proctitle = $0; # Save original process title
 	my $conf;
 	my @entries = ( );
 	my @defKeys;
@@ -242,6 +243,7 @@ sub main()
 		}
 	}
 
+	$0 = "$proctitle [MASTER]";
 	foreach my $feedName ( keys(%feeds) ) {
 		my $reaped_pid;
 		my $child_limit_reached = 0;
@@ -253,6 +255,7 @@ sub main()
 			my $pid = fork();
 			die "cannot fork: $!" if ( !defined($pid) );
 			if ( $pid == 0 ) { # Child process
+				$0 = "$proctitle [$feedName]";
 				Child(\%feeds, $feed);
 				exit(0); # Children should not return
 			} else {
