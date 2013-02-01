@@ -281,6 +281,10 @@ sub main()
 			}
 		}
 	}
+	while ( scalar(@pids) ) {
+		wait();
+		pop(@pids);
+	}
 
 	return 0;
 }
