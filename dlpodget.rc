@@ -22,6 +22,7 @@ enable    = 1
 noop      = 0
 debug     = 0
 maxchildren  = 5
+cache     = $HOME/.cache/dlpodget
 
 [paths]
 root      = $HOME/podcasts
