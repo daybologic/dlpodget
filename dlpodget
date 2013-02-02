@@ -96,8 +96,12 @@ sub DownloadStream($$$$)
 	$is_interactive = is_interactive();
 	$ua = LWP::UserAgent->new( show_progress => $is_interactive );
 	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive );
-	$ua->timeout($Feeds->{_main}->{timeout});
-	$tries = $Feeds->{_main}->{maxtries};
+	printf(
+		STDERR "Setting timeout %u and retries %d\n",
+		$Feeds->{_main}->{TIMEOUT}, $Feeds->{_main}->{MAXTRIES}
+	) if ( $Debug );
+	$ua->timeout($Feeds->{_main}->{TIMEOUT});
+	$tries = $Feeds->{_main}->{MAXTRIES};
 
 	unless ( $Feeds->{_main}->{noop} ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
