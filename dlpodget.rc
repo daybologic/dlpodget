@@ -35,7 +35,7 @@ comedy    = $LOCALPFX/comedy
 localpath = $POLITICS/infowars
 rss       = http://xml.nfowars.net/Alex.rss
 check     = 1
-download  = 0
+download  = 1
 enable    = 1
 
 [bsec]
