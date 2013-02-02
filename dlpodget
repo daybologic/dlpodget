@@ -58,6 +58,7 @@ sub ReadFeed($$)
 	my @entries = ( );
 	my ( $Feeds, $Feed ) = @_;
 	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
+	# FIXME: timeout is not configurable; we need a disk-based cache, so we can parse after download
 	my $feed = XML::Feed->parse(URI->new($Url));
 	if ( !$feed ) {
 		printf(STDERR "Stream %s error: %s\n", $Name, $@);
