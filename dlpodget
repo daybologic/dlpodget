@@ -157,7 +157,7 @@ sub Child($$)
 	my @entries = ReadFeed($Feeds, $Feed);
 	foreach my $entry ( @entries ) {
 		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
-		DownloadStream($Feeds, $entry, $Feed->{name});
+		DownloadStream($Feeds, $entry, $Feed->{name}, 0); # TODO: tries should be non-zero
 	}
 }
 
