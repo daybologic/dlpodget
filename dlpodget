@@ -96,7 +96,7 @@ sub DownloadStream($$$)
 	$ua = LWP::UserAgent->new( show_progress => $is_interactive );
 	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive );
 
-	unless ( $Feeds->{_main}->{noop} ) {
+	unless ( $Feeds->{_main}->{NOOP} ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
 		} else {
@@ -112,10 +112,10 @@ sub DownloadStream($$$)
 		%get_params,
 		':content_cb' => sub {
 			my ( $chunk ) = @_;
-			print $f $chunk unless ( $Feeds->{_main}->{noop} );
+			print $f $chunk unless ( $Feeds->{_main}->{NOOP} );
 		}
 	);
-	close($f) if ( !$Feeds->{_main}->{noop} );
+	close($f) if ( !$Feeds->{_main}->{NOOP} );
 	printf(STDERR "done.\n") if ( !$is_interactive );
 }
 
@@ -205,8 +205,8 @@ sub main()
 				$feeds{_main}->{ uc($mk) } = $conf->GetDatum(undef, $mk);
 			}
 			# Set debug flag via config if it existed.
-			if ( $feeds{_main}->{debug} ) {
-				$Debug = $feeds{_main}->{debug};
+			if ( $feeds{_main}->{DEBUG} ) {
+				$Debug = $feeds{_main}->{DEBUG};
 				printf(STDERR "Set Debug via config: %s\n", $Debug);
 			}
 		}
