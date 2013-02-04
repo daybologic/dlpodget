@@ -1,4 +1,4 @@
-UNRELEASED
+0.3.0
 -----
   * fb06a3eee37b: Fixes for NOOP and DEBUG flags, which were upper-case
   * 8b28bfcb2112: Documentation fix; we meant max feeds in the config, not streams
