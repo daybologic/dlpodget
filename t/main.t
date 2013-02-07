@@ -35,7 +35,7 @@ sub t_ReadFeed()
 		_main => { },
 		dummy => { }
 	);
-	my @arr = ReadFeed(\%feeds, TEST_FEED(), 'dummy');
+	my @arr = ReadFeed(\%feeds, { rss => TEST_FEED(), name => 'dummy' });
 	cmp_ok(scalar(@arr), '>=', MIN_FEED_STREAMS(), sprintf('%s: At least %u feeds', $F, MIN_FEED_STREAMS()));
 	foreach my $hashref ( @arr ) {
 		my $t = ref($hashref);
