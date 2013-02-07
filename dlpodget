@@ -37,6 +37,8 @@ use Data::Dumper;
 use Daybo::ConfReader;
 use Getopt::Std;
 use URI::Escape;
+use IO::Interactive qw(is_interactive);
+use POSIX ":sys_wait_h";
 use strict;
 use warnings;
 use diagnostics;
@@ -51,10 +53,11 @@ sub FileFromURI($)
 	return $uri_parts[-1];
 }
 
-sub ReadFeed($$$)
+sub ReadFeed($$)
 {
 	my @entries = ( );
-	my ( $Feeds, $Url, $Name ) = @_;
+	my ( $Feeds, $Feed ) = @_;
+	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
 	my $feed = XML::Feed->parse(URI->new($Url));
 	if ( !$feed ) {
 		printf(STDERR "Stream %s error: %s\n", $Name, $@);
@@ -78,7 +81,7 @@ sub ReadFeed($$$)
 
 sub DownloadStream($$$)
 {
-	my ( $ua, $f, %get_params );
+	my ( $ua, $f, %get_params, $is_interactive );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
@@ -89,8 +92,11 @@ sub DownloadStream($$$)
 			return;
 		}
 	}
-	$ua = LWP::UserAgent->new( show_progress => 1 );
-	unless ( $Feeds->{_main}->{noop} ) {
+	$is_interactive = is_interactive();
+	$ua = LWP::UserAgent->new( show_progress => $is_interactive );
+	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive );
+
+	unless ( $Feeds->{_main}->{NOOP} ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
 		} else {
@@ -106,10 +112,11 @@ sub DownloadStream($$$)
 		%get_params,
 		':content_cb' => sub {
 			my ( $chunk ) = @_;
-			print $f $chunk unless ( $Feeds->{_main}->{noop} );
+			print $f $chunk unless ( $Feeds->{_main}->{NOOP} );
 		}
 	);
-	close($f) if ( !$Feeds->{_main}->{noop} );
+	close($f) if ( !$Feeds->{_main}->{NOOP} );
+	printf(STDERR "done.\n") if ( !$is_interactive );
 }
 
 sub ProcessTags($$)
@@ -135,20 +142,32 @@ sub ProcessTags($$)
 	return $V;
 }
 
+sub Child($$)
+{
+	my ( $Feeds, $Feed ) = @_;
+	my @entries = ReadFeed($Feeds, $Feed);
+	foreach my $entry ( @entries ) {
+		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
+		DownloadStream($Feeds, $entry, $Feed->{name});
+	}
+}
+
 sub main()
 {
+	my $proctitle = $0; # Save original process title
 	my $conf;
 	my @entries = ( );
 	my @defKeys;
 	my %feeds = ( );
 	my %opts = ( );
+	my %pids;
 	my $confSeen = 0;
 	my @confFiles = (
 		'dlpodget.rc',
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('d', \%opts) );
+	return 1 if ( !getopts('dn:', \%opts) );
 	$Debug = 1 if ( $opts{'d'} );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 
@@ -172,6 +191,7 @@ sub main()
 		}
 	}
 	if ( $conf ) {
+		my %reserveSec = map {  $_ => 1 } ( '_main', 'paths' ); # Reserved section names
 		my ( @sections, $secC );
 		$secC = $conf->GetSections(\@sections);
 
@@ -185,17 +205,30 @@ sub main()
 				$feeds{_main}->{ uc($mk) } = $conf->GetDatum(undef, $mk);
 			}
 			# Set debug flag via config if it existed.
-			if ( $feeds{_main}->{debug} ) {
-				$Debug = $feeds{_main}->{debug};
+			if ( $feeds{_main}->{DEBUG} ) {
+				$Debug = $feeds{_main}->{DEBUG};
 				printf(STDERR "Set Debug via config: %s\n", $Debug);
+			}
+		}
+
+		if ( 'paths' ~~ @sections ) { # Has a paths section?
+			my @secKeys;
+			if ( $conf->GetKeys('paths', \@secKeys) ) {
+				foreach my $pk ( @secKeys ) {
+					$feeds{_main}->{ uc($pk) } = $conf->GetDatum('paths', $pk);
+				}
+				# For backward compatibility, set localpfx with [paths] root
+				$feeds{_main}->{'LOCALPFX'} = $feeds{_main}->{'ROOT'}
+					if ( $feeds{_main}->{'ROOT'} );
 			}
 		}
 
 		for ( my $secI = 0; $secI < $secC; $secI++ ) {
 			my @secKeys;
+			next if ( $opts{'n'} && $sections[$secI] ne $opts{'n'} );
 			my $keyC = $conf->GetKeys($sections[$secI], \@secKeys);
 			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
-				next if ( $sections[$secI] eq '_main' ); # Skip reserved section
+				next if ( $reserveSec{$sections[$secI]} ); # Skip reserved sections
 				my $v = $conf->GetDatum($sections[$secI], $secKeys[$keyI]);
 				$v = ProcessTags(\%feeds, $v);
 				printf(
@@ -210,15 +243,50 @@ sub main()
 		}
 	}
 
+	$0 = "$proctitle [MASTER]" if ( $feeds{_main}->{MAXCHILDREN} != 0 );
 	foreach my $feedName ( keys(%feeds) ) {
+		my $reaped_pid;
+		my $child_limit_reached = 0;
 		my $feed = $feeds{$feedName};
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
-		@entries = ReadFeed(\%feeds, $feed->{rss}, $feedName);
-		foreach my $entry ( @entries ) {
-			print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
-			DownloadStream(\%feeds, $entry, $feedName);
+		$feed->{name} = $feedName;
+		if ( $feeds{_main}->{MAXCHILDREN} == 0 ) { # Master performs downloads
+			$0 = "$proctitle [$feedName]";
+			Child(\%feeds, $feed);
+			next;
+		} elsif ( $feeds{_main}->{MAXCHILDREN} < 0 || scalar(keys(%pids)) < $feeds{_main}->{MAXCHILDREN} ) {
+			my $pid = fork();
+			die "cannot fork: $!" if ( !defined($pid) );
+			if ( $pid == 0 ) { # Child process
+				$0 = "$proctitle [$feedName]";
+				Child(\%feeds, $feed);
+				exit(0); # Children should not return
+			} else {
+				$pids{$pid} = $feedName;
+			}
+		} else {
+			warn "Not enough children, waiting.";
+			$child_limit_reached = 1;
 		}
+
+		if ( $child_limit_reached ) {
+			$reaped_pid = wait();
+		} else {
+			$reaped_pid = waitpid(-1, WNOHANG); # Any children finished?
+			next if ( $reaped_pid <= 0 ); # No, carry on.
+		}
+
+		# A child returned, remove it from the PID list
+		die 'Internal error' if ( !exists($pids{$reaped_pid}) );
+		delete($pids{$reaped_pid});
+
+		redo if ( $child_limit_reached );
+	}
+	while ( scalar(keys(%pids)) ) {
+		my $pid = wait();
+		last if ( $pid == -1 );
+		delete($pids{$pid});
 	}
 
 	return 0;
