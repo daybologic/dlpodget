@@ -3,6 +3,11 @@ Section: net
 Priority: extra
 Maintainer: David Duncan Ross Palmer <palmer@overchat.org>
 Build-Depends: debhelper (>= 7)
+Build-Depends-Indep: libwww-perl,
+ libxml-feed-perl,
+ libio-interactive-perl,
+ dl-libconfreader-perl,
+ libxml-feed-perl
 Standards-Version: 3.7.3
 Homepage: http://www.daybologic.co.uk/
 

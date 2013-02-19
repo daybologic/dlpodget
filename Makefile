@@ -39,3 +39,7 @@ install:
 	else \
 		install -m 755 dlpodget ~/bin/; \
 	fi
+
+check : test
+test:
+	./t/main.t
