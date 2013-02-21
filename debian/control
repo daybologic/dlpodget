@@ -16,7 +16,7 @@ Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends},
  libwww-perl,
  libxml-feed-perl,
- dl-libconfreader-perl,
+ libconfig-inifiles-perl,
  liburi-perl,
  libio-interactive-perl
 Description: Podcast downloader and management system
