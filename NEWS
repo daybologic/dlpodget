@@ -5,7 +5,7 @@
     this is because libconfig-inifiles-perl is a common Debian package, where as Daybo
     Logic's internal config library isn't, as yet.
 
-2012-01-26
+2013-01-26
 ----------
   * It's important to note that the subdirectories under ~/podcasts have changed,
     there are now separate directories for religion, politics, comedy etc.  These
