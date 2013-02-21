@@ -1,3 +1,10 @@
+2013-02-21
+----------
+  * We have made the move from Daybo::ConfReader to Config::IniFiles, this requires minor
+    config changes, you must now put all _main parameters explicitly under [main],
+    this is because libconfig-inifiles-perl is a common Debian package, where as Daybo
+    Logic's internal config library isn't, as yet.
+
 2012-01-26
 ----------
   * It's important to note that the subdirectories under ~/podcasts have changed,
