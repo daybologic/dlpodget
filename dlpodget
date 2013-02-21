@@ -125,7 +125,6 @@ sub ProcessTags($$)
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
 	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
-		$avoid = 0;
 		my $var = substr($V, $idx);
 		if ( $var =~ $tagRx ) {
 			my $v = $Feeds->{_main}->{ uc($1) };
