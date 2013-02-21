@@ -18,6 +18,7 @@
 ;                 is less efficient than 0, since a dedicated child is cloned for each feed.
 ;                 -1 means no limit (no more than the number of feeds in the configuration).
 
+[main]
 enable    = 1
 noop      = 0
 debug     = 0
@@ -157,7 +158,8 @@ check     = 1
 download  = 1
 enable    = 1
 
-[acooke]  ; Letter From America
+; Letter From America
+[acooke]
 localpath = $BBC/acooke
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/acooke/rss.xml
 check     = 1
