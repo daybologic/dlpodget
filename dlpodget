@@ -85,7 +85,7 @@ sub LogFeed($)
 	my $Url = shift;
 	my $ua = LWP::UserAgent->new( show_progress => 0 );
 	my $log_feed_notify_uri =
-		'http://www.daybologic.co.uk/dlpodget/log.php?mode=feed&uri=' .
+		'http://www.daybologic.co.uk/dlpodget/log.cgi?mode=feed&uri=' .
 		$Url;
 
 	$ua->get($log_feed_notify_uri);
