@@ -86,7 +86,7 @@ sub RemoteLog($$)
 	my $ua = LWP::UserAgent->new( show_progress => 0 );
 	my $log_feed_notify_uri = sprintf(
 		'http://www.daybologic.co.uk/dlpodget/log.cgi?mode=%s&uri=%s',
-		$Mode, $Url
+		$Mode, uri_escape($Url)
 	);
 
 	$ua->get($log_feed_notify_uri);
