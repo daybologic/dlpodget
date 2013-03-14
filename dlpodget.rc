@@ -8,6 +8,7 @@
 ;   check     = <1|0>, default 1, whether to automatically check for new files on each run
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
+;   popcon    = <1|0>, default 1, Participate in the popularity contest, by informing Daybo Logic of stream usage.
 ;
 ; More generally, we have a default section, which contains the following options:
 ;
@@ -23,6 +24,7 @@ enable    = 1
 noop      = 0
 debug     = 0
 maxchildren  = 5
+popcon    = 1
 
 [paths]
 root      = $HOME/podcasts
