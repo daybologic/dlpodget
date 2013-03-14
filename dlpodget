@@ -64,7 +64,7 @@ sub ReadFeed($$)
 		return @entries;
 	}
 
-	LogFeed($Url);
+	RemoteLog('feed', $Url);
 	foreach my $entry ($feed->entries) {
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
 		my $uriDecoded = uri_unescape($enclosure->{'url'});
@@ -80,13 +80,14 @@ sub ReadFeed($$)
 	return @entries;
 }
 
-sub LogFeed($)
+sub RemoteLog($$)
 {
-	my $Url = shift;
+	my ( $Mode, $Url ) = @_;
 	my $ua = LWP::UserAgent->new( show_progress => 0 );
-	my $log_feed_notify_uri =
-		'http://www.daybologic.co.uk/dlpodget/log.cgi?mode=feed&uri=' .
-		$Url;
+	my $log_feed_notify_uri = sprintf(
+		'http://www.daybologic.co.uk/dlpodget/log.cgi?mode=%s&uri=%s',
+		$Mode, $Url
+	);
 
 	$ua->get($log_feed_notify_uri);
 	printf(STDERR "Posted to %s\n", $log_feed_notify_uri);
@@ -117,9 +118,14 @@ sub DownloadStream($$$)
 			return;
 		}
 	}
-	%get_params = (
-		'Range' => "bytes=$local_length-"
-	) if ( $local_length );
+	if ( $local_length ) {
+		%get_params = (
+			'Range' => "bytes=$local_length-"
+		);
+	} else {
+		RemoteLog('stream', $entry->{uri});
+	}
+
 	$ua->get(
 		$entry->{uri},
 		%get_params,
