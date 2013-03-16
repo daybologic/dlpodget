@@ -44,6 +44,7 @@ use warnings;
 use diagnostics;
 
 my $Debug = 0;
+my $Log = undef;
 
 sub FileFromURI($)
 {
@@ -51,6 +52,15 @@ sub FileFromURI($)
 	return undef if ( !$Url );
 	my @uri_parts = split('/', $Url);
 	return $uri_parts[-1];
+}
+
+sub OpenLocalLog($)
+{
+	my ( $h, $Path ) = ( undef, shift );
+	warn "Unable to open log file $Path for writing; $!"
+		if ( !open($h, '>>', $Path) );
+
+	return $h;
 }
 
 sub ReadFeed($$)
@@ -64,7 +74,7 @@ sub ReadFeed($$)
 		return @entries;
 	}
 
-	RemoteLog($Feeds, 'feed', $Url);
+	DownloadLog($Feeds, 'feed', $Url);
 	foreach my $entry ($feed->entries) {
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
 		my $uriDecoded = uri_unescape($enclosure->{'url'});
@@ -80,18 +90,32 @@ sub ReadFeed($$)
 	return @entries;
 }
 
-sub RemoteLog($$$)
+sub LocalLog(@)
 {
-	my ( $Feeds, $Mode, $Url ) = @_;
+	my ( $Feeds, $Type, $Url ) = @_;
+	return unless ( $Feeds->{main}->{LOG} ); # Logging not enabled.
+	$Log ||= OpenLocalLog($Feeds->{main}->{LOG}); # Open log file
+	return print($Log "Downloading $Type: $Url\n");
+}
+
+sub RemoteLog(@)
+{
+	my ( $Feeds, $Type, $Url ) = @_;
 	return unless ( $Feeds->{main}->{POPCON} );
 	my $ua = LWP::UserAgent->new( show_progress => 0 );
 	my $log_feed_notify_uri = sprintf(
-		'http://www.daybologic.co.uk/dlpodget/log.cgi?mode=%s&uri=%s',
-		$Mode, uri_escape($Url)
+		'http://www.daybologic.co.uk/dlpodget/log.cgi?type=%s&uri=%s',
+		$Type, uri_escape($Url)
 	);
 
 	$ua->get($log_feed_notify_uri);
 	printf(STDERR "Posted to %s\n", $log_feed_notify_uri);
+}
+
+sub DownloadLog($$$)
+{
+	LocalLog(@_);
+	RemoteLog(@_);
 }
 
 sub DownloadStream($$$)
@@ -124,7 +148,7 @@ sub DownloadStream($$$)
 			'Range' => "bytes=$local_length-"
 		);
 	} else {
-		RemoteLog($Feeds, 'stream', $entry->{uri});
+		DownloadLog($Feeds, 'stream', $entry->{uri});
 	}
 
 	$ua->get(
@@ -306,6 +330,7 @@ sub main()
 		delete($pids{$pid});
 	}
 
+	close($Log) if ( $Log );
 	return 0;
 }
 

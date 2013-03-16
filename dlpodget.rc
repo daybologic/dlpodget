@@ -25,6 +25,7 @@ noop      = 0
 debug     = 0
 maxchildren  = 5
 popcon    = 1
+log       = /home/overlord/dlpodget.log
 
 [paths]
 root      = $HOME/podcasts
