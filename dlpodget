@@ -43,7 +43,10 @@ use strict;
 use warnings;
 use diagnostics;
 
+use constant RATE_LIMIT => 4; # Limit to 4KB per second
+
 my $Debug = 0;
+my $OutputHandle = undef;
 
 sub FileFromURI($)
 {
@@ -79,12 +82,21 @@ sub ReadFeed($$)
 	return @entries;
 }
 
-sub DownloadStream($$$)
-{
-	my ( $ua, $f, %get_params, $is_interactive );
+sub Chunk {
+	my ( $chunk ) = @_;
+	print $OutputHandle $chunk;
+}
+
+sub NullChunk {
+	return;
+}
+
+sub DownloadStream($$$) {
+	my ( $ua, %get_params, $is_interactive );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
+	my $chunkCB = \&Chunk;
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
 		if ( !$entry->{length} || $local_length == $entry->{length} ) {
@@ -96,26 +108,25 @@ sub DownloadStream($$$)
 	$ua = LWP::UserAgent->new( show_progress => $is_interactive );
 	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive );
 
+		if ( open($OutputHandle, '>>:raw', $local_podcast) ) {
+			binmode($OutputHandle);
 	unless ( $Feeds->{main}->{NOOP} ) {
-		if ( open($f, '>>:raw', $local_podcast) ) {
-			binmode($f);
 		} else {
 			printf(STDERR "Local failure on stream %s -- %s: %s\n", $Name, $local_podcast, $!);
 			return;
 		}
 	}
+	$chunkCB = \&NullChunk if ( $Feeds->{main}->{NOOP} );
 	%get_params = (
 		'Range' => "bytes=$local_length-"
 	) if ( $local_length );
 	$ua->get(
 		$entry->{uri},
 		%get_params,
-		':content_cb' => sub {
-			my ( $chunk ) = @_;
-			print $f $chunk unless ( $Feeds->{main}->{NOOP} );
-		}
+		':content_cb' => $chunkCB
 	);
-	close($f) if ( !$Feeds->{main}->{NOOP} );
+	close($OutputHandle) if ( !$Feeds->{main}->{NOOP} );
+	$OutputHandle = undef;
 	printf(STDERR "done.\n") if ( !$is_interactive );
 }
 
