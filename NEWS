@@ -1,7 +1,22 @@
+2013-02-21
+----------
+  * We have made the move from Daybo::ConfReader to Config::IniFiles, this requires minor
+    config changes, you must now put all _main parameters explicitly under [main],
+    this is because libconfig-inifiles-perl is a common Debian package, where as Daybo
+    Logic's internal config library isn't, as yet.
+
+2013-01-26
+----------
+  * It's important to note that the subdirectories under ~/podcasts have changed,
+    there are now separate directories for religion, politics, comedy etc.  These
+    can be seen in a new [paths] section in the config file, and the keys of these
+    directories can ne referenced from within each feed definition.
+  * -n flag is now supported, to download one stream by the section name only.
+
 2012-12-10
 ----------
-New release which supports BSEC and partial downloads
+  * New release which supports BSEC and partial downloads
 
 2012-12-08
 ----------
-Initial release
+  * Initial release

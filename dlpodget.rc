@@ -11,15 +11,16 @@
 ;   timeout   = <secs>, default 30, set to 0 to move back to library defined defaults (180)
 ;   maxtries  = <n>, The number of times to attempt to download a specific podcast
 ;
-; More generally, we have a default section, which contains the following options:
+; More generally, we have a main section, which contains the following options:
 ;
 ;   enable      = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
-;   localpfx    = <prefix which will be exported to sections as $LOCALPFX>
 ;   noop        = <1|0>, default 0, set to 1 to disable modification of local files.
+;   debug       = <1|0>, default 0, Enable verbose maintainer information
 ;   maxchildren = <0-n>, default 0, max concurrent downloads. nb. setting this to 1
 ;                 is less efficient than 0, since a dedicated child is cloned for each feed.
 ;                 -1 means no limit (no more than the number of feeds in the configuration).
 
+[main]
 enable    = 1
 noop      = 0
 debug     = 0
@@ -161,7 +162,8 @@ check     = 1
 download  = 1
 enable    = 1
 
-[acooke]  ; Letter From America
+; Letter From America
+[acooke]
 localpath = $BBC/acooke
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/acooke/rss.xml
 check     = 1
