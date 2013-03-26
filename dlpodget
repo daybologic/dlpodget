@@ -43,7 +43,8 @@ use strict;
 use warnings;
 use diagnostics;
 
-use constant RATE_LIMIT => 4; # Limit to 4KB per second
+use constant RATE_LIMIT_LIMIT  => 4; # Limit to 4KB per second
+use constant RATE_LIMIT_PERIOD => (30); # Period in seconds over which to calculate average
 
 my $Debug = 0;
 my $OutputHandle = undef;
@@ -82,9 +83,18 @@ sub ReadFeed($$)
 	return @entries;
 }
 
+#TODO: Move these out of global scope!
+my $chunks;
+my $total_size;
 sub Chunk {
 	my ( $chunk ) = @_;
+	my $chunk_len = length($chunk);
 	print $OutputHandle $chunk;
+	printf(
+		STDERR "Now we have %u chunks. This chunk was %u in size\n",
+		++$chunks, $chunk_len
+	) if ( $Debug );
+	$total_size += $chunk_len;
 }
 
 sub NullChunk {
@@ -92,6 +102,8 @@ sub NullChunk {
 }
 
 sub DownloadStream($$$) {
+	$chunks = 0;
+	$total_size = 0;
 	my ( $ua, %get_params, $is_interactive );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
