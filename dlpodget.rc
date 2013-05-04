@@ -9,97 +9,243 @@
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
 ;
-; More generally, we have a default section, which contains the following options:
+; More generally, we have a main section, which contains the following options:
 ;
-;   enable    = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
-;   localpfx  = <prefix which will be exported to sections as $LOCALPFX>
-;   noop      = <1|0>, default 0, set to 1 to disable modification of local files.
+;   enable      = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
+;   noop        = <1|0>, default 0, set to 1 to disable modification of local files.
+;   debug       = <1|0>, default 0, Enable verbose maintainer information
+;   maxchildren = <0-n>, default 0, max concurrent downloads. nb. setting this to 1
+;                 is less efficient than 0, since a dedicated child is cloned for each feed.
+;                 -1 means no limit (no more than the number of feeds in the configuration).
 
+[main]
 enable    = 1
-localpfx  = $HOME/podcasts
 noop      = 0
 debug     = 0
+maxchildren  = 5
+
+[paths]
+root      = $HOME/podcasts
+bbc       = $LOCALPFX/bbc
+religion  = $LOCALPFX/religion
+politics  = $LOCALPFX/politics
+tech      = $LOCALPFX/tech
+comedy    = $LOCALPFX/comedy
 
 [infowars]
-localpath = $LOCALPFX/infowars
+localpath = $POLITICS/infowars
 rss       = http://xml.nfowars.net/Alex.rss
 check     = 1
 download  = 1
 enable    = 1
 
 [bsec]
-localpath = $LOCALPFX/bsec
+localpath = $RELIGION/bsec
 rss       = http://feeds.feedburner.com/BradleyStokeEvangelicalChurchSermons?format=xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbcaq]
-localpath = $LOCALPFX/bbc/aq
+localpath = $POLITICS/aq
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/bbcaq/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbctoday]
-localpath = $LOCALPFX/bbc/today
+localpath = $BBC/today
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bsdtalk]
-localpath = $LOCALPFX/bsdtalk
+localpath = $TECH/bsdtalk
 rss       = http://feeds.feedburner.com/Bsdtalk
 check     = 1
 download  = 1
 enable    = 1
 
 [thearchers]
-localpath = $LOCALPFX/bbc/thearchers
+localpath = $BBC/thearchers
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/archers/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [joerogan]
-localpath = $LOCALPFX/joerogan
+localpath = $COMEDY/joerogan
 rss       = http://blog.joerogan.net/feed
 check     = 1
 download  = 1
 enable    = 0
 
 [fricomedy]
-localpath = $LOCALPFX/bbc/r4comedy
+localpath = $COMEDY/r4comedy
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/fricomedy/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [bbcwitness]
-localpath = $LOCALPFX/bbc/witness
+localpath = $BBC/witness
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/witness/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
+[bbcwitness_2011]
+localpath = $BBC/witness
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/w2011/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[bbcwitness_2010]
+localpath = $BBC/witness
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/w2010/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
 [bbchardtalk]
-localpath = $LOCALPFX/bbc/hardtalk
+localpath = $POLITICS/hardtalk
 rss       = http://downloads.bbc.co.uk/podcasts/worldservice/ht/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [beyondbelief]
-localpath = $LOCALPFX/bbc/beyondbelief
+localpath = $RELIGION/beyondbelief
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/belief/rss.xml
 check     = 1
 download  = 1
 enable    = 1
 
 [iot]
-localpath = $LOCALPFX/bbc/iot
+localpath = $BBC/iot
 rss       = http://downloads.bbc.co.uk/podcasts/radio4/iot/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[fooc]
+localpath = $BBC/fooc
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/fooc/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[bbcclick]
+localpath = $TECH/click
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/digitalp/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[heartsoul]
+localpath = $RELIGION/heartsoul
+rss       = http://downloads.bbc.co.uk/podcasts/worldservice/heartsoul/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[bbctbl]
+localpath = $BBC/tbl
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/bottomline/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+; Letter From America
+[acooke]
+localpath = $BBC/acooke
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/acooke/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfabushjr]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfabushjr/rss.xml
+localpath = $BBC/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfaclintonpt2]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaclintonpt2/rss.xml
+localpath = $BBC/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfaclinton]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaclinton/rss.xml
+localpath = $BBC/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfabushsr]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfabushsr/rss.xml
+localpath = $BBC/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfaregan]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaregan/rss.xml
+localpath = $BBC/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfanixoncarter]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfanixoncarter/rss.xml
+localpath = $BBC/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[acooke_lfaearlyyrs]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/lfaearlyyrs/rss.xml
+localpath = $BBC/acooke
+check     = 1
+download  = 1
+enable    = 1
+
+[reith]
+localpath = $BBC/reith
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/reith/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[reitharc]
+localpath = $BBC/reith
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/rla76/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[reitharc2]
+localpath = $BBC/reith
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/rla48/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[bbctftd]
+localpath = $RELIGION/tftd
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/thought/rss.xml
+check     = 1
+download  = 1
+enable    = 1
+
+[christian.org.uk]
+localpath = $RELIGION/christian.org.uk
+rss       = http://www.christian.org.uk/downloads/audio/seriespodcast.xml
 check     = 1
 download  = 1
 enable    = 1
