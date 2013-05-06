@@ -45,16 +45,14 @@ use diagnostics;
 
 my $Debug = 0;
 
-sub FileFromURI($)
-{
+sub FileFromURI($) {
 	my $Url = shift;
 	return undef if ( !$Url );
 	my @uri_parts = split('/', $Url);
 	return $uri_parts[-1];
 }
 
-sub ReadFeed($$)
-{
+sub ReadFeed($$) {
 	my @entries = ( );
 	my ( $Feeds, $Feed ) = @_;
 	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
@@ -79,8 +77,7 @@ sub ReadFeed($$)
 	return @entries;
 }
 
-sub DownloadStream($$$)
-{
+sub DownloadStream($$$) {
 	my ( $ua, $f, %get_params, $is_interactive );
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
@@ -119,8 +116,7 @@ sub DownloadStream($$$)
 	printf(STDERR "done.\n") if ( !$is_interactive );
 }
 
-sub ProcessTags($$)
-{
+sub ProcessTags($$) {
 	my ( $Feeds, $V ) = @_;
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
@@ -141,8 +137,7 @@ sub ProcessTags($$)
 	return $V;
 }
 
-sub Child($$)
-{
+sub Child($$) {
 	my ( $Feeds, $Feed ) = @_;
 	my @entries = ReadFeed($Feeds, $Feed);
 	foreach my $entry ( @entries ) {
@@ -151,8 +146,7 @@ sub Child($$)
 	}
 }
 
-sub main()
-{
+sub main() {
 	my $proctitle = $0; # Save original process title
 	my $conf;
 	my @entries = ( );
