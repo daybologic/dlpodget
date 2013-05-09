@@ -170,7 +170,7 @@ sub DB() {
 				feed_id INTEGER NOT NULL,
 				remotefn CHAR(32) NOT NULL,
 				localfn CHAR(32),
-				INTEGER relotelen,
+				remotelen INTEGER,
 				UNIQUE(feed_id, remotefn) ON CONFLICT REPLACE
 			)'
 		);
