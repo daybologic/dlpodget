@@ -150,7 +150,7 @@ sub Child($$$$)
 	foreach my $entry ( @entries ) {
 		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
 		DownloadStream($Feeds, $entry, $Feed->{name});
-		DBUpdateStream($DB, $FeedKey);
+		DBUpdateStream($DB, $FeedKey, $entry);
 	}
 }
 
@@ -211,15 +211,25 @@ sub DBUpdateFeed($$) {
 my %_DBUpdateStream = (
 	'repl_into_stream' => undef
 );
-sub DBUpdateStream($$) {
+sub DBUpdateStream($$$) {
 	my $ret = 0;
-	my ( $DB, $FeedKey ) = @_;
+	my ( $DB, $FeedKey, $Entry ) = @_;
 	if ( !$_DBUpdateStream{'repl_into_stream'} ) {
-		my $sth = $DB->prepare('REPLACE INTO streams (feed_id) VALUES(?)');
+		my $sth = $DB->prepare(
+			'REPLACE INTO streams (
+				feed_id, remotefn, remotelen
+			) VALUES(
+				?, ?, ?
+			)'
+		);
 		$_DBUpdateStream{'repl_into_stream'} = $sth if ( $sth );
 	}
 	if ( $_DBUpdateStream{'repl_into_stream'} ) {
-		$ret = $_DBUpdateStream{'repl_into_stream'}->execute($FeedKey);
+		$ret = $_DBUpdateStream{'repl_into_stream'}->execute(
+			$FeedKey,
+			$Entry->{filename},
+			$Entry->{length}
+		);
 		warn $FeedKey;
 	}
 	return $ret;
