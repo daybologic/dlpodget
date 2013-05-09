@@ -186,7 +186,13 @@ sub DBUpdateFeed($$) {
 	my $ret = 0;
 	my ( $DB, $Name ) = @_;
 	if ( !$_DBUpdateFeed{'repl_into_feed'} ) {
-		my $sth = $DB->prepare('REPLACE INTO feeds (name, last_check_t) VALUES(?, ?)');
+		my $sth = $DB->prepare('
+			INSERT OR REPLACE INTO feeds (
+				name, last_check_t
+			) VALUES(
+				?, ?
+			)'
+		);
 		$_DBUpdateFeed{'repl_into_feed'} = $sth if ( $sth );
 	}
 	if ( !$_DBUpdateFeed{'get_feed_id'} ) {
@@ -216,7 +222,7 @@ sub DBUpdateStream($$$) {
 	my ( $DB, $FeedKey, $Entry ) = @_;
 	if ( !$_DBUpdateStream{'repl_into_stream'} ) {
 		my $sth = $DB->prepare(
-			'REPLACE INTO streams (
+			'INSERT OR REPLACE INTO streams (
 				feed_id, remotefn, remotelen
 			) VALUES(
 				?, ?, ?
