@@ -164,9 +164,9 @@ sub DB() {
 		);
 		$dbh->do(
 			'CREATE TABLE IF NOT EXISTS streams (
-				id INTEGER PRIMARY KEY,
-				feed_id INTEGER,
-				remotefn CHAR(32),
+				id INTEGER PRIMARY KEY NOT NULL,
+				feed_id INTEGER NOT NULL,
+				remotefn CHAR(32) NOT NULL,
 				localfn CHAR(32),
 				INTEGER relotelen,
 				UNIQUE(feed_id, remotefn) ON CONFLICT REPLACE
