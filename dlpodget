@@ -159,7 +159,9 @@ sub DB() {
 	if ( $dbh ) {
 		$dbh->do(
 			'CREATE TABLE IF NOT EXISTS feeds (
-				id INTEGER PRIMARY KEY, name CHAR(16) unique, last_check_t INTEGER
+				id INTEGER PRIMARY KEY NOT NULL,
+				name CHAR(16) UNIQUE NOT NULL,
+				last_check_t INTEGER NOT NULL default 0
 			)'
 		);
 		$dbh->do(
