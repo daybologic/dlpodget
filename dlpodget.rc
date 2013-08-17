@@ -32,6 +32,13 @@ politics  = $LOCALPFX/politics
 tech      = $LOCALPFX/tech
 comedy    = $LOCALPFX/comedy
 
+[gb2rs]
+localpath = $TECH/hamradio/gb2rs
+rss       = http://gb2rs.podbean.com/feed
+check     = 1
+download  = 1
+enable    = 1
+
 [infowars]
 localpath = $POLITICS/infowars
 rss       = http://xml.nfowars.net/Alex.rss
@@ -248,4 +255,4 @@ localpath = $RELIGION/christian.org.uk
 rss       = http://www.christian.org.uk/downloads/audio/seriespodcast.xml
 check     = 1
 download  = 1
-enable    = 1
+enable    = 0
