@@ -174,38 +174,51 @@ sub DB() {
 }
 
 my %_DBUpdateFeed = (
-	'repl_into_feed' => undef,
-	'get_feed_id' => undef
+	'get_feed_id' => undef,
+	'ins_feed' => undef,
+	'upd_feed' => undef
 );
 sub DBUpdateFeed($$) {
 	my $ret = 0;
+	my $sth;
 	my ( $DB, $Name ) = @_;
-	if ( !$_DBUpdateFeed{'repl_into_feed'} ) {
-		my $sth = $DB->prepare('
-			INSERT OR REPLACE INTO feeds (
-				name, last_check_t
-			) VALUES(
-				?, ?
-			)'
-		);
-		$_DBUpdateFeed{'repl_into_feed'} = $sth if ( $sth );
-	}
+
+	# Prepare all of the possible statements
 	if ( !$_DBUpdateFeed{'get_feed_id'} ) {
 		my $sth = $DB->prepare('SELECT id FROM feeds WHERE name = ?');
 		$_DBUpdateFeed{'get_feed_id'} = $sth if ( $sth );
 	}
 
-	if ( $_DBUpdateFeed{'repl_into_feed'} ) {
-		$ret = $_DBUpdateFeed{'repl_into_feed'}->execute($Name, time());
+	if ( !$_DBUpdateFeed{'ins_feed'} ) {
+		my $sth = $DB->prepare('
+			INSERT INTO feeds (
+				last_check_t, name
+			) VALUES(
+				?, ?
+			)'
+		);
+		$_DBUpdateFeed{'ins_feed'} = $sth if ( $sth );
 	}
-	if ( $ret && $_DBUpdateFeed{'get_feed_id'} ) {
-		my $id = 0;
-		if ( $_DBUpdateFeed{'get_feed_id'}->execute($Name) ) {
-			my $ref = $_DBUpdateFeed{'get_feed_id'}->fetchrow_hashref();
-			$id = $ref->{id} if ( $ref );
-		}
-		$ret = $id if ( $id );
+
+	if ( !$_DBUpdateFeed{'upd_feed'} ) {
+		my $sth = $DB->prepare('UPDATE feeds SET last_check_t = ? WHERE id = ?');
+		$_DBUpdateFeed{'upd_feed'} = $sth if ( $sth );
 	}
+
+	# Execute needed statements
+	$_DBUpdateFeed{'get_feed_id'}->execute($Name);
+	my $ref = $_DBUpdateFeed{'get_feed_id'}->fetchrow_hashref();
+	if ( $ref->{id} ) { # Does feed exist?
+		# Yes, the feed exists.
+		$ret = $ref->{id};
+		$_DBUpdateFeed{'upd_feed'}->execute(time(), $ret);
+	} else { # Feed does not exist
+		my $sth = $_DBUpdateFeed{'ins_feed'}->execute(time(), $Name);
+		$ret = $DB->{last_insertid};
+	}
+
+	warn $ret;
+	die('Assertion failure') if ( !$ret );
 	return $ret;
 }
 
@@ -214,6 +227,7 @@ my %_DBUpdateStream = (
 );
 sub DBUpdateStream($$$) {
 	my $ret = 0;
+	return; # FIXME
 	my ( $DB, $FeedKey, $Entry ) = @_;
 	if ( !$_DBUpdateStream{'repl_into_stream'} ) {
 		my $sth = $DB->prepare(
