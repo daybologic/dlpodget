@@ -214,7 +214,7 @@ sub DBUpdateFeed($$) {
 		$_DBUpdateFeed{'upd_feed'}->execute(time(), $ret);
 	} else { # Feed does not exist
 		my $sth = $_DBUpdateFeed{'ins_feed'}->execute(time(), $Name);
-		$ret = $DB->{last_insertid};
+		$ret = $DB->last_insert_id(undef, undef, undef, undef);
 	}
 
 	warn $ret;
