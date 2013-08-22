@@ -217,7 +217,6 @@ sub DBUpdateFeed($$) {
 		$ret = $DB->last_insert_id(undef, undef, undef, undef);
 	}
 
-	warn $ret;
 	die('Assertion failure') if ( !$ret );
 	return $ret;
 }
