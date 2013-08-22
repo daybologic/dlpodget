@@ -230,9 +230,9 @@ sub DBUpdateStream($$$) {
 	if ( !$_DBUpdateStream{'repl_into_stream'} ) {
 		my $sth = $DB->prepare(
 			'INSERT OR REPLACE INTO streams (
-				feed_id, remotefn, remotelen
+				feed_id, remotefn, remotelen, localfn
 			) VALUES(
-				?, ?, ?
+				?, ?, ?, ?
 			)'
 		);
 		$_DBUpdateStream{'repl_into_stream'} = $sth if ( $sth );
@@ -241,9 +241,9 @@ sub DBUpdateStream($$$) {
 		$ret = $_DBUpdateStream{'repl_into_stream'}->execute(
 			$FeedKey,
 			$Entry->{filename},
-			$Entry->{length}
+			$Entry->{length},
+			$Entry->{filename}
 		);
-		warn $FeedKey;
 	}
 	return $ret;
 }
