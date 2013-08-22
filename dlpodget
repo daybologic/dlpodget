@@ -226,7 +226,6 @@ my %_DBUpdateStream = (
 );
 sub DBUpdateStream($$$) {
 	my $ret = 0;
-	return; # FIXME
 	my ( $DB, $FeedKey, $Entry ) = @_;
 	if ( !$_DBUpdateStream{'repl_into_stream'} ) {
 		my $sth = $DB->prepare(
