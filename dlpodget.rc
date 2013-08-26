@@ -46,6 +46,7 @@ rss       = http://xml.nfowars.net/Alex.rss
 check     = 1
 download  = 1
 enable    = 1
+codec     = mp2
 
 [bsec]
 localpath = $RELIGION/bsec
@@ -68,6 +69,7 @@ check     = 1
 download  = 1
 enable    = 1
 codec     = ogg
+quality   = -1
 
 [bsdtalk]
 localpath = $TECH/bsdtalk
@@ -82,6 +84,7 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/archers/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+codec     = flac
 
 [joerogan]
 localpath = $COMEDY/joerogan
