@@ -92,7 +92,10 @@ sub DownloadStream($$$) {
 		}
 	}
 	$is_interactive = is_interactive();
-	$ua = LWP::UserAgent->new( show_progress => $is_interactive );
+	$ua = LWP::UserAgent->new(
+		show_progress => $is_interactive,
+		agent => 'dlpodget'
+	);
 	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive );
 
 	unless ( $Feeds->{main}->{NOOP} ) {
