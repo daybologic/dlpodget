@@ -31,6 +31,14 @@ religion  = $LOCALPFX/religion
 politics  = $LOCALPFX/politics
 tech      = $LOCALPFX/tech
 comedy    = $LOCALPFX/comedy
+music     = $LOCALPFX/music
+
+[tranceaddict]
+localpath = $MUSIC/trance/tranceaddict
+rss       = http://tranceaddiction.podomatic.com/rss2.xml
+check     = 1
+download  = 1
+enable    = 1
 
 [gb2rs]
 localpath = $TECH/hamradio/gb2rs
