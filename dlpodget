@@ -79,10 +79,30 @@ sub ReadFeed($$) {
 	return @entries;
 }
 
+sub rsleep($) {
+	my $time = shift;
+	return unless ( $time );
+
+	if ( $time =~ m/^(\d+)r$/o ) {
+		$time = int(rand($1)) + 1;
+	} elsif ( $time !~ m/^\d+$/o ) {
+		return;
+	}
+
+	printf(STDERR "Sleeping %u seconds\n", $time)
+		if ( $Debug );
+
+	sleep($time);
+	return;
+}
+
 sub DownloadStream($$$) {
 	my ( $ua, $f, %get_params, $is_interactive );
+	my $http_resp;
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
+	my $rsleep = $Feeds->{$Name}->{rsleep} || $Feeds->{main}->{RSLEEP};
+	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->{RETRIES};
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
@@ -109,14 +129,20 @@ sub DownloadStream($$$) {
 	%get_params = (
 		'Range' => "bytes=$local_length-"
 	) if ( $local_length );
-	$ua->get(
-		$entry->{uri},
-		%get_params,
-		':content_cb' => sub {
-			my ( $chunk ) = @_;
-			print $f $chunk unless ( $Feeds->{main}->{NOOP} );
-		}
-	);
+
+	my $tries = 1 + ($retries || 0);
+	do {
+		$http_resp = $ua->get(
+			$entry->{uri},
+			%get_params,
+			':content_cb' => sub {
+				my ( $chunk ) = @_;
+				print $f $chunk unless ( $Feeds->{main}->{NOOP} );
+			}
+		);
+		rsleep($rsleep) if ( ($tries-1) && $http_resp->code() != 200 );
+	} while ( $http_resp->code() != 200 && --$tries );
+
 	close($f) if ( !$Feeds->{main}->{NOOP} );
 	printf(STDERR "done.\n") if ( !$is_interactive );
 }
