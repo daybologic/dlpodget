@@ -290,7 +290,7 @@ sub main() {
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('dn:', \%opts) );
+	return 1 if ( !getopts('c:dn:', \%opts) );
 	$Debug = 1 if ( $opts{'d'} );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 
@@ -363,6 +363,23 @@ sub main() {
 				$feeds{ $sections[$secI] }->{ $secKeys[$keyI] } = $v;
 			}
 		}
+	}
+
+	if ( $opts{'c'} ) {
+		my $max_children_opt = int($opts{'c'});
+		if ( $Debug ) {
+			my $msg;
+			if ( defined($feeds{main}->{MAXCHILDREN}) ) {
+				$msg = sprintf(
+					"Overriding config maxchildren %u via -c %u\n",
+					$feeds{main}->{MAXCHILDREN}, $max_children_opt
+				);
+			} else {
+				$msg = sprintf("Setting maxchildren via -c %u\n", $max_children_opt);
+			}
+			print(STDERR $msg);
+		}
+		$feeds{main}->{MAXCHILDREN} = $max_children_opt;
 	}
 
 	$0 = "$proctitle [MASTER]" if ( $feeds{main}->{MAXCHILDREN} != 0 );
