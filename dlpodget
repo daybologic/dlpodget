@@ -46,6 +46,7 @@ use warnings;
 use diagnostics;
 
 my $Debug = 0;
+my $Quiet = 0;
 
 sub FileFromURI($) {
 	my $Url = shift;
@@ -107,16 +108,16 @@ sub DownloadStream($$$) {
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
 		if ( !$entry->{length} || $local_length == $entry->{length} ) {
-			printf(STDERR "%s already exists\n", $local_podcast);
+			printf(STDERR "%s already exists\n", $local_podcast) unless ( $Quiet );
 			return;
 		}
 	}
 	$is_interactive = is_interactive();
 	$ua = LWP::UserAgent->new(
-		show_progress => $is_interactive,
+		show_progress => $is_interactive && !$Quiet,
 		agent => 'dlpodget'
 	);
-	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive );
+	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive && !$Quiet );
 
 	unless ( $Feeds->{main}->{NOOP} ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
@@ -144,7 +145,7 @@ sub DownloadStream($$$) {
 	} while ( $http_resp->code() != 200 && --$tries );
 
 	close($f) if ( !$Feeds->{main}->{NOOP} );
-	printf(STDERR "done.\n") if ( !$is_interactive );
+	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
 }
 
 sub ProcessTags($$) {
@@ -290,9 +291,11 @@ sub main() {
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('c:dn:', \%opts) );
+	return 1 if ( !getopts('qc:dn:', \%opts) );
 	$Debug = 1 if ( $opts{'d'} );
+	$Quiet = 1 if ( $opts{'q'} );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
+	print(STDERR "Quiet mode enabled by -q\n") if ( $Debug );
 
 	foreach my $confFile ( @confFiles ) {
 		next unless ( -f $confFile );
@@ -306,7 +309,7 @@ sub main() {
 
 	if ( $conf && (@defKeys = $conf->Parameters('main')) ) {
 		if ( !$conf->val('main', 'enable', 1) ) {
-			print(STDERR "Configuration disabled.\n");
+			print(STDERR "Configuration disabled.\n") unless ( $Quiet );
 			$conf = undef;
 		}
 	}
@@ -408,7 +411,7 @@ sub main() {
 				$pids{$pid} = $feedName;
 			}
 		} else {
-			warn "Pending (child limit reached).";
+			warn "Pending (child limit reached)." unless ( $Quiet );
 			$child_limit_reached = 1;
 		}
 
