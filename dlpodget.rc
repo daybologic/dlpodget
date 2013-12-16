@@ -8,6 +8,8 @@
 ;   check     = <1|0>, default 1, whether to automatically check for new files on each run
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
+;   notify    = <1|0>, or a mailto:, ftp: or an http: link
+;   attach    = <1|0>, Send the downloaded file (optional for mailto:, http:, ftp: is pretty useless without it)
 ;   retries   = <0-n>, default 0, number of times to retry downloading a feed
 ;               or stream (global; can be over-ridden per feed).
 ;   rsleep    = <0-n[r]>, default 0, time in seconds to sleep after a failed
@@ -17,6 +19,7 @@
 ;
 ;   enable      = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
 ;   noop        = <1|0>, default 0, set to 1 to disable modification of local files.
+;   notify      = a mailto:, ftp: or http: link
 ;   debug       = <1|0>, default 0, Enable verbose maintainer information
 ;   maxchildren = <0-n>, default 0, max concurrent downloads. nb. setting this to 1
 ;                 is less efficient than 0, since a dedicated child is cloned for each feed.
@@ -30,6 +33,7 @@
 enable    = 1
 noop      = 0
 debug     = 0
+notify    = mailto:palmer@overchat.org
 maxchildren  = 5
 retries   = 3
 rsleep    = 90r
@@ -65,6 +69,7 @@ rss       = http://xml.nfowars.net/Alex.rss
 check     = 1
 download  = 1
 enable    = 1
+notify    = 1
 
 [bsec]
 localpath = $RELIGION/bsec
@@ -86,6 +91,8 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+notify    = 1
+attach    = 1
 
 [bsdtalk]
 localpath = $TECH/bsdtalk
