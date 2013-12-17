@@ -104,6 +104,7 @@ sub DownloadStream($$$) {
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $rsleep = $Feeds->{$Name}->{rsleep} || $Feeds->{main}->{RSLEEP};
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->{RETRIES};
+	my $notify = $Feeds->{$Name}->{notify} || $Feeds->{main}->{NOTIFY};
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
@@ -146,6 +147,8 @@ sub DownloadStream($$$) {
 
 	close($f) if ( !$Feeds->{main}->{NOOP} );
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
+
+	Notify($local_podcast) if ( $notify );
 }
 
 sub ProcessTags($$) {
@@ -276,6 +279,13 @@ sub DBUpdateStream($$$) {
 		);
 	}
 	return $ret;
+}
+
+sub Notify($) {
+	my $local_feed = shift;
+	system(
+		"echo \"Feed $local_feed\" | mail -s \"New feed available\" palmer\@overchat.org"
+	);
 }
 
 sub main() {
