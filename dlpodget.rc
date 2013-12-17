@@ -282,6 +282,6 @@ localpath = $RELIGION/christian.org.uk
 rss       = http://www.christian.org.uk/downloads/audio/seriespodcast.xml
 check     = 1
 download  = 1
-enable    = 1
+enable    = 0
 retries   = 3
 rsleep    = 5r
