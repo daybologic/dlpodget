@@ -18,7 +18,8 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
  libxml-feed-perl,
  libconfig-inifiles-perl,
  liburi-perl,
- libio-interactive-perl
+ libio-interactive-perl,
+ libdbd-sqlite3-perl
 Description: Podcast downloader and management system
  Daybo Logic's podcast system keeps track of new podcasts posted on an RSS
  feed and downloads whatever you do not yet have, checking file lengths
