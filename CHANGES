@@ -1,2 +1,2 @@
 [???]
-_main configurarion section must not have the explicit name 'main'
+_main configurarion section must now have the explicit name 'main'
