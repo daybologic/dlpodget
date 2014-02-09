@@ -1,0 +1,17 @@
+#!/usr/bin/perl -w
+
+sub Total($) {
+	my $line = shift;
+	my @rows = split(m/\s+/, $line);
+	my $total = $rows[-1];
+	$total = 0 if ( $total !~ m/^\d+\.\d+$/ );
+	print $total;
+	return;
+}
+
+foreach my $line ( <STDIN> ) {
+	Total($1) if ( $line =~ m/^\s+Total\s+(.*)/ );
+}
+
+exit(0);
+1;
