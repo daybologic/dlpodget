@@ -2,6 +2,7 @@
 
 package main;
 use Test::More tests => 9;
+use Devel::Cover;
 use strict;
 use warnings;
 use diagnostics;
