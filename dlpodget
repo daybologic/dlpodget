@@ -368,7 +368,7 @@ sub main() {
 		}
 	}
 
-	if ( $opts{'c'} ) {
+	if ( defined($opts{'c'}) ) {
 		my $max_children_opt = int($opts{'c'});
 		if ( $Debug ) {
 			my $msg;
