@@ -299,7 +299,7 @@ sub main() {
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 	print(STDERR "Quiet mode enabled by -q\n") if ( $Debug );
 	printf(STDERR "Overridden database with -f %s\n", $File)
-		if ( $File );
+		if ( $opts{'f'} );
 
 	foreach my $confFile ( @confFiles ) {
 		next unless ( -f $confFile );
