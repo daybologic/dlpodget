@@ -1,7 +1,7 @@
 #!/usr/bin/make
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2013, David Duncan Ross Palmer (M6KVM), Daybo Logic
+# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
