@@ -2,7 +2,7 @@ Source: dlpodget
 Section: net
 Priority: extra
 Maintainer: David Duncan Ross Palmer <palmer@overchat.org>
-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper (>= 7), lynx
 Build-Depends-Indep: libwww-perl,
  libxml-feed-perl,
  libio-interactive-perl,

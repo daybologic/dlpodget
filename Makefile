@@ -43,3 +43,5 @@ install:
 check : test
 test:
 	./t/main.t
+	cover
+	lynx -dump cover_db/coverage.html | ./bin/cover_check
