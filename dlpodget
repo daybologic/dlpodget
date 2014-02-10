@@ -45,6 +45,8 @@ use strict;
 use warnings;
 use diagnostics;
 
+use constant DEV_NULL => '/dev/null';
+
 my $Debug = 0;
 my $Quiet = 0;
 my $File = '';
@@ -176,12 +178,15 @@ sub Child($$$$) {
 	foreach my $entry ( @entries ) {
 		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
 		DownloadStream($Feeds, $entry, $Feed->{name});
-		DBUpdateStream($DB, $FeedKey, $entry);
+		DBUpdateStream($DB, $FeedKey, $entry) if ( $DB );
 	}
 }
 
 sub DB() {
-	my $dbh = DBI->connect("DBI:SQLite:$File");
+	my $dbh;
+
+	return undef if ( $File eq DEV_NULL() );
+	$dbh = DBI->connect("DBI:SQLite:$File");
 	if ( $dbh ) {
 		$dbh->do(
 			'CREATE TABLE IF NOT EXISTS feeds (
@@ -399,7 +404,7 @@ sub main() {
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
 		$feed->{name} = $feedName;
-		$feed_key = DBUpdateFeed($db, $feed->{name});
+		$feed_key = DBUpdateFeed($db, $feed->{name}) if ( $db );
 		if ( $feeds{main}->{MAXCHILDREN} == 0 ) { # Master performs downloads
 			$0 = "$proctitle [$feedName]";
 			Child($db, $feed_key, \%feeds, $feed);
