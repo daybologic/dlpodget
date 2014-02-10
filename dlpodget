@@ -47,6 +47,7 @@ use diagnostics;
 
 my $Debug = 0;
 my $Quiet = 0;
+my $File = '';
 
 sub FileFromURI($) {
 	my $Url = shift;
@@ -180,7 +181,7 @@ sub Child($$$$) {
 }
 
 sub DB() {
-	my $dbh = DBI->connect("DBI:SQLite:$ENV{HOME}/.dlpodget.db");
+	my $dbh = DBI->connect("DBI:SQLite:$File");
 	if ( $dbh ) {
 		$dbh->do(
 			'CREATE TABLE IF NOT EXISTS feeds (
@@ -291,11 +292,14 @@ sub main() {
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('qc:dn:', \%opts) );
+	return 1 if ( !getopts('f:qc:dn:', \%opts) );
 	$Debug = 1 if ( $opts{'d'} );
 	$Quiet = 1 if ( $opts{'q'} );
+	$File  = ( $opts{'f'} ) ? ( $opts{'f'} ) : ( "$ENV{HOME}/.dlpodget.db" );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 	print(STDERR "Quiet mode enabled by -q\n") if ( $Debug );
+	printf(STDERR "Overridden database with -f %s\n", $File)
+		if ( $File );
 
 	foreach my $confFile ( @confFiles ) {
 		next unless ( -f $confFile );
