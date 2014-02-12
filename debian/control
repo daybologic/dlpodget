@@ -8,7 +8,10 @@ Build-Depends-Indep: libwww-perl,
  libio-interactive-perl,
  dl-libconfreader-perl,
  libxml-feed-perl,
- libdevel-cover-perl
+ libdevel-cover-perl,
+ libconfig-inifiles-perl,
+ libdbd-sqlite3-perl,
+ libpod-coverage-perl
 Standards-Version: 3.7.3
 Homepage: http://www.daybologic.co.uk/
 
