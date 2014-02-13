@@ -10,7 +10,7 @@ use diagnostics;
 require 'dlpodget';
 
 use constant MIN_FEED_STREAMS => (10);
-use constant TEST_FEED        => 'http://xml.nfowars.net/Alex.rss';
+use constant TEST_FEED        => 'http://xml.nfowars.net/Alex.rss'; # Requires an internet connection
 
 sub t_FileFromURI()
 {
@@ -36,15 +36,20 @@ sub t_ReadFeed()
 		_main => { },
 		dummy => { }
 	);
+
 	my @arr = ReadFeed(\%feeds, { rss => TEST_FEED(), name => 'dummy' });
-	cmp_ok(scalar(@arr), '>=', MIN_FEED_STREAMS(), sprintf('%s: At least %u feeds', $F, MIN_FEED_STREAMS()));
 	foreach my $hashref ( @arr ) {
 		my $t = ref($hashref);
 		$types{$t} = 1;
 		foreach my $k ( keys(%$hashref) ) { $seenKeys{$k} = 1; }
 	}
-	is(scalar(keys(%types)), 1, "$F: Only one type of return type");
-	is_deeply(\%seenKeys, \%expectedKeys, 'Only expected keys returned');
+	SKIP: {
+		skip 'Requires internet connection', 3 unless $ENV{TEST_INTERNET};
+
+		cmp_ok(scalar(@arr), '>=', MIN_FEED_STREAMS(), sprintf('%s: At least %u feeds', $F, MIN_FEED_STREAMS()));
+		is(scalar(keys(%types)), 1, "$F: Only one type of return type");
+		is_deeply(\%seenKeys, \%expectedKeys, 'Only expected keys returned');
+	};
 }
 
 sub t_ProcessTags()
