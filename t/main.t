@@ -44,7 +44,7 @@ sub t_ReadFeed()
 		foreach my $k ( keys(%$hashref) ) { $seenKeys{$k} = 1; }
 	}
 	SKIP: {
-		skip 'Requires internet connection; use TEST_LIVE=1 to enable', 3 unless $ENV{TEST_LIVE};
+		skip 'Requires internet connection; use TEST_AUTHOR=1 to enable', 3 unless $ENV{TEST_AUTHOR};
 
 		cmp_ok(scalar(@arr), '>=', MIN_FEED_STREAMS(), sprintf('%s: At least %u feeds', $F, MIN_FEED_STREAMS()));
 		is(scalar(keys(%types)), 1, "$F: Only one type of return type");
