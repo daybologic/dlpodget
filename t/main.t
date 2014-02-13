@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 9;
+use Test::More tests => 22;
 use Devel::Cover;
 use strict;
 use warnings;
@@ -67,11 +67,30 @@ sub t_ProcessTags()
 	is(ProcessTags(\%testData, '$'), '$', "$F: Illegal variable");
 }
 
+sub t_rsleep() {
+	is(rsleep(undef), 0, 'rsleep undef 0');
+	is(rsleep(0), 0, 'rsleep 0 0');
+	is(rsleep(1), 1, 'rsleep 1 1');
+	is(rsleep(-1), -1, 'rsleep -1 -1');
+	is(rsleep(-2), -1, 'rsleep -2 -1');
+	is(rsleep('blah'), -1, 'rsleep blah -1');
+	is(rsleep(10), 10, 'rsleep 10 10');
+
+	# Random tests
+	srand(0); # Ensure we always start from a deterministic point
+	my @sleepTimes = ( qw/2 8 1 9 6/ );
+	is(rsleep('10R'), -1, 'rsleep 10R -1');
+	foreach my $v ( @sleepTimes ) {
+		is(rsleep('10r'), $v, "rsleep 10r $v");
+	}
+}
+
 sub t_main()
 {
 	t_FileFromURI();
 	t_ReadFeed();
 	t_ProcessTags();
+	t_rsleep();
 	return 0;
 }
 
