@@ -85,19 +85,19 @@ sub ReadFeed($$) {
 
 sub rsleep($) {
 	my $time = shift;
-	return unless ( $time );
+	return 0 unless ( $time );
 
 	if ( $time =~ m/^(\d+)r$/o ) {
 		$time = int(rand($1)) + 1;
 	} elsif ( $time !~ m/^\d+$/o ) {
-		return;
+		return -1;
 	}
 
 	printf(STDERR "Sleeping %u seconds\n", $time)
 		if ( $Debug );
 
 	sleep($time);
-	return;
+	return $time;
 }
 
 sub DownloadStream($$$) {
