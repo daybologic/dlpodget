@@ -45,3 +45,6 @@ test:
 	./t/main.t
 	cover
 	lynx -dump cover_db/coverage.html | ./bin/cover_check
+
+clean:
+	rm -rf cover_db
