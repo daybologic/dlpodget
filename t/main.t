@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 4;
+use Test::More tests => 5;
 use Devel::Cover;
 use strict;
 use warnings;
@@ -85,13 +85,18 @@ sub t_rsleep() {
 	}
 }
 
+sub t_DB() {
+	isa_ok(DB(), 'DBI::db', 'DB; get handle');
+}
+
 sub t_main()
 {
 	my %tests = (
 		'FileFromURI' => \&t_FileFromURI,
 		'ReadFeed'    => \&t_ReadFeed,
 		'ProcessTags' => \&t_ProcessTags,
-		'rsleep'      => \&t_rsleep
+		'rsleep'      => \&t_rsleep,
+		'DB'          => \&t_DB
 	);
 	while ( my ( $name, $func ) = each(%tests) ) {
 		subtest $name => $func;
