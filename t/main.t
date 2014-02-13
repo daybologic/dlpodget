@@ -33,7 +33,7 @@ sub t_ReadFeed()
 		uri => 1
 	);
 	my %feeds = (
-		_main => { },
+		main => { },
 		dummy => { }
 	);
 
@@ -56,7 +56,7 @@ sub t_ProcessTags()
 {
 	my $F = 'ProcessTags';
 	my %testData = (
-		_main => {
+		main => {
 			'DUMMYA' => '$DUMMYC',
 			'DUMMYB' => '/tmp/2',
 			'DUMMYC' => '/tmp/3'
