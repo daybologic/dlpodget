@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 22;
+use Test::More tests => 4;
 use Devel::Cover;
 use strict;
 use warnings;
@@ -87,10 +87,15 @@ sub t_rsleep() {
 
 sub t_main()
 {
-	t_FileFromURI();
-	t_ReadFeed();
-	t_ProcessTags();
-	t_rsleep();
+	my %tests = (
+		'FileFromURI' => \&t_FileFromURI,
+		'ReadFeed'    => \&t_ReadFeed,
+		'ProcessTags' => \&t_ProcessTags,
+		'rsleep'      => \&t_rsleep
+	);
+	while ( my ( $name, $func ) = each(%tests) ) {
+		subtest $name => $func;
+	}
 	return 0;
 }
 
