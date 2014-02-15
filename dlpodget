@@ -73,11 +73,12 @@ sub ReadFeed($$) {
 		my $uriDecoded = uri_unescape($enclosure->{'url'});
 		my $filename = FileFromURI($uriDecoded);
 		push(@entries, {
-			filename => $filename,
-			uri      => $uriDecoded,
-			title    => $entry->title,
-			type     => $enclosure->{'type'},
-			length   => $enclosure->{'length'}
+			localFilename  => $filename,
+			remoteFilename => $filename,
+			uri            => $uriDecoded,
+			title          => $entry->title,
+			type           => $enclosure->{'type'},
+			length         => $enclosure->{'length'}
 		}) if ( $filename );
 	}
 	return @entries;
@@ -107,7 +108,7 @@ sub DownloadStream($$$) {
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $rsleep = $Feeds->{$Name}->{rsleep} || $Feeds->{main}->{RSLEEP};
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->{RETRIES};
-	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
+	my $local_podcast = join('/', $Feeds->{$Name}->{localpath}, $entry->{localFilename});
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
 		if ( !$entry->{length} || $local_length == $entry->{length} ) {
@@ -276,9 +277,9 @@ sub DBUpdateStream($$$) {
 	if ( $_DBUpdateStream{'repl_into_stream'} ) {
 		$ret = $_DBUpdateStream{'repl_into_stream'}->execute(
 			$FeedKey,
-			$Entry->{filename},
+			$Entry->{remoteFilename},
 			$Entry->{length},
-			$Entry->{filename}
+			$Entry->{localFilename}
 		);
 	}
 	return $ret;
