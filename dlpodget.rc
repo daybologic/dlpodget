@@ -8,6 +8,7 @@
 ;   check     = <1|0>, default 1, whether to automatically check for new files on each run
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
+;   codec     = <name>, Name of a file format to convert to
 ;   retries   = <0-n>, default 0, number of times to retry downloading a feed
 ;               or stream (global; can be over-ridden per feed).
 ;   rsleep    = <0-n[r]>, default 0, time in seconds to sleep after a failed
@@ -65,6 +66,7 @@ rss       = http://xml.nfowars.net/Alex.rss
 check     = 1
 download  = 1
 enable    = 1
+codec     = mp2
 
 [bsec]
 localpath = $RELIGION/bsec
@@ -86,6 +88,8 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/today/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+codec     = ogg
+quality   = -1
 
 [bsdtalk]
 localpath = $TECH/bsdtalk
@@ -100,6 +104,7 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/archers/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+codec     = flac
 
 [joerogan]
 localpath = $COMEDY/joerogan
