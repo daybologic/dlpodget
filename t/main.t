@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 6;
+use Test::More tests => 8;
 use Devel::Cover;
 use strict;
 use warnings;
@@ -114,6 +114,36 @@ sub t_translationInfo() {
 	}
 }
 
+sub t_validateDirection($) {
+	my @invalid = ( 0, '0', undef, 3, 300, -1, 'string' );
+	foreach my $inv ( @invalid ) {
+		eval {
+			validateDirection($inv);
+		};
+		like(
+			$@, qr/^Direction must be encode or decode /o,
+			sprintf(
+				'Invalid direction: %s',
+				(defined($inv)) ? ( $inv ) : ( 'undef' )
+			)
+		);
+	}
+}
+
+#
+#sub t_validateFilename($) {
+#	my $fileName = shift;
+#	die 'Must supply filename' if ( !$fileName );
+#	die 'File does not exist' unless ( -f $fileName );
+#}
+
+#sub t_validateCodec($) {
+#	my $codecInfo = codecInfo(shift);
+#	return $codecInfo if ( $codecInfo );
+#
+#	die 'Unknown codec';
+#}
+
 sub t_main()
 {
 	my %tests = (
@@ -123,7 +153,8 @@ sub t_main()
 		'rsleep'      => \&t_rsleep,
 		'DB'          => \&t_DB,
 		'codecInfo'   => \&t_codecInfo,
-		'translationInfo' => \&t_translationInfo
+		'translationInfo' => \&t_translationInfo,
+		'validateDirection' => \&t_validateDirection
 	);
 	while ( my ( $name, $func ) = each(%tests) ) {
 		subtest $name => $func;
