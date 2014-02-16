@@ -90,26 +90,44 @@ sub translationInfo($$) {
 	my ( $fCodec, $tCodec );
 
 	my %translations = (
-		CODEC_MP3()          => {
-			CODEC_MP3()  => undef,
-			CODEC_PCM()  => 'mpg321 "%s" -w "%s"',
-			CODEC_FLAC() => "",
-			CODEC_OGG()  => ""
-		}, CODEC_PCM()       => {
-			CODEC_MP3()  => 'lame "%s" "%s"',
-			CODEC_PCM()  => undef,
-			CODEC_FLAC() => "",
-			CODEC_OGG()  => ""
-		}, CODEC_FLAC()      => {
-			CODEC_MP3()  => "",
-			CODEC_PCM()  => "",
-			CODEC_FLAC() => undef,
-			CODEC_OGG()  => ""
-		}, CODEC_OGG()       => {
-			CODEC_MP3()  => "",
-			CODEC_PCM()  => "",
-			CODEC_FLAC() => "",
-			CODEC_OGG()  => undef
+		CODEC_MP3()             => {
+			CODEC_MP3()     => undef,
+			CODEC_PCM()     => {
+				'cmd'   => 'mpg321 "%s" -w "%s"',
+				'order' => CODEC_TRANSLATION_OUTPUT_LAST()
+			},
+			CODEC_FLAC()    => "",
+			CODEC_OGG()     => ""
+		}, CODEC_PCM()          => {
+			CODEC_MP3()     => {
+				'cmd'   => 'lame "%s" "%s"',
+				'order' => CODEC_TRANSLATION_OUTPUT_LAST()
+			},
+			CODEC_PCM()     => undef,
+			CODEC_FLAC()    => {
+				'cmd'   => 'flac -o "%s" "%s"',
+				'order' => CODEC_TRANSLATION_OUTPUT_FIRST()
+			},
+			CODEC_OGG()     => {
+				'cmd'   => 'oggenc -o "%s" "%s"',
+				'order' => CODEC_TRANSLATION_OUTPUT_FIRST()
+			}
+		}, CODEC_FLAC()         => {
+			CODEC_MP3()     => "",
+			CODEC_PCM()     => {
+				'cmd'   => 'flac -d -o "%s" "%s"',
+				'order' => CODEC_TRANSLATION_OUTPUT_FIRST()
+			},
+			CODEC_FLAC()    => undef,
+			CODEC_OGG()     => ""
+		}, CODEC_OGG()          => {
+			CODEC_MP3()     => "",
+			CODEC_PCM()     => {
+				'cmd'   => 'oggdec -o "%s" "%s"',
+				'order' => CODEC_TRANSLATION_OUTPUT_FIRST()
+			},
+			CODEC_FLAC()    => "",
+			CODEC_OGG()     => undef
 		}
 	);
 
