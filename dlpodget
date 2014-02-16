@@ -60,6 +60,9 @@ use constant CODEC_ERR_REDUNDANT               => (3);
 use constant CODEC_TRANSLATION_ORDER_FIRST     => (1);
 use constant CODEC_TRANSLATION_ORDER_LAST      => (2);
 
+use constant CODEC_TRANSLATION_ENCODE          => (1);
+use constant CODEC_TRANSLATION_DECODE          => (2);
+
 my $Debug = 0;
 my $Quiet = 0;
 my $File = '';
@@ -86,6 +89,36 @@ sub codecInfo($) {
 		}
 	);
 	return $codecs{$codec};
+}
+
+sub validateDirection($) {
+	my $direction = int(shift);
+	return $direction if ( $direction >= 1 && $direction <= 2 );
+	die 'Direction must be encode or decode';
+}
+
+sub validateFilename($) {
+	my $fileName = shift;
+	die 'Must supply filename' if ( !$fileName );
+	die 'File does not exist' unless ( -f $fileName );
+}
+
+sub validateCodec($) {
+	my $codecInfo = codecInfo(shift);
+	return $codecInfo if ( $codecInfo );
+
+	die 'Unknown codec';
+}
+
+sub transcodePCM($$$) {
+	# Nb. 'file', CODEC_OGG(), CODEC_TRANSLATION_ENCODE() means convert a .wav to .ogg
+	my ( $fileName, $codec, $direction ) = @_;
+
+	validateFilename($fileName);
+	validateCodec($codec);
+	validateDirection($direction);
+
+	#my %translations
 }
 
 sub translationInfo($$) {
