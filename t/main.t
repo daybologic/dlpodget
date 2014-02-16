@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 5;
+use Test::More tests => 6;
 use Devel::Cover;
 use strict;
 use warnings;
@@ -89,6 +89,14 @@ sub t_DB() {
 	isa_ok(DB(), 'DBI::db', 'DB; get handle');
 }
 
+sub t_codecInfo() {
+	is(codecInfo(-1), undef, 'codecInfo -1 is undef');
+	is(codecInfo(0), undef, 'codecInfo 0 is undef');
+	for ( my $i = 1; $i < 5; $i++ ) {
+		isa_ok(codecInfo($i), 'HASH', "codecInfo($i)");
+	}
+}
+
 sub t_main()
 {
 	my %tests = (
@@ -96,7 +104,8 @@ sub t_main()
 		'ReadFeed'    => \&t_ReadFeed,
 		'ProcessTags' => \&t_ProcessTags,
 		'rsleep'      => \&t_rsleep,
-		'DB'          => \&t_DB
+		'DB'          => \&t_DB,
+		'codecInfo'   => \&t_codecInfo
 	);
 	while ( my ( $name, $func ) = each(%tests) ) {
 		subtest $name => $func;
