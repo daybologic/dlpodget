@@ -58,8 +58,8 @@ use constant CODEC_ERR_UNSUPPORTED_CODEC       => (1);
 use constant CODEC_ERR_UNSUPPORTED_TRANSLATION => (2);
 use constant CODEC_ERR_REDUNDANT               => (3);
 
-use constant CODEC_TRANSLATION_ORDER_FIRST     => (1);
-use constant CODEC_TRANSLATION_ORDER_LAST      => (2);
+use constant CODEC_TRANSLATION_OUTPUT_FIRST    => (1);
+use constant CODEC_TRANSLATION_OUTPUT_LAST     => (2);
 
 use constant CODEC_TRANSLATION_ENCODE          => (1);
 use constant CODEC_TRANSLATION_DECODE          => (2);
