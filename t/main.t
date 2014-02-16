@@ -92,8 +92,25 @@ sub t_DB() {
 sub t_codecInfo() {
 	is(codecInfo(-1), undef, 'codecInfo -1 is undef');
 	is(codecInfo(0), undef, 'codecInfo 0 is undef');
-	for ( my $i = 1; $i < 5; $i++ ) {
+	for ( my $i = CODEC_MIN(); $i <= CODEC_MAX(); $i++ ) {
 		isa_ok(codecInfo($i), 'HASH', "codecInfo($i)");
+	}
+	is(codecInfo(CODEC_MAX()+1), undef, 'codecInfo max+1 is undef');
+}
+
+sub t_translationInfo() {
+	for ( my $i = CODEC_MIN(); $i <= CODEC_MAX(); $i++ ) {
+		for ( my $j = CODEC_MIN(); $j <= CODEC_MAX(); $j++ ) {
+			my $expect = undef;
+			my $ret = translationInfo($i, $j);
+			$ret = ref($ret) if ( $ret && ref($ret) );
+			if ( $i == $j ) {
+				$expect = CODEC_ERR_REDUNDANT();
+			} else {
+				$expect = 'HASH';
+			}
+			is($ret, $expect, 'translationInfo');
+		}
 	}
 }
 
@@ -105,7 +122,8 @@ sub t_main()
 		'ProcessTags' => \&t_ProcessTags,
 		'rsleep'      => \&t_rsleep,
 		'DB'          => \&t_DB,
-		'codecInfo'   => \&t_codecInfo
+		'codecInfo'   => \&t_codecInfo,
+		'translationInfo' => \&t_translationInfo
 	);
 	while ( my ( $name, $func ) = each(%tests) ) {
 		subtest $name => $func;
