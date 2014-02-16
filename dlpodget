@@ -449,4 +449,5 @@ sub main() {
 	return 0;
 }
 
-exit(main());
+exit(main()) if ( !caller() );
+1;

@@ -39,3 +39,12 @@ install:
 	else \
 		install -m 755 dlpodget ~/bin/; \
 	fi
+
+check : test
+test:
+	./t/main.t
+	cover
+	lynx -dump cover_db/coverage.html | ./bin/cover_check
+
+clean:
+	rm -rf cover_db
