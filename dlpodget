@@ -116,9 +116,9 @@ sub translationInfo($$) {
 	$fCodec = $translations{$fromCodec};
 	return CODEC_ERR_UNSUPPORTED_CODEC() unless ( $fCodec );
 	return CODEC_ERR_UNSUPPORTED_TRANSLATION()
-		unless ( exists($fCodec->{'from'}->{$toCodec}) );
+		unless ( exists($fCodec->{$toCodec}) );
 
-	$tCodec = $fCodec->{'from'}->{$toCodec};
+	$tCodec = $fCodec->{$toCodec};
 	return CODEC_ERR_REDUNDANT() if ( !$tCodec );
 
 	return $fCodec;
