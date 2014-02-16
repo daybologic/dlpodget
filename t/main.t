@@ -90,6 +90,18 @@ sub t_DB() {
 	isa_ok(DB(), 'DBI::db', 'DB; get handle');
 }
 
+sub syntax() {
+	printf("%s [-n <function> ] -d\n\n", $0);
+
+	print("-d\n");
+	print("\tdebug (not implemented)\n\n");
+
+	print("-n <function>\n");
+	print("\tOnly unit test this function\n\n");
+
+	return;
+}
+
 sub getOpts(%) {
 	my %P = @_;
 	my $O;
@@ -114,7 +126,10 @@ sub getOpts(%) {
 		}
 	}
 
-	syntax() if ( $O->{'h'} );
+	if ( $O->{'h'} ) {
+		syntax();
+		$ret = 0;
+	}
 	return $ret;
 }
 
