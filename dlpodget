@@ -93,8 +93,10 @@ sub codecInfo($) {
 }
 
 sub validateDirection($) {
-	my $direction = int(shift);
-	return $direction if ( $direction >= 1 && $direction <= 2 );
+	my $direction = shift;
+	if ( defined($direction) && $direction =~ m/^(\d)$/ ) {
+		return $direction if ( $direction >= 1 && $direction <= 2 );
+	}
 	die 'Direction must be encode or decode';
 }
 
