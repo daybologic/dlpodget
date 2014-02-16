@@ -1,0 +1,32 @@
+#!/usr/bin/perl -w
+
+sub Total($) {
+	my $line = shift;
+	my @rows = split(m/\s+/, $line);
+	my $total = $rows[-1];
+	$total = 0 if ( $total !~ m/^\d+\.\d+$/ );
+	return $total;
+}
+
+sub checkTotal($) {
+	my $total = shift;
+	if ( $total < 35 ) {
+		return 1;
+	}
+	return 0;
+}
+
+sub main() {
+	my $exit_code = 1; # Fail
+	foreach my $line ( <STDIN> ) {
+		if ( $line =~ m/^\s+Total\s+(.*)/ ) {
+			my $total = Total($1);
+			$exit_code = checkTotal($total);
+			last;
+		}
+	}
+	return $exit_code;
+}
+
+exit(main());
+1;
