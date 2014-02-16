@@ -93,22 +93,22 @@ sub translationInfo($$) {
 		CODEC_MP3()          => {
 			CODEC_MP3()  => undef,
 			CODEC_PCM()  => 'mpg321 "%s" -w "%s"',
-			CODEC_FLAC() => undef,
-			CODEC_OGG()  => undef
+			CODEC_FLAC() => "",
+			CODEC_OGG()  => ""
 		}, CODEC_PCM()       => {
 			CODEC_MP3()  => 'lame "%s" "%s"',
 			CODEC_PCM()  => undef,
-			CODEC_FLAC() => undef,
-			CODEC_OGG()  => undef
+			CODEC_FLAC() => "",
+			CODEC_OGG()  => ""
 		}, CODEC_FLAC()      => {
-			CODEC_MP3()  => undef,
-			CODEC_PCM()  => undef,
+			CODEC_MP3()  => "",
+			CODEC_PCM()  => "",
 			CODEC_FLAC() => undef,
-			CODEC_OGG()  => undef
+			CODEC_OGG()  => ""
 		}, CODEC_OGG()       => {
-			CODEC_MP3()  => undef,
-			CODEC_PCM()  => undef,
-			CODEC_FLAC() => undef,
+			CODEC_MP3()  => "",
+			CODEC_PCM()  => "",
+			CODEC_FLAC() => "",
 			CODEC_OGG()  => undef
 		}
 	);
