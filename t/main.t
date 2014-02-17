@@ -3,6 +3,7 @@
 package main;
 use Test::More tests => 8;
 use Devel::Cover;
+use Getopt::Std;
 use strict;
 use warnings;
 use diagnostics;
@@ -89,6 +90,18 @@ sub t_DB() {
 	isa_ok(DB(), 'DBI::db', 'DB; get handle');
 }
 
+sub syntax() {
+	printf("%s [-n <function> ] -d\n\n", $0);
+
+	print("-d\n");
+	print("\tdebug (not implemented)\n\n");
+
+	print("-n <function>\n");
+	print("\tOnly unit test this function\n\n");
+
+	return;
+}
+
 sub t_codecInfo() {
 	is(codecInfo(-1), undef, 'codecInfo -1 is undef');
 	is(codecInfo(0), undef, 'codecInfo 0 is undef');
@@ -112,6 +125,37 @@ sub t_translationInfo() {
 			is($ret, $expect, 'translationInfo');
 		}
 	}
+}
+
+sub getOpts(%) {
+	my %P = @_;
+	my $O;
+	my $ret;
+
+	return 1 if ( scalar(@_) % 2 );
+	die 'assert' unless ( $P{'output'} && $P{'tests'} );
+	$O = $P{'output'};
+	$ret = getopts('n:d?h', $O);
+	return $ret if ( !$ret );
+
+	$O->{'h'} = 1 if ( $O->{'?'} );
+
+	while ( my ( $o, $v ) = each(%$O) ) {
+		if ( $o eq 'n' ) {
+			unless ( $v ~~ $P{'tests'} ) {
+				die(sprintf(
+					'Argument %s to -n, is not a known test',
+					$v
+				));
+			}
+		}
+	}
+
+	if ( $O->{'h'} ) {
+		syntax();
+		$ret = 0;
+	}
+	return $ret;
 }
 
 sub t_validateDirection($) {
@@ -146,6 +190,7 @@ sub t_validateDirection($) {
 
 sub t_main()
 {
+	my %opts = ( );
 	my %tests = (
 		'FileFromURI' => \&t_FileFromURI,
 		'ReadFeed'    => \&t_ReadFeed,
@@ -156,7 +201,9 @@ sub t_main()
 		'translationInfo' => \&t_translationInfo,
 		'validateDirection' => \&t_validateDirection
 	);
+	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );
 	while ( my ( $name, $func ) = each(%tests) ) {
+		next unless ( !$opts{'n'} || $opts{'n'} eq $name );
 		subtest $name => $func;
 	}
 	return 0;
