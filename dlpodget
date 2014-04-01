@@ -285,13 +285,26 @@ sub DBUpdateStream($$$) {
 }
 
 sub syntax() {
-	printf("%s [-n <feed> ] -d\n\n", $0);
-
-	print("-d\n");
-	print("\tdebug\n\n");
+	printf("%s [-c n...] [-f <file>] [-n <feed>] -d -q\n\n", $0);
 
 	print("-n <feed>\n");
 	print("\tOnly download one feed, not all those in the config\n\n");
+
+	print("-f <file>\n");
+	print("\tOverride the database file (default \"$ENV{HOME}/.dlpodget.db)\"\n\n");
+
+	print("-q\n");
+	print("\tQuiet mode - no output (except errors)\n\n");
+
+	print("-c <n...>\n");
+	print("\tOverride maximum children in the feed download pool (see config)\n\n");
+
+	print("-h / -?\n");
+	print("\tSyntax help (this)\n\n");
+	# TODO: You want more specific help by using -h and another option.
+
+	print("-d\n");
+	print("\tdebug\n\n");
 
 	return 0;
 }
