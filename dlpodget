@@ -284,6 +284,18 @@ sub DBUpdateStream($$$) {
 	return $ret;
 }
 
+sub syntax() {
+	printf("%s [-n <feed> ] -d\n\n", $0);
+
+	print("-d\n");
+	print("\tdebug\n\n");
+
+	print("-n <feed>\n");
+	print("\tOnly download one feed, not all those in the config\n\n");
+
+	return 0;
+}
+
 sub main() {
 	my $proctitle = $0; # Save original process title
 	my $conf;
@@ -297,7 +309,8 @@ sub main() {
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('f:qc:dn:', \%opts) );
+	return 1 if ( !getopts('f:qc:dn:h?', \%opts) );
+	return syntax() if ( $opts{'h'} || $opts{'?'} );
 	$Debug = 1 if ( $opts{'d'} );
 	$Quiet = 1 if ( $opts{'q'} );
 	$File  = ( $opts{'f'} ) ? ( $opts{'f'} ) : ( "$ENV{HOME}/.dlpodget.db" );
