@@ -13,18 +13,18 @@ require 'dlpodget';
 use constant MIN_FEED_STREAMS => (10);
 use constant TEST_FEED        => 'http://xml.nfowars.net/Alex.rss'; # Requires an internet connection
 
-sub t_FileFromURI()
+sub t_fileFromURI()
 {
-	my $F = 'FileFromURI';
-	is(FileFromURI('test1'), 'test1', "$F test1");
-	is(FileFromURI('http://www.daybologic.co.uk/ddrp/test2.wav'), 'test2.wav', "$F test2");
-	is(FileFromURI(undef), undef, "$F test3");
+	my $F = 'fileFromURI';
+	is(fileFromURI('test1'), 'test1', "$F test1");
+	is(fileFromURI('http://www.daybologic.co.uk/ddrp/test2.wav'), 'test2.wav', "$F test2");
+	is(fileFromURI(undef), undef, "$F test3");
 }
 
-sub t_ReadFeed()
+sub t_readFeed()
 {
 	my %types = ( );
-	my $F = 'ReadFeed';
+	my $F = 'readFeed';
 	my %seenKeys = ( );
 	my %expectedKeys = (
 		length => 1,
@@ -38,7 +38,7 @@ sub t_ReadFeed()
 		dummy => { }
 	);
 
-	my @arr = ReadFeed(\%feeds, { rss => TEST_FEED(), name => 'dummy' });
+	my @arr = readFeed(\%feeds, { rss => TEST_FEED(), name => 'dummy' });
 	foreach my $hashref ( @arr ) {
 		my $t = ref($hashref);
 		$types{$t} = 1;
@@ -53,9 +53,9 @@ sub t_ReadFeed()
 	};
 }
 
-sub t_ProcessTags()
+sub t_processTags()
 {
-	my $F = 'ProcessTags';
+	my $F = 'processTags';
 	my %testData = (
 		main => {
 			'DUMMYA' => '$DUMMYC',
@@ -63,31 +63,31 @@ sub t_ProcessTags()
 			'DUMMYC' => '/tmp/3'
 		}
 	);
-	is(ProcessTags(\%testData, 'blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
-	is(ProcessTags(\%testData, 'blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
-	is(ProcessTags(\%testData, '$'), '$', "$F: Illegal variable");
+	is(processTags(\%testData, 'blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
+	is(processTags(\%testData, 'blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
+	is(processTags(\%testData, '$'), '$', "$F: Illegal variable");
 }
 
-sub t_rsleep() {
-	is(rsleep(undef), 0, 'rsleep undef 0');
-	is(rsleep(0), 0, 'rsleep 0 0');
-	is(rsleep(1), 1, 'rsleep 1 1');
-	is(rsleep(-1), -1, 'rsleep -1 -1');
-	is(rsleep(-2), -1, 'rsleep -2 -1');
-	is(rsleep('blah'), -1, 'rsleep blah -1');
-	is(rsleep(10), 10, 'rsleep 10 10');
+sub t_rSleep() {
+	is(rSleep(undef), 0, 'rSleep undef 0');
+	is(rSleep(0), 0, 'rSleep 0 0');
+	is(rSleep(1), 1, 'rSleep 1 1');
+	is(rSleep(-1), -1, 'rSleep -1 -1');
+	is(rSleep(-2), -1, 'rSleep -2 -1');
+	is(rSleep('blah'), -1, 'rSleep blah -1');
+	is(rSleep(10), 10, 'rSleep 10 10');
 
 	# Random tests
 	srand(0); # Ensure we always start from a deterministic point
 	my @sleepTimes = ( qw/2 8 1 9 6/ );
-	is(rsleep('10R'), -1, 'rsleep 10R -1');
+	is(rSleep('10R'), -1, 'rSleep 10R -1');
 	foreach my $v ( @sleepTimes ) {
-		is(rsleep('10r'), $v, "rsleep 10r $v");
+		is(rSleep('10r'), $v, "rSleep 10r $v");
 	}
 }
 
-sub t_DB() {
-	isa_ok(DB(), 'DBI::db', 'DB; get handle');
+sub t_db() {
+	isa_ok(db(), 'DBI::db', 'DB; get handle');
 }
 
 sub syntax() {
@@ -137,11 +137,11 @@ sub t_main()
 {
 	my %opts = ( );
 	my %tests = (
-		'FileFromURI' => \&t_FileFromURI,
-		'ReadFeed'    => \&t_ReadFeed,
-		'ProcessTags' => \&t_ProcessTags,
-		'rsleep'      => \&t_rsleep,
-		'DB'          => \&t_DB
+		'fileFromURI' => \&t_fileFromURI,
+		'readFeed'    => \&t_readFeed,
+		'processTags' => \&t_processTags,
+		'rSleep'      => \&t_rSleep,
+		'db'          => \&t_db
 	);
 	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );
 	while ( my ( $name, $func ) = each(%tests) ) {
