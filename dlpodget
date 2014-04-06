@@ -284,15 +284,28 @@ sub DBUpdateStream($$$) {
 	return $ret;
 }
 
-sub banner() {
+sub banner($) {
+	my $showLicense = shift;
+	my $doneShbang = 0;
+	my $blankLines = 0;
+
 	if ( open(my $f, '<', $0) ) {
 		while ( my $l = <$f> ) {
 			last if ( $l !~ s/^\#//o ); # Strip comments
-			next if ( $l =~ m/^\!/ ); # Skip shband
+
+			if ( !$doneShbang && $l =~ m/^\!/ ) { # Skip shband
+				$doneShbang++;
+				next;
+			}
+			if ( !$showLicense ) {
+				last if ( $blankLines == 2 );
+				$blankLines++ if ( $l =~ m/^\s*$/ );
+			}
+
 			print $l;
 		}
 		close($f);
-		print("\n");
+		print("\n") if ( $showLicense );
 	}
 	exit 0;
 }
@@ -335,9 +348,9 @@ sub main() {
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('f:qc:dn:h?', \%opts) );
+	return 1 if ( !getopts('Lf:qc:dn:h?', \%opts) );
 	$Quiet = 1 if ( $opts{'q'} );
-	banner() unless ( $Quiet );
+	banner($opts{'L'}) unless ( $Quiet );
 	return syntax() if ( $opts{'h'} || $opts{'?'} );
 	$Debug = 1 if ( $opts{'d'} );
 	$File  = ( $opts{'f'} ) ? ( $opts{'f'} ) : ( "$ENV{HOME}/.dlpodget.db" );
