@@ -308,7 +308,6 @@ sub banner($) {
 		print(" Use -L to see full license terms.\n") if ( !$showLicense );
 		print("\n");
 	}
-	exit 0;
 }
 
 sub syntax() {
