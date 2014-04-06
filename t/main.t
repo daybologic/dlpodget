@@ -90,7 +90,7 @@ sub t_db() {
 	isa_ok(db(), 'DBI::db', 'DB; get handle');
 }
 
-sub syntax() {
+sub ut_syntax() {
 	printf("%s [-n <function> ] -d\n\n", $0);
 
 	print("-d\n");
@@ -127,7 +127,7 @@ sub getOpts(%) {
 	}
 
 	if ( $O->{'h'} ) {
-		syntax();
+		ut_syntax();
 		$ret = 0;
 	}
 	return $ret;
