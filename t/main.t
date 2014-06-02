@@ -23,6 +23,7 @@ sub t_fileFromURI()
 
 sub t_readFeed()
 {
+	my @arr;
 	my %types = ( );
 	my $F = 'readFeed';
 	my %seenKeys = ( );
@@ -38,11 +39,13 @@ sub t_readFeed()
 		dummy => { }
 	);
 
-	my @arr = readFeed(\%feeds, { rss => TEST_FEED(), name => 'dummy' });
-	foreach my $hashref ( @arr ) {
-		my $t = ref($hashref);
-		$types{$t} = 1;
-		foreach my $k ( keys(%$hashref) ) { $seenKeys{$k} = 1; }
+	if ( $ENV{TEST_AUTHOR} ) {
+		@arr = readFeed(\%feeds, { rss => TEST_FEED(), name => 'dummy' });
+		foreach my $hashref ( @arr ) {
+			my $t = ref($hashref);
+			$types{$t} = 1;
+			foreach my $k ( keys(%$hashref) ) { $seenKeys{$k} = 1; }
+		}
 	}
 	SKIP: {
 		skip 'Requires internet connection; use TEST_AUTHOR=1 to enable', 3 unless $ENV{TEST_AUTHOR};
