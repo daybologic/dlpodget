@@ -102,18 +102,30 @@ sub ut_syntax() {
 	return;
 }
 
+sub listTests($) {
+	my $testList = shift;
+	foreach my $testName ( @$testList ) {
+		printf("%s\n", $testName);
+	}
+}
+
 sub getOpts(%) {
 	my %P = @_;
 	my $O;
-	my $ret;
+	my $ret = 0;
 
 	return 1 if ( scalar(@_) % 2 );
 	die 'assert' unless ( $P{'output'} && $P{'tests'} );
 	$O = $P{'output'};
-	$ret = getopts('n:d?h', $O);
+	$ret = getopts('ln:d?h', $O);
 	return $ret if ( !$ret );
 
 	$O->{'h'} = 1 if ( $O->{'?'} );
+
+	if ( $O->{'l'} ) {
+		listTests($P{'tests'});
+		return $ret;
+	}
 
 	while ( my ( $o, $v ) = each(%$O) ) {
 		if ( $o eq 'n' ) {
@@ -130,6 +142,7 @@ sub getOpts(%) {
 		ut_syntax();
 		$ret = 0;
 	}
+	$ret = 1;
 	return $ret;
 }
 
