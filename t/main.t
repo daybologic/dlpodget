@@ -124,6 +124,7 @@ sub getOpts(%) {
 
 	if ( $O->{'l'} ) {
 		listTests($P{'tests'});
+		$ret = 0;
 		return $ret;
 	}
 
