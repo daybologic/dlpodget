@@ -432,7 +432,7 @@ sub main() {
 			}
 		}
 
-		InitConfigDefaults(\%feeds);
+		initConfigDefaults(\%feeds);
 		if ( 'paths' ~~ @sections ) { # Has a paths section?
 			my @secKeys;
 			if ( (@secKeys = $conf->Parameters('paths')) ) {
@@ -490,7 +490,7 @@ sub main() {
 		my $reaped_pid;
 		my $child_limit_reached = 0;
 		my $feed = $feeds{$feedName};
-		InitFeedDefaults(\%feeds, $feed);
+		initFeedDefaults(\%feeds, $feed);
 		$streamsDefinedCount++ if ( $feed->{rss} );
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
