@@ -256,7 +256,7 @@ sub main()
 			Child(\%feeds, $feed);
 			next;
 		} elsif ( $feeds{_main}->{MAXCHILDREN} < 0 || scalar(keys(%pids)) < $feeds{_main}->{MAXCHILDREN} ) {
-			sleep($feeds{_main}->{CHILDDELAY}) if ( scalar(keys(%pids)) );
+			sleep($feeds{_main}->{CHILDDELAY}) if ( $feeds{_main}->{CHILDDELAY} && scalar(keys(%pids)) );
 			my $pid = fork();
 			die "cannot fork: $!" if ( !defined($pid) );
 			if ( $pid == 0 ) { # Child process
