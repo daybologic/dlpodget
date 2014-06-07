@@ -30,11 +30,28 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+package ourConfig;
+use Config::IniFiles;
+
+sub new {
+	my $obj;
+	my $class = shift;
+
+	$obj = bless($class);
+	return $obj;
+}
+
+sub initConfigDefaults($) {
+}
+
+sub initFeedDefaults($$) {
+}
+
 package main;
+use Config::IniFiles;
 use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
-use Config::IniFiles;
 use Getopt::Std;
 use URI::Escape;
 use IO::Interactive qw(is_interactive);
@@ -50,13 +67,6 @@ use constant DEV_NULL => '/dev/null';
 my $Debug = 0;
 my $Quiet = 0;
 my $File = '';
-
-sub fileFromURI($) {
-	my $Url = shift;
-	return undef if ( !$Url );
-	my @uri_parts = split('/', $Url);
-	return $uri_parts[-1];
-}
 
 sub initConfigDefaults($) {
 	my $Feeds = shift;
@@ -86,6 +96,13 @@ sub initFeedDefaults($$) {
 	foreach my $chk ( 'check', 'download', 'enable' ) {
 		$Feed->{$chk} = 1 if ( !$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/ );
 	}
+}
+
+sub fileFromURI($) {
+	my $Url = shift;
+	return undef if ( !$Url );
+	my @uri_parts = split('/', $Url);
+	return $uri_parts[-1];
 }
 
 sub readFeed($$) {
