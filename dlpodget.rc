@@ -21,6 +21,7 @@
 ;   maxchildren = <0-n>, default 0, max concurrent downloads. nb. setting this to 1
 ;                 is less efficient than 0, since a dedicated child is cloned for each feed.
 ;                 -1 means no limit (no more than the number of feeds in the configuration).
+;   childdelay  = <0-n> Artificial pause between forking, to avoid performance penalty on launch
 ;   retries     = <0-n>, default 0, number of times to retry downloading a the
 ;                 stream or the feed.
 ;   rsleep      = <0-n[r]>, default 0, time in seconds to sleep after a failed
@@ -31,6 +32,7 @@ enable    = 1
 noop      = 0
 debug     = 0
 maxchildren  = 5
+childdelay   = 2
 retries   = 3
 rsleep    = 90r
 
