@@ -12,11 +12,10 @@ require 'dlpodget';
 
 #use constant BLAH             => (10);
 
-sub t_fileFromURI() {
-	my $F = 'fileFromURI';
-	is(fileFromURI('test1'), 'test1', "$F test1");
-	is(fileFromURI('http://www.daybologic.co.uk/ddrp/test2.wav'), 'test2.wav', "$F test2");
-	is(fileFromURI(undef), undef, "$F test3");
+sub t_obj() {
+	my $F = 'obj';
+	my $o = new ourConfig;
+	isa_ok($o, 'ourConfig');
 }
 
 sub getOpts(%) {
@@ -53,7 +52,7 @@ sub getOpts(%) {
 sub t_main() {
 	my %opts = ( );
 	my %tests = (
-		'fileFromURI' => \&t_fileFromURI,
+		'obj' => \&t_obj,
 	);
 	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );
 	while ( my ( $name, $func ) = each(%tests) ) {

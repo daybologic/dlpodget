@@ -37,7 +37,7 @@ sub new {
 	my $obj;
 	my $class = shift;
 
-	$obj = bless($class);
+	$obj = bless({}, $class);
 	return $obj;
 }
 
