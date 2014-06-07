@@ -48,7 +48,7 @@ sub initConfigDefaults($) {
 
 	$confmain->{TMPDIR} = '/tmp' unless ( $confmain->{TMPDIR} );
 	$confmain->{HOME} = $confmain->{TMPDIR} unless ( $confmain->{HOME} );
-	$confmain->{localpfx} = $confmain->{HOME} unless ( $confmain->{localpfx} );
+	$confmain->{LOCALPFX} = $confmain->{HOME} unless ( $confmain->{LOCALPFX} );
 
 	my %defaults = (
 		'enable' => 1,
@@ -64,7 +64,7 @@ sub initConfigDefaults($) {
 
 sub initFeedDefaults($$) {
 	my ( $Feeds, $Feed ) = @_;
-	$Feed->{localpath} = $Feeds->{main}->{localpfx} unless ( $Feed->{localpath} );
+	$Feed->{localpath} = $Feeds->{main}->{LOCALPFX} unless ( $Feed->{localpath} );
 	$Feed->{rss} = '' unless ( $Feed->{rss} );
 	foreach my $chk ( 'check', 'download', 'enable' ) {
 		$Feed->{$chk} = 1 if ( !$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/ );
