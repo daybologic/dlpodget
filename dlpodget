@@ -34,10 +34,12 @@ package OurConfig;
 use Config::IniFiles;
 
 sub new {
-	my $obj;
 	my $class = shift;
+	my $obj = {
+		'ini' => undef
+	};
 
-	$obj = bless({}, $class);
+	$obj = bless($obj, $class);
 	return $obj;
 }
 
@@ -68,6 +70,19 @@ sub initFeedDefaults($$) {
 	$Feed->{rss} = '' unless ( $Feed->{rss} );
 	foreach my $chk ( 'check', 'download', 'enable' ) {
 		$Feed->{$chk} = 1 if ( !$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/ );
+	}
+}
+
+sub load($) {
+	my $self = shift;
+	foreach my $confFile ( @confFiles ) {
+		next unless ( -f $confFile );
+		$self->{'ini'} = Config::IniFiles->new(-file => $confFile, -commentchar => ';');
+		if ( !$self->{'ini'} ) {
+			print(STDERR "Fault with $confFile: " . join(',', @Config::IniFiles::errors) . "\n");
+			return 1;
+		}
+		last;
 	}
 }
 
@@ -378,7 +393,6 @@ sub syntax() {
 
 sub main() {
 	my $proctitle = $0; # Save original process title
-	my $conf; # @Deprecated
 	my $ourConfig = new OurConfig; # Replaces $conf
 	my @entries = ( );
 	my @defKeys;
@@ -403,16 +417,6 @@ sub main() {
 		my $n = ' (null device)';
 		$n = '' if ( $File ne DEV_NULL() );
 		printf(STDERR "Overridden database with -f %s%s\n", $File, $n)
-	}
-
-	foreach my $confFile ( @confFiles ) {
-		next unless ( -f $confFile );
-		$conf = Config::IniFiles->new(-file => $confFile, -commentchar => ';');
-		if ( !$conf ) {
-			print(STDERR "Fault with $confFile: " . join(',', @Config::IniFiles::errors) . "\n");
-			return 1;
-		}
-		last;
 	}
 
 	if ( $conf && (@defKeys = $conf->Parameters('main')) ) {
