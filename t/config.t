@@ -14,8 +14,8 @@ require 'dlpodget';
 
 sub t_obj() {
 	my $F = 'obj';
-	my $o = new ourConfig;
-	isa_ok($o, 'ourConfig');
+	my $o = new OurConfig;
+	isa_ok($o, 'OurConfig');
 }
 
 sub getOpts(%) {
