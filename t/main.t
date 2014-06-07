@@ -13,16 +13,14 @@ require 'dlpodget';
 use constant MIN_FEED_STREAMS => (10);
 use constant TEST_FEED        => 'http://xml.nfowars.net/Alex.rss'; # Requires an internet connection
 
-sub t_fileFromURI()
-{
+sub t_fileFromURI() {
 	my $F = 'fileFromURI';
 	is(fileFromURI('test1'), 'test1', "$F test1");
 	is(fileFromURI('http://www.daybologic.co.uk/ddrp/test2.wav'), 'test2.wav', "$F test2");
 	is(fileFromURI(undef), undef, "$F test3");
 }
 
-sub t_readFeed()
-{
+sub t_readFeed() {
 	my %types = ( );
 	my $F = 'readFeed';
 	my %seenKeys = ( );
@@ -53,8 +51,7 @@ sub t_readFeed()
 	};
 }
 
-sub t_processTags()
-{
+sub t_processTags() {
 	my $F = 'processTags';
 	my %testData = (
 		main => {
@@ -133,8 +130,7 @@ sub getOpts(%) {
 	return $ret;
 }
 
-sub t_main()
-{
+sub t_main() {
 	my %opts = ( );
 	my %tests = (
 		'fileFromURI' => \&t_fileFromURI,

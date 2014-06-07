@@ -58,8 +58,7 @@ sub fileFromURI($) {
 	return $uri_parts[-1];
 }
 
-sub InitConfigDefaults($)
-{
+sub InitConfigDefaults($) {
 	my $Feeds = shift;
 	my $confmain = $Feeds->{_main};
 	die 'Assertion failure' unless $confmain;
@@ -80,8 +79,7 @@ sub InitConfigDefaults($)
 	}
 }
 
-sub InitFeedDefaults($$)
-{
+sub InitFeedDefaults($$) {
 	my ( $Feeds, $Feed ) = @_;
 	$Feed->{localpath} = $Feeds->{_main}->{localpfx} unless ( $Feed->{localpath} );
 	$Feed->{rss} = '' unless ( $Feed->{rss} );
@@ -90,8 +88,7 @@ sub InitFeedDefaults($$)
 	}
 }
 
-sub ReadStream($$$)
-{
+sub ReadStream($$$) {
 	my @entries = ( );
 	my ( $Feeds, $Feed ) = @_;
 	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
