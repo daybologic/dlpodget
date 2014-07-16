@@ -1,7 +1,8 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 4;
+use Test::More tests => 5;
+use Test::Output;
 use Devel::Cover;
 use Getopt::Std;
 use strict;
@@ -12,6 +13,19 @@ require 'dlpodget';
 
 use constant MIN_FEED_STREAMS => (10);
 use constant TEST_FEED        => 'http://xml.nfowars.net/Alex.rss'; # Requires an internet connection
+
+sub t_child_1() {
+	child(
+		undef, # DB
+		undef, # FeedKey
+		undef, # Feeds,
+		undef  # Feed
+	);
+}
+
+sub t_child() {
+	stderr_is(\&t_child_1,"Stream Untitled feed error: \n",'child results with no parameters');
+}
 
 sub t_fileFromURI()
 {
@@ -139,7 +153,8 @@ sub t_main()
 		'fileFromURI' => \&t_fileFromURI,
 		'readFeed'    => \&t_readFeed,
 		'processTags' => \&t_processTags,
-		'db'          => \&t_db
+		'db'          => \&t_db,
+		'child'       => \&t_child,
 	);
 	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );
 	while ( my ( $name, $func ) = each(%tests) ) {

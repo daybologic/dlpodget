@@ -63,6 +63,8 @@ sub readFeed($$) {
 	my ( $Feeds, $Feed ) = @_;
 	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
 	my $feed = XML::Feed->parse(URI->new($Url));
+
+	$Name ||= 'Untitled feed';
 	if ( !$feed ) {
 		printf(STDERR "Stream %s error: %s\n", $Name, $@);
 		return @entries;
