@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 package main;
-use Test::More tests => 5;
+use Test::More tests => 4;
 use Devel::Cover;
 use Getopt::Std;
 use strict;
@@ -69,24 +69,6 @@ sub t_processTags()
 	is(processTags(\%testData, 'blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
 	is(processTags(\%testData, 'blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
 	is(processTags(\%testData, '$'), '$', "$F: Illegal variable");
-}
-
-sub t_rSleep() {
-	is(rSleep(undef), 0, 'rSleep undef 0');
-	is(rSleep(0), 0, 'rSleep 0 0');
-	is(rSleep(1), 1, 'rSleep 1 1');
-	is(rSleep(-1), -1, 'rSleep -1 -1');
-	is(rSleep(-2), -1, 'rSleep -2 -1');
-	is(rSleep('blah'), -1, 'rSleep blah -1');
-	is(rSleep(10), 10, 'rSleep 10 10');
-
-	# Random tests
-	srand(0); # Ensure we always start from a deterministic point
-	my @sleepTimes = ( qw/2 8 1 9 6/ );
-	is(rSleep('10R'), -1, 'rSleep 10R -1');
-	foreach my $v ( @sleepTimes ) {
-		is(rSleep('10r'), $v, "rSleep 10r $v");
-	}
 }
 
 sub t_db() {
@@ -157,7 +139,6 @@ sub t_main()
 		'fileFromURI' => \&t_fileFromURI,
 		'readFeed'    => \&t_readFeed,
 		'processTags' => \&t_processTags,
-		'rSleep'      => \&t_rSleep,
 		'db'          => \&t_db
 	);
 	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );
