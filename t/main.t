@@ -23,8 +23,18 @@ sub t_child_1() {
 	);
 }
 
+sub t_child_2() {
+	child(
+		undef, # DB
+		undef, # FeedKey
+		undef, # Feeds,
+		{ name => 'Horatio' }
+	);
+}
+
 sub t_child() {
-	stderr_is(\&t_child_1,"Stream Untitled feed error: \n",'child results with no parameters');
+	stderr_is(\&t_child_1, "Stream Untitled feed error: \n",'child results with no parameters');
+	stderr_is(\&t_child_2, "Stream Horatio error: \n", 'child results with dummy feed name');
 }
 
 sub t_fileFromURI()
