@@ -1,10 +1,12 @@
 #!/usr/bin/perl -w
 
 package main;
+
 use Test::More tests => 6;
 use Test::Output;
 use Devel::Cover;
 use Getopt::Std;
+
 use strict;
 use warnings;
 use diagnostics;
