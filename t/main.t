@@ -16,6 +16,8 @@ require 'dlpodget';
 use constant MIN_FEED_STREAMS => (10);
 use constant TEST_FEED        => 'http://xml.nfowars.net/Alex.rss'; # Requires an internet connection
 
+my $Debug = 0;
+
 sub t_child_1() {
 	child(
 		undef, # DB
@@ -44,7 +46,7 @@ sub t_child() {
 sub t_rSleep() {
 	plan tests => 13;
 
-	my $paul = Muadeeb->new(mock => 1);
+	my $paul = Muadeeb->new(mock => 1, debug => $Debug);
 	is($paul->rSleep(undef), 0, 'rSleep undef 0');
 	is($paul->rSleep(0), 0, 'rSleep 0 0');
 	is($paul->rSleep(1), 1, 'rSleep 1 1');
@@ -133,7 +135,7 @@ sub ut_syntax() {
 	printf("%s [-n <function> ] -d\n\n", $0);
 
 	print("-d\n");
-	print("\tdebug (not implemented)\n\n");
+	print("\tdebug\n\n");
 
 	print("-n <function>\n");
 	print("\tOnly unit test this function\n\n");
@@ -197,6 +199,8 @@ sub t_main() {
 		'rSleep'      => \&t_rSleep,
 	);
 	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );
+	$Debug = $opts{'d'};
+
 	while ( my ( $name, $func ) = each(%tests) ) {
 		next unless ( !$opts{'n'} || $opts{'n'} eq $name );
 		subtest $name => $func;
