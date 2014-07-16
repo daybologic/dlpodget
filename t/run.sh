@@ -1,4 +1,4 @@
-#!/usr/bin/make
+#!/bin/sh
 #
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
@@ -30,21 +30,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-all:
-
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
+for t in t/*.t; do
+	if test ! -x $t; then
+		echo Found non executable test $t
+		exit 2;
 	fi
+	echo "Running $t"
+	./$t
+	if test "0" -ne "$?"; then
+		echo $t failed.
+		exit 1;
+	fi
+done
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
-
-clean:
-	rm -rf cover_db
+exit 0
