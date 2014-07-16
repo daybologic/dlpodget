@@ -29,8 +29,7 @@ sub t_rSleep() {
 	}
 }
 
-sub t_main()
-{
+sub t_main() {
 	my %opts = ( );
 	my %tests = (
 		'rSleep'      => \&t_rSleep,

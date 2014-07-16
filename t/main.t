@@ -39,8 +39,7 @@ sub t_child() {
 	stderr_is(\&t_child_2, "Stream Horatio error: \n", 'child results with dummy feed name');
 }
 
-sub t_fileFromURI()
-{
+sub t_fileFromURI() {
 	plan tests => 3;
 
 	my $F = 'fileFromURI';
@@ -49,8 +48,7 @@ sub t_fileFromURI()
 	is(fileFromURI(undef), undef, "$F test3");
 }
 
-sub t_readFeed()
-{
+sub t_readFeed() {
 	plan tests => 3;
 
 	my @arr;
@@ -86,8 +84,7 @@ sub t_readFeed()
 	};
 }
 
-sub t_processTags()
-{
+sub t_processTags() {
 	plan tests => 3;
 
 	my $F = 'processTags';
@@ -166,8 +163,7 @@ sub getOpts(%) {
 	return $ret;
 }
 
-sub t_main()
-{
+sub t_main() {
 	my %opts = ( );
 	my %tests = (
 		'fileFromURI' => \&t_fileFromURI,
