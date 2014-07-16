@@ -10,6 +10,8 @@ use diagnostics;
 require 'dlpodget';
 
 sub t_rSleep() {
+	plan tests => 13;
+
 	is(rSleep(undef), 0, 'rSleep undef 0');
 	is(rSleep(0), 0, 'rSleep 0 0');
 	is(rSleep(1), 1, 'rSleep 1 1');

@@ -33,12 +33,16 @@ sub t_child_2() {
 }
 
 sub t_child() {
+	plan tests => 2;
+
 	stderr_is(\&t_child_1, "Stream Untitled feed error: \n",'child results with no parameters');
 	stderr_is(\&t_child_2, "Stream Horatio error: \n", 'child results with dummy feed name');
 }
 
 sub t_fileFromURI()
 {
+	plan tests => 3;
+
 	my $F = 'fileFromURI';
 	is(fileFromURI('test1'), 'test1', "$F test1");
 	is(fileFromURI('http://www.daybologic.co.uk/ddrp/test2.wav'), 'test2.wav', "$F test2");
@@ -47,6 +51,8 @@ sub t_fileFromURI()
 
 sub t_readFeed()
 {
+	plan tests => 3;
+
 	my @arr;
 	my %types = ( );
 	my $F = 'readFeed';
@@ -82,6 +88,8 @@ sub t_readFeed()
 
 sub t_processTags()
 {
+	plan tests => 3;
+
 	my $F = 'processTags';
 	my %testData = (
 		main => {
@@ -96,6 +104,8 @@ sub t_processTags()
 }
 
 sub t_db() {
+	plan tests => 1;
+
 	isa_ok(db(), 'DBI::db', 'DB; get handle');
 }
 
