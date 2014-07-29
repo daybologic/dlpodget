@@ -14,3 +14,31 @@
   * C++ re-write
   * Archive support - frozen feeds (https://bitbucket.org/daybologic/dlpodget.arc)
   * Quiet mode (-q) for use from crontab
+
+The following modules should be broken out from the monolithic script:
+  * LEGACY:
+
+    * Utils
+      * fileFromURI
+      * processTags (this should invoke and execute the new TagProcessor
+
+    * Muadeeb
+      * rSleep
+
+    * Undecided
+      * readFeed
+      * downloadStream
+      * child
+      * db
+      * dbUpdateFeed
+      * dbUpdateStream
+
+    * main
+      * banner
+      * syntax
+
+  * NEW:
+
+    * TagProcessor
+      * assoc
+      * output

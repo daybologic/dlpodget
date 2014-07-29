@@ -61,7 +61,7 @@ sub rSleep($$) {
 	return $time;
 }
 
-package main;
+package main; # TODO: Only one package?  Should be more OOP!
 use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
