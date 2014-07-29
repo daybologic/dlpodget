@@ -65,7 +65,7 @@ sub assoc($$$) {
 	return $self;
 }
 
-sub getValue($$) {
+sub value($$) {
 	my ($self, $k);
 	if (exists($self->mappings->{$k})) {
 		return $self->mappings->{$k};
@@ -75,8 +75,8 @@ sub getValue($$) {
 	warn(sprintf('%s: No key %s found', $self, $k));
 }
 
-# @Deprecated -- Create assoc() and get() functions.
-sub processTags($$$) {
+# @TODO
+sub result($$$) {
 	my ( $self, $Feeds, $V ) = @_;
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
