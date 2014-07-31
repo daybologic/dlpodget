@@ -39,28 +39,6 @@ has [ 'debug', 'mock' ] => (
 	default => 0,
 );
 
-package Muadeeb; # Father, the sleeper has awakened!
-use Moose;
-
-extends 'LocalBase';
-
-sub rSleep($$) {
-	my ( $self, $time ) = @_;
-	return 0 unless ( $time );
-
-	if ( $time =~ m/^(\d+)r$/o ) {
-		$time = int(rand($1)) + 1;
-	} elsif ( $time !~ m/^\d+$/o ) {
-		return -1;
-	}
-
-	printf(STDERR "Sleeping %u seconds\n", $time)
-		if ( $self->debug );
-
-	sleep($time) unless( $self->mock );
-	return $time;
-}
-
 package main; # TODO: Only one package?  Should be more OOP!
 use LWP::UserAgent;
 use XML::Feed;
@@ -151,7 +129,7 @@ sub downloadStream($$$) {
 	) if ( $local_length );
 
 	my $tries = 1 + ($retries || 0);
-	my $paul = new Muadeeb;
+	my $paul = new Dlpodget::Muadeeb;
 	do {
 		$http_resp = $ua->get(
 			$entry->{uri},

@@ -2,7 +2,7 @@
 
 package main;
 
-use Test::More tests => 6;
+use Test::More tests => 5;
 use Test::Output;
 use Devel::Cover;
 use Getopt::Std;
@@ -41,27 +41,6 @@ sub t_child() {
 
 	stderr_is(\&t_child_1, "Stream Untitled feed error: \n",'child results with no parameters');
 	stderr_is(\&t_child_2, "Stream Horatio error: \n", 'child results with dummy feed name');
-}
-
-sub t_rSleep() {
-	plan tests => 13;
-
-	my $paul = Muadeeb->new(mock => 1, debug => $Debug);
-	is($paul->rSleep(undef), 0, 'rSleep undef 0');
-	is($paul->rSleep(0), 0, 'rSleep 0 0');
-	is($paul->rSleep(1), 1, 'rSleep 1 1');
-	is($paul->rSleep(-1), -1, 'rSleep -1 -1');
-	is($paul->rSleep(-2), -1, 'rSleep -2 -1');
-	is($paul->rSleep('blah'), -1, 'rSleep blah -1');
-	is($paul->rSleep(10), 10, 'rSleep 10 10');
-
-	# Random tests
-	srand(0); # Ensure we always start from a deterministic point
-	my @sleepTimes = ( qw/2 8 1 9 6/ );
-	is($paul->rSleep('10R'), -1, 'rSleep 10R -1');
-	foreach my $v ( @sleepTimes ) {
-		is($paul->rSleep('10r'), $v, "rSleep 10r $v");
-	}
 }
 
 sub t_fileFromURI() {
@@ -196,7 +175,6 @@ sub t_main() {
 		'processTags' => \&t_processTags,
 		'db'          => \&t_db,
 		'child'       => \&t_child,
-		'rSleep'      => \&t_rSleep,
 	);
 	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );
 	$Debug = $opts{'d'};
