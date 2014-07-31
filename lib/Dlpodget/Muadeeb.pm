@@ -45,23 +45,21 @@ has ['mock','debug']       => (
 	'default' => 0,
 );
 
-#TODO: Rename time, a perioSecs is not /the time/ and that's confusing ;)
-# I mean it's not the actual time of date innum?
 sub rSleep($$) {
-	my ( $self, $time ) = @_;
-	return 0 unless ( $time );
+	my ( $self, $periodSecs ) = @_;
+	return 0 unless ( $periodSecs );
 
-	if ( $time =~ m/^(\d+)r$/o ) {
-		$time = int(rand($1)) + 1;
-	} elsif ( $time !~ m/^\d+$/o ) {
+	if ( $periodSecs =~ m/^(\d+)r$/o ) {
+		$periodSecs = int(rand($1)) + 1;
+	} elsif ( $periodSecs !~ m/^\d+$/o ) {
 		return -1;
 	}
 
-	printf(STDERR "Sleeping %u seconds\n", $time) # TODO: Need logging component
+	printf(STDERR "Sleeping %u seconds\n", $periodSecs) # TODO: Need logging component
 		if ( $self->debug );
 
-	sleep($time) unless( $self->mock );
-	return $time;
+	$periodSecs = sleep($periodSecs) unless( $self->mock );
+	return $periodSecs;
 }
 
 1;
