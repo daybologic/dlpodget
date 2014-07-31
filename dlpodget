@@ -30,15 +30,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-package LocalBase; # All Moose objects in the script shall be derived from this.
-use Moose;
-
-has [ 'debug', 'mock' ] => (
-	isa     => 'Bool',
-	is      => 'rw',
-	default => 0,
-);
-
 package main; # TODO: Only one package?  Should be more OOP!
 use LWP::UserAgent;
 use XML::Feed;

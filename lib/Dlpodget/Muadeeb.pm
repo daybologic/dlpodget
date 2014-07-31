@@ -35,8 +35,7 @@ use Moose;
 use strict;
 use warnings;
 
-# TODO: Should derive from LocalBase or it's successor.
-#extends 'LocalBase';
+extends 'Dlpodget::Base';
 
 # TODO: this debug flag should be inherited from LocalBase, or it's successor.
 has ['mock','debug']       => (

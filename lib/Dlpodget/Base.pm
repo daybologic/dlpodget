@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package Dlpodget::LocalBase; # All Moose objects in the script shall be derived from this.
+
 use Moose;
 use strict;
 use warnings;
