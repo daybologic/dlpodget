@@ -39,7 +39,7 @@ use strict;
 use warnings;
 use diagnostics;
 
-my $Debug = 0;
+my $Debug = 0; # TODO Need shared getopts() handling!
 
 sub t_rSleep() {
 	my $paul = Dlpodget::Muadeeb->new(mock => 1, debug => $Debug);
