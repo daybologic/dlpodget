@@ -42,7 +42,7 @@ use warnings;
 has ['mock','debug']       => (
 	'isa'     => 'Bool',
 	'is'      => 'ro',
-	'default' => 1,
+	'default' => 0,
 );
 
 #TODO: Rename time, a perioSecs is not /the time/ and that's confusing ;)
