@@ -36,7 +36,7 @@ for t in t/*.t; do
 		exit 2;
 	fi
 	echo "Running $t"
-	./$t
+	PERL5LIB=lib $t
 	if test "0" -ne "$?"; then
 		echo $t failed.
 		exit 1;

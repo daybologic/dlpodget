@@ -37,13 +37,6 @@ use warnings;
 
 extends 'Dlpodget::Base';
 
-# TODO: this debug flag should be inherited from LocalBase, or it's successor.
-has ['mock','debug']       => (
-	'isa'     => 'Bool',
-	'is'      => 'ro',
-	'default' => 0,
-);
-
 sub rSleep($$) {
 	my ( $self, $periodSecs ) = @_;
 	return 0 unless ( $periodSecs );

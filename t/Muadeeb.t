@@ -42,7 +42,7 @@ use diagnostics;
 my $Debug = 0; # TODO Need shared getopts() handling!
 
 sub t_rSleep() {
-	my $paul = Dlpodget::Muadeeb->new(mock => 1, debug => $Debug);
+	my $paul = new Dlpodget::Muadeeb(mock => 1, debug => $Debug);
 	is($paul->rSleep(undef), 0, 'rSleep undef 0');
 	is($paul->rSleep(0), 0, 'rSleep 0 0');
 	is($paul->rSleep(1), 1, 'rSleep 1 1');

@@ -42,13 +42,6 @@ has 'mappings'    => (
 	'default' => sub {{}},
 );
 
-# TODO: this debug flag should be inherited from LocalBase, or it's successor.
-has 'debug'       => (
-	'isa'     => 'Bool',
-	'is'      => 'ro',
-	'default' => 1,
-);
-
 sub assoc($$$) {
 	my ($self, $k, $v) = @_;
 
