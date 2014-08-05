@@ -180,6 +180,23 @@ sub getOpts(%) {
 	return $ret;
 }
 
+sub t_processTags() {
+	plan tests => 3;
+
+	my $F = 'processTags';
+	my %testData = (
+		main => {
+			'DUMMYA' => '$DUMMYC',
+			'DUMMYB' => '/tmp/2',
+			'DUMMYC' => '/tmp/3'
+		}
+	);
+	is(processTags(\%testData, 'blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
+	is(processTags(\%testData, 'blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
+	is(processTags(\%testData, '$'), '$', "$F: Illegal variable");
+}
+
+
 sub t_main() {
 	my %opts = ( );
 	my %tests = (
