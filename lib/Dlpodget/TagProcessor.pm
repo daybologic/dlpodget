@@ -36,6 +36,8 @@ use Moose;
 use strict;
 use warnings;
 
+extends 'Dlpodget::Base';
+
 has 'mappings'    => (
 	'isa'     => 'HashRef',
 	'is'      => 'ro',
@@ -45,12 +47,12 @@ has 'mappings'    => (
 sub assoc($$$) {
 	my ($self, $k, $v) = @_;
 
-	if (exists($self->mappings->{$k})) {
+	if ( exists($self->mappings->{$k}) ) {
 		my $old = $self->mappings->{$k};
 		$old = '(undef)' unless (defined($old));
 		warn(sprintf(
-			'%s: Key clobered, old value: \'%s\', new value: \'%s\'',
-			$self, $old, $v
+			'%s: Key \'%s\' clobered, old value: \'%s\', new value: \'%s\'',
+			$self, $k, $old, $v
 		));
 	}
 
@@ -59,25 +61,25 @@ sub assoc($$$) {
 }
 
 sub value($$) {
-	my ($self, $k);
-	if (exists($self->mappings->{$k})) {
+	my ( $self, $k ) = @_;
+	if ( exists($self->mappings->{$k}) ) {
 		return $self->mappings->{$k};
 	}
 
-	$k = '(undef)' unless (defined($k));
+	$k = '(undef)' unless ( defined($k) );
 	warn(sprintf('%s: No key %s found', $self, $k));
 }
 
 # @TODO
 sub result($$$) {
-	my ( $self, $Feeds, $V ) = @_;
+	my ( $self, $V ) = @_;
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
 	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
 		my $var = substr($V, $idx);
 		if ( $var =~ $tagRx ) {
-			my $v = $Feeds->{main}->{ uc($1) };
-			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $self->debug );
+			my $v = $self->mappings->{ uc($1) };
+			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $self->debug ); #TODO: Use logger
 			if ( !defined($v) ) {
 				$avoid = $idx+1;
 				next;

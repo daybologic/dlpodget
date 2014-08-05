@@ -31,22 +31,45 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 use Dlpodget::TagProcessor;
-use Test::More tests => 2;
+use Test::More 0.96;
 use POSIX;
 use strict;
 use warnings;
 
-sub t_main() {
-	my @methods = qw(
-		assoc
-		value
-		result
+sub t_processTags($) {
+	my $F = 'processTags';
+	my $obj = shift;
+	my %testData = (
+		'DUMMYA' => '$DUMMYC',
+		'DUMMYB' => '/tmp/2',
+		'DUMMYC' => '/tmp/3'
 	);
 
+	plan tests => keys(%testData) * 2;
+
+	while ( my ( $tag, $subst ) = each(%testData) ) {
+		$obj->assoc($tag, $subst);
+	}
+
+	while ( my ( $tag, $subst ) = each(%testData) ) {
+		is($obj->value($tag), $subst, sprintf('Value of tag %s is %s', $tag, $subst));
+	}
+
+	is($obj->result('blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
+	is($obj->result('blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
+	is($obj->result('$'), '$', "$F: Illegal variable");
+}
+
+sub t_main() {
+	plan tests => 3;
+
+	my @methods = qw( assoc value result );
 	my $obj = new Dlpodget::TagProcessor;
 
 	isa_ok($obj, 'Dlpodget::TagProcessor');
 	can_ok($obj, @methods);
+
+	subtest 'processTags' => sub { t_processTags($obj) };
 
 	return EXIT_SUCCESS;
 }
