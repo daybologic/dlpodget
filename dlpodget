@@ -30,7 +30,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-package main; # TODO: Only one package?  Should be more OOP!
+package main;
+use Dlpodget::TagProcessor;
 use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
@@ -50,6 +51,7 @@ use constant DEV_NULL => '/dev/null';
 my $Debug = 0;
 my $Quiet = 0;
 my $File = '';
+my $globalTagProcessor = new Dlpodget::TagProcessor;
 
 sub fileFromURI($) {
 	my $Url = shift;
@@ -137,8 +139,8 @@ sub downloadStream($$$) {
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
 }
 
-sub processTags($$) {
-	my ( $Feeds, $V ) = @_;
+sub processTagsOld($$) {
+	my ( $Feeds, $V ) = @_; # Feeds deprecated in this function
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
 	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
@@ -156,6 +158,12 @@ sub processTags($$) {
 		}
 	}
 	return $V;
+}
+
+sub processTags($$) {
+	my ( undef, $V ) = @_;
+
+	return $globalTagProcessor->result($V);
 }
 
 sub child($$$$) {
@@ -377,7 +385,8 @@ sub main() {
 		}
 		if ( scalar(@defKeys) ) {
 			foreach my $mk ( @defKeys ) {
-				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
+				#$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
+				$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
 			}
 			# Set debug flag via config if it existed.
 			if ( $feeds{main}->{DEBUG} ) {

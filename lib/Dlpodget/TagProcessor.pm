@@ -70,9 +70,10 @@ sub value($$) {
 	warn(sprintf('%s: No key %s found', $self, $k));
 }
 
-# @TODO
+# Does this need to effectively call assoc() itsel?!?!
 sub result($$$) {
 	my ( $self, $V ) = @_;
+	$self->debug(1); # FIXME
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
 	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
