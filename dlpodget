@@ -62,6 +62,7 @@ sub rSleep($$) {
 }
 
 package main;
+use File::Path qw(make_path);
 use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
@@ -139,6 +140,7 @@ sub downloadStream($$$) {
 	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive && !$Quiet );
 
 	unless ( $Feeds->{main}->{NOOP} ) {
+		make_path($Feeds->{$Name}->{localpath});
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
 		} else {
