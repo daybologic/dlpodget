@@ -10,7 +10,7 @@ sub Total($) {
 
 sub checkTotal($) {
 	my $total = shift;
-	if ( $total < 35 ) {
+	if ( $total < 34 ) {
 		return 1;
 	}
 	return 0;
