@@ -32,6 +32,11 @@
 
 # TODO: Use GNU Autotools
 AUTOMAKE_OPTIONS=subdir-objects
+SUBDIRS = lib t
+ifdef DLPODGET_DOCS
+SUBDIRS += docs
+endif
+
 
 all: subdirs
 
@@ -51,11 +56,6 @@ test:
 
 clean:
 	rm -rf cover_db
-
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
 
 # nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
 subdirs:
