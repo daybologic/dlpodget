@@ -1,7 +1,6 @@
-#!/usr/bin/make
-#
+#!/bin/sh
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2013, David Duncan Ross Palmer, Daybo Logic
+# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,28 +29,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+os=`uname`
+if test $os = 'Darwin'; then
+	rsed='sed -E'
+else
+	rsed='sed -r'
+fi
 
-
-all: subdirs
-
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
-
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+$rsed $@
+exit $?
