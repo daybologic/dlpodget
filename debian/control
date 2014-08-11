@@ -6,12 +6,13 @@ Build-Depends: debhelper (>= 7), lynx
 Build-Depends-Indep: libwww-perl,
  libxml-feed-perl,
  libio-interactive-perl,
- dl-libconfreader-perl,
  libxml-feed-perl,
  libdevel-cover-perl,
  libconfig-inifiles-perl,
  libdbd-sqlite3-perl,
- libpod-coverage-perl
+ libpod-coverage-perl,
+ libtest-output-perl,
+ libmoose-perl
 Standards-Version: 3.7.3
 Homepage: http://www.daybologic.co.uk/
 
@@ -23,7 +24,8 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
  libconfig-inifiles-perl,
  liburi-perl,
  libio-interactive-perl,
- libdbd-sqlite3-perl
+ libdbd-sqlite3-perl,
+ libmoose-perl
 Description: Podcast downloader and management system
  Daybo Logic's podcast system keeps track of new podcasts posted on an RSS
  feed and downloads whatever you do not yet have, checking file lengths
