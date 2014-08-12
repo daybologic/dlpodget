@@ -30,8 +30,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Question: Would it have been better to implement this as a tie hash container?
 package Dlpodget::TagProcessor;
-# TODO: Should derive from LocalBase or it's successor.
+
 use Moose;
 use strict;
 use warnings;
@@ -47,6 +48,7 @@ has 'mappings'    => (
 sub assoc($$$) {
 	my ($self, $k, $v) = @_;
 
+	$k = uc($k); # All keys are uppercase
 	if ( exists($self->mappings->{$k}) ) {
 		my $old = $self->mappings->{$k};
 		$old = '(undef)' unless (defined($old));
@@ -62,6 +64,8 @@ sub assoc($$$) {
 
 sub value($$) {
 	my ( $self, $k ) = @_;
+
+	$k = uc($k); # All keys are uppercase
 	if ( exists($self->mappings->{$k}) ) {
 		return $self->mappings->{$k};
 	}

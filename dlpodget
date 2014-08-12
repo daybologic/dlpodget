@@ -51,7 +51,6 @@ use constant DEV_NULL => '/dev/null';
 my $Debug = 0;
 my $Quiet = 0;
 my $File = '';
-my $globalTagProcessor = new Dlpodget::TagProcessor;
 
 sub fileFromURI($) {
 	my $Url = shift;
@@ -92,8 +91,8 @@ sub downloadStream($$$) {
 	my $http_resp;
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
-	my $rsleep = $Feeds->{$Name}->{rsleep} || $Feeds->{main}->{RSLEEP};
-	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->{RETRIES};
+	my $rsleep = $Feeds->{$Name}->{rsleep}   || $Feeds->{main}->value('rsleep');
+	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->value('retries');
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
@@ -109,7 +108,7 @@ sub downloadStream($$$) {
 	);
 	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive && !$Quiet );
 
-	unless ( $Feeds->{main}->{NOOP} ) {
+	unless ( $Feeds->{main}->value('noop') ) {
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
 		} else {
@@ -129,42 +128,38 @@ sub downloadStream($$$) {
 			%get_params,
 			':content_cb' => sub {
 				my ( $chunk ) = @_;
-				print $f $chunk unless ( $Feeds->{main}->{NOOP} );
+				print $f $chunk unless ( $Feeds->{main}->value('noop') );
 			}
 		);
 		$paul->rSleep($rsleep) if ( ($tries-1) && $http_resp->code() != 200 );
 	} while ( $http_resp->code() != 200 && --$tries );
 
-	close($f) if ( !$Feeds->{main}->{NOOP} );
+	close($f) if ( !$Feeds->{main}->value('noop') );
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
 }
 
-sub processTagsOld($$) {
-	my ( $Feeds, $V ) = @_; # Feeds deprecated in this function
-	my $tagRx = qr/^\$([A-Z0-9]+)/o;
-	my $avoid = 0;
-	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
-		my $var = substr($V, $idx);
-		if ( $var =~ $tagRx ) {
-			my $v = $Feeds->{main}->{ uc($1) };
-			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $Debug );
-			if ( !defined($v) ) {
-				$avoid = $idx+1;
-				next;
-			}
-			substr($V, $idx, length($1)+1, $v);
-		} else {
-			$avoid++;
-		}
-	}
-	return $V;
-}
-
-sub processTags($$) {
-	my ( undef, $V ) = @_;
-
-	return $globalTagProcessor->result($V);
-}
+# @Deprecated because $Feeds->{'main'} should be itself a Dlpodget::TagProcessor object!
+#sub processTags($$) {
+#	my ( undef, $V ) = @_; # Feeds deprecated in this function
+#	my $tagRx = qr/^\$([A-Z0-9]+)/o;
+#	my $avoid = 0;
+#	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
+#		my $var = substr($V, $idx);
+#		if ( $var =~ $tagRx ) {
+#			#my $v = $Feeds->{main}->{ uc($1) };
+#			#my $v = $globalTagProcessor->value(uc($1));
+#			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( 1 || $Debug );
+#			if ( !defined($v) ) {
+#				$avoid = $idx+1;
+#				next;
+#			}
+#			substr($V, $idx, length($1)+1, $v);
+#		} else {
+#			$avoid++;
+#		}
+#	}
+#	return $V;
+#}
 
 sub child($$$$) {
 	my ( $DB, $FeedKey, $Feeds, $Feed ) = @_;
@@ -372,6 +367,8 @@ sub main() {
 			$conf = undef;
 		}
 	}
+
+	$feeds{'main'} = new Dlpodget::TagProcessor;
 	if ( $conf ) {
 		my %reserveSec = map {  $_ => 1 } ( 'main', 'paths' ); # Reserved section names
 		my ( @sections, $secC );
@@ -381,16 +378,17 @@ sub main() {
 		# First load the generation configuration information
 		# Include environment variables.
 		foreach my $ek ( keys(%ENV) ) {
-			$feeds{main}->{ uc($ek) } = $ENV{$ek};
+			$feeds{'main'}->assoc(uc($ek), $ENV{$ek});
 		}
 		if ( scalar(@defKeys) ) {
 			foreach my $mk ( @defKeys ) {
+				#$globalTagProcessor->assoc($mk, $globalTagProcessor->result($conf->val('main', $mk)));
 				#$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
-				$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
+				#$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
 			}
 			# Set debug flag via config if it existed.
-			if ( $feeds{main}->{DEBUG} ) {
-				$Debug = $feeds{main}->{DEBUG};
+			if ( $feeds{main}->value('DEBUG') ) {
+				$Debug = $feeds{main}->value('DEBUG');
 				printf(STDERR "Set Debug via config: %s\n", $Debug);
 			}
 		}
@@ -399,11 +397,12 @@ sub main() {
 			my @secKeys;
 			if ( (@secKeys = $conf->Parameters('paths')) ) {
 				foreach my $pk ( @secKeys ) {
-					$feeds{main}->{ uc($pk) } = $conf->val('paths', $pk);
+					$feeds{'main'}->assoc(uc($pk), $conf->val('paths', $pk));
 				}
 				# For backward compatibility, set localpfx with [paths] root
-				$feeds{main}->{'LOCALPFX'} = $feeds{main}->{'ROOT'}
-					if ( $feeds{main}->{'ROOT'} );
+				if ( $feeds{'main'}->value('root') ) {
+					$feeds{'main'}->assoc('localpfx', $feeds{'main'}->value('root'));
+				}
 			}
 		}
 
@@ -415,7 +414,7 @@ sub main() {
 			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
 				next if ( $reserveSec{$sections[$secI]} ); # Skip reserved sections
 				my $v = $conf->val($sections[$secI], $secKeys[$keyI]);
-				$v = processTags(\%feeds, $v);
+				#$v = processTags(\%feeds, $v);
 				printf(
 					STDERR
 					'[%s] %s -> %s'."\n",
@@ -432,20 +431,20 @@ sub main() {
 		my $max_children_opt = int($opts{'c'});
 		if ( $Debug ) {
 			my $msg;
-			if ( defined($feeds{main}->{MAXCHILDREN}) ) {
+			if ( defined($feeds{'main'}->value('maxchildren')) ) {
 				$msg = sprintf(
 					"Overriding config maxchildren %u via -c %u\n",
-					$feeds{main}->{MAXCHILDREN}, $max_children_opt
+					$feeds{main}->value('maxchildren'), $max_children_opt
 				);
 			} else {
 				$msg = sprintf("Setting maxchildren via -c %u\n", $max_children_opt);
 			}
 			print(STDERR $msg);
 		}
-		$feeds{main}->{MAXCHILDREN} = $max_children_opt;
+		$feeds{'main'}->assoc('maxchildren', $max_children_opt);
 	}
 
-	$0 = "$proctitle [MASTER]" if ( $feeds{main}->{MAXCHILDREN} != 0 );
+	$0 = "$proctitle [MASTER]" if ( $feeds{main}->value('maxchildren') != 0 );
 	my $db = db();
 	foreach my $feedName ( keys(%feeds) ) {
 		my $feed_key;
