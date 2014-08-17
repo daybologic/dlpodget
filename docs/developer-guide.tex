@@ -88,6 +88,10 @@ You should never commit code to the \textbf{stable} or \textbf{default} branches
 branches, whose meaning is as follows:
 
 \begin{itemize}
+\item develop
+\\
+All commits should start off against this branch.  It is then an ecumenical matter for mantainers
+if and when they are merged into \textbf{stable}.
 \item stable
 \\
 This branch is the freeze branch for properly unit tested and features we have agreed to release in
@@ -100,6 +104,7 @@ The default branch contains the latest version, merged down from whichever the l
 There must not be any commit within this branch except a merge commit.
 \\
 \end{itemize}
+
 Please do not make named feature branches.  Always develop within \textbf{develop}, and use bookmarks
 or additional repository clones for separate features.
 
