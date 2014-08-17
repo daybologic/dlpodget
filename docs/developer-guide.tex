@@ -84,20 +84,35 @@ to your own account.  You should then only commit code to the \textbf{develop} b
 submit pull requests to the master repository, and this acts a staging area and allows other developers
 to code review and comment on the pull request before it is accepted.
 
-You should never commit code to the \textbf{stable} or \textbf{default} branches.  These are special
-branches, whose meaning is as follows:
+You should never commit code to any branch other than \textbf{develop}, sometimes .rc example or documentation
+changes may be acceptable within \textbf{stable}.  Please check our branch policies, they are:
 
 \begin{itemize}
 \item develop
 \\
 All commits should start off against this branch.  It is then an ecumenical matter for mantainers
-if and when they are merged into \textbf{stable}.
+if and when they are merged into \textbf{stable}.  This branch allows developers to integrate changes
+with each other, all of the way down the stack.  Developers may have agreed with each other to merge
+early within \textbf{develop} within repositories other than the master, and provided code is not
+obviously flawed, project leads should publish it within the master early to aid this integration
+process.  As such, code within this branch may not be fully stable or fully unit tested, users who are
+not developers should never use this branch, unless given a specific changeset hash-id by a maintainer
+to use to test a potential bug fix, and they do so at their own risk (as they do in general).
 \item stable
 \\
-This branch is the freeze branch for properly unit tested and features we have agreed to release in
+This branch is the freeze branch for properly unit tested features we have agreed to release in
 the next iteration of the project.  Code here is expected to be mature and mostly production ready.
 Broken code in this branch shoud be avoided.  Users can test the 'bleeding edge' by using checkouts
 from this branch, though they should not do so from \textbf{develop}
+\item rc/N
+\\
+This is a special branch which contains the tags for the major version number represented by N.
+It tracks the ongoing supported official releases, and allows retrospective transplating of bug fixes
+on to old versions of the code.  Once tagged within this branch, code is typically merged to
+\textbf{default}, but only if it is the latest version.  Otherwise later versions in other \textbf{rc/N}
+branches, typically merge directly from the branch with the bug-fix in it.
+Note that there may be multiple heads within this branch -- they track the minor version numbers (not patch
+version numbers).
 \item default
 \\
 The default branch contains the latest version, merged down from whichever the latest release tag is.
