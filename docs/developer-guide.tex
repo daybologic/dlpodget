@@ -57,13 +57,15 @@
 \\
 \href{#struct}{1.1~ Code structure}
 \\
+\href{#struct}{1.2~ Working practices / team organisation}
+\\
 
 \newpage
 \textbf{1.~ Introduction}
 \\
-The Daybo Logic Podcast downloader is designed to work as an unattended, regularly scheduled servant, which
-will download all of your favourite RSS feeds in the background on your server.  Alternatively, it can be run
-on-demand from your desktop computer.
+Great that you're interested in contributing to the project!  However, please do read the user-guide
+first, so that you aware of the meanings of all of the currently existing options available to users,
+and the current aims of the project.
 \\
 \textbf{1.0~ Languages}
 \begin{itemize}
@@ -72,6 +74,34 @@ on-demand from your desktop computer.
 TODO
 \textbf{1.1~ Code structure}
 TODO
+
+\newpage
+\textbf{1.2~ Working practices / team organisation}
+\\
+Before committing any code to the project, it is recommended that you create an account
+on Atlassian Bitbucket, and fork the \href{https://bitbucket.org/daybologic/dlpodget}{master repository}
+to your own account.  You should then only commit code to the \textbf{develop} branch.  You can then
+submit pull requests to the master repository, and this acts a staging area and allows other developers
+to code review and comment on the pull request before it is accepted.
+
+You should never commit code to the \textbf{stable} or \textbf{default} branches.  These are special
+branches, whose meaning is as follows:
+
+\begin{itemize}
+\item stable
+\\
+This branch is the freeze branch for properly unit tested and features we have agreed to release in
+the next iteration of the project.  Code here is expected to be mature and mostly production ready.
+Broken code in this branch shoud be avoided.  Users can test the 'bleeding edge' by using checkouts
+from this branch, though they should not do so from \textbf{develop}
+\item default
+\\
+The default branch contains the latest version, merged down from whichever the latest release tag is.
+There must not be any commit within this branch except a merge commit.
+\\
+\end{itemize}
+Please do not make named feature branches.  Always develop within \textbf{develop}, and use bookmarks
+or additional repository clones for separate features.
 
 \par For the lastest news check the~ \href{http://bitbucket.org/daybologic/dlpodget}{web
 page}~ and update your documentation \& regularly.
