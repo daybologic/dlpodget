@@ -56,6 +56,11 @@ test:
 
 clean:
 	rm -rf cover_db
+	for dir in $(SUBDIRS); do \
+		cd $$dir; \
+		make clean; \
+		cd ..; \
+	done
 
 # nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
 subdirs:
