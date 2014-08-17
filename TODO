@@ -14,6 +14,7 @@
   * C++ re-write
   * Archive support - frozen feeds (https://bitbucket.org/daybologic/dlpodget.arc)
   * Quiet mode (-q) for use from crontab
+  * Optional rotation of old downloaded streams, requested by https://bitbucket.org/Aggamemnon
 
 The following modules should be broken out from the monolithic script:
   * LEGACY:

@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package main;
+use File::Path qw(make_path);
 use Dlpodget::TagProcessor;
 use LWP::UserAgent;
 use XML::Feed;
@@ -109,6 +110,7 @@ sub downloadStream($$$) {
 	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive && !$Quiet );
 
 	unless ( $Feeds->{main}->value('noop') ) {
+		make_path($Feeds->{$Name}->{localpath});
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
 		} else {
