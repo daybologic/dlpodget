@@ -44,6 +44,7 @@ politics  = $LOCALPFX/politics
 tech      = $LOCALPFX/tech
 comedy    = $LOCALPFX/comedy
 music     = $LOCALPFX/music
+radio     = $TECH/radio
 
 [tranceaddict]
 localpath = $MUSIC/trance/tranceaddict
@@ -280,3 +281,11 @@ download  = 1
 enable    = 0
 retries   = 3
 rsleep    = 5r
+
+[southgatearc]
+localpath = $RADIO/sarc
+rss       = http://www.southgatearc.org/sarc.rss
+check     = 1
+enable    = 1
+download  = 1
+retries   = 3
