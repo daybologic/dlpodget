@@ -330,7 +330,10 @@ sub banner($) {
 }
 
 sub syntax() {
-	printf("%s [-c n...] [-f <file>] [-n <feed>] -d -q\n\n", $0);
+	printf("%s [-C config] [-c n...] [-f <file>] [-n <feed>] -d -q\n\n", $0);
+
+	print("-C <config>\n");
+	print("\tSpecify a specific, user-defined config file\n\n");
 
 	print("-n <feed>\n");
 	print("\tOnly download one feed, not all those in the config\n\n");
@@ -367,7 +370,8 @@ sub main() {
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('Lf:qc:dn:h?', \%opts) );
+	return 1 if ( !getopts('C:Lf:qc:dn:h?', \%opts) );
+	@confFiles = ( $opts{'C'} ) if ( $opts{'C'} );
 	$Quiet = 1 if ( $opts{'q'} );
 	banner($opts{'L'}) unless ( $Quiet );
 	return syntax() if ( $opts{'h'} || $opts{'?'} );
