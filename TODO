@@ -14,3 +14,4 @@
   * C++ re-write
   * Archive support - frozen feeds (https://bitbucket.org/daybologic/dlpodget.arc)
   * Quiet mode (-q) for use from crontab
+  * Unit test using Dummy::LWP::UserAgent
