@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2013, David Duncan Ross Palmer, Daybo Logic
+# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,39 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+package LocalBase; # All Moose objects in the script shall be derived from this.
+use Moose;
+
+has [ 'debug', 'mock' ] => (
+	isa     => 'Bool',
+	is      => 'rw',
+	default => 0,
+);
+
+package Muadeeb; # Father, the sleeper has awakened!
+use Moose;
+
+extends 'LocalBase';
+
+sub rSleep($$) {
+	my ( $self, $time ) = @_;
+	return 0 unless ( $time );
+
+	if ( $time =~ m/^(\d+)r$/o ) {
+		$time = int(rand($1)) + 1;
+	} elsif ( $time !~ m/^\d+$/o ) {
+		return -1;
+	}
+
+	printf(STDERR "Sleeping %u seconds\n", $time)
+		if ( $self->debug );
+
+	sleep($time) unless( $self->mock );
+	return $time;
+}
+
 package main;
+use File::Path qw(make_path);
 use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
@@ -38,27 +70,33 @@ use Config::IniFiles;
 use Getopt::Std;
 use URI::Escape;
 use IO::Interactive qw(is_interactive);
+use DBI;
 use POSIX ":sys_wait_h";
+
 use strict;
 use warnings;
 use diagnostics;
 
-my $Debug = 0;
+use constant DEV_NULL => '/dev/null';
 
-sub FileFromURI($)
-{
+my $Debug = 0;
+my $Quiet = 0;
+my $File = '';
+
+sub fileFromURI($) {
 	my $Url = shift;
 	return undef if ( !$Url );
 	my @uri_parts = split('/', $Url);
 	return $uri_parts[-1];
 }
 
-sub ReadFeed($$)
-{
+sub readFeed($$) {
 	my @entries = ( );
 	my ( $Feeds, $Feed ) = @_;
 	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
 	my $feed = XML::Feed->parse(URI->new($Url));
+
+	$Name ||= 'Untitled feed';
 	if ( !$feed ) {
 		printf(STDERR "Stream %s error: %s\n", $Name, $@);
 		return @entries;
@@ -67,7 +105,7 @@ sub ReadFeed($$)
 	foreach my $entry ($feed->entries) {
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
 		my $uriDecoded = uri_unescape($enclosure->{'url'});
-		my $filename = FileFromURI($uriDecoded);
+		my $filename = fileFromURI($uriDecoded);
 		push(@entries, {
 			filename => $filename,
 			uri      => $uriDecoded,
@@ -79,24 +117,46 @@ sub ReadFeed($$)
 	return @entries;
 }
 
-sub DownloadStream($$$)
-{
+sub downloadStream($$$) {
 	my ( $ua, $f, %get_params, $is_interactive );
+	my $http_resp;
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
+	my $rsleep = $Feeds->{$Name}->{rsleep} || $Feeds->{main}->{RSLEEP};
+	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->{RETRIES};
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
 		if ( !$entry->{length} || $local_length == $entry->{length} ) {
-			printf(STDERR "%s already exists\n", $local_podcast);
+			printf(STDERR "%s already exists\n", $local_podcast) unless ( $Quiet );
 			return;
+		} elsif ( $local_length > $entry->{length} ) {
+			# Downloaded too much, this might mean we were downloading the stream
+			# from two concurrent downloaders, we should just kill the file and redo.
+			if ( unlink($local_podcast) == 1 ) {
+				printf(
+					STDERR "Deleted %s (bigger than upstream\'s), will download again\n",
+					$local_podcast
+				);
+				$local_length = 0;
+			} else {
+				printf(
+					STDERR "Can\'t delete oversized file %s: %s, skipped.\n",
+					$local_podcast, $!
+				);
+				return;
+			}
 		}
 	}
 	$is_interactive = is_interactive();
-	$ua = LWP::UserAgent->new( show_progress => $is_interactive );
-	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive );
+	$ua = LWP::UserAgent->new(
+		show_progress => $is_interactive && !$Quiet,
+		agent => 'dlpodget'
+	);
+	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive && !$Quiet );
 
 	unless ( $Feeds->{main}->{NOOP} ) {
+		make_path($Feeds->{$Name}->{localpath});
 		if ( open($f, '>>:raw', $local_podcast) ) {
 			binmode($f);
 		} else {
@@ -107,20 +167,26 @@ sub DownloadStream($$$)
 	%get_params = (
 		'Range' => "bytes=$local_length-"
 	) if ( $local_length );
-	$ua->get(
-		$entry->{uri},
-		%get_params,
-		':content_cb' => sub {
-			my ( $chunk ) = @_;
-			print $f $chunk unless ( $Feeds->{main}->{NOOP} );
-		}
-	);
+
+	my $tries = 1 + ($retries || 0);
+	my $paul = new Muadeeb;
+	do {
+		$http_resp = $ua->get(
+			$entry->{uri},
+			%get_params,
+			':content_cb' => sub {
+				my ( $chunk ) = @_;
+				print $f $chunk unless ( $Feeds->{main}->{NOOP} );
+			}
+		);
+		$paul->rSleep($rsleep) if ( ($tries-1) && $http_resp->code() != 200 );
+	} while ( $http_resp->code() != 200 && --$tries );
+
 	close($f) if ( !$Feeds->{main}->{NOOP} );
-	printf(STDERR "done.\n") if ( !$is_interactive );
+	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
 }
 
-sub ProcessTags($$)
-{
+sub processTags($$) {
 	my ( $Feeds, $V ) = @_;
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
@@ -141,18 +207,173 @@ sub ProcessTags($$)
 	return $V;
 }
 
-sub Child($$)
-{
-	my ( $Feeds, $Feed ) = @_;
-	my @entries = ReadFeed($Feeds, $Feed);
+sub child($$$$) {
+	my ( $DB, $FeedKey, $Feeds, $Feed ) = @_;
+	my @entries = readFeed($Feeds, $Feed);
 	foreach my $entry ( @entries ) {
 		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
-		DownloadStream($Feeds, $entry, $Feed->{name});
+		downloadStream($Feeds, $entry, $Feed->{name});
+		dbUpdateStream($DB, $FeedKey, $entry) if ( $DB );
 	}
 }
 
-sub main()
-{
+sub db() {
+	my $dbh;
+
+	return undef if ( $File eq DEV_NULL() );
+	$dbh = DBI->connect("DBI:SQLite:$File");
+	if ( $dbh ) {
+		$dbh->do(
+			'CREATE TABLE IF NOT EXISTS feeds (
+				id INTEGER PRIMARY KEY NOT NULL,
+				name CHAR(16) UNIQUE NOT NULL,
+				last_check_t INTEGER NOT NULL default 0
+			)'
+		);
+		$dbh->do(
+			'CREATE TABLE IF NOT EXISTS streams (
+				id INTEGER PRIMARY KEY NOT NULL,
+				feed_id INTEGER NOT NULL,
+				remotefn CHAR(32) NOT NULL,
+				localfn CHAR(32),
+				remotelen INTEGER,
+				UNIQUE(feed_id, remotefn) ON CONFLICT REPLACE
+			)'
+		);
+	}
+	return $dbh;
+}
+
+my %_dbUpdateFeed = (
+	'get_feed_id' => undef,
+	'ins_feed' => undef,
+	'upd_feed' => undef
+);
+sub dbUpdateFeed($$) {
+	my $ret = 0;
+	my $sth;
+	my ( $DB, $Name ) = @_;
+
+	# Prepare all of the possible statements
+	if ( !$_dbUpdateFeed{'get_feed_id'} ) {
+		my $sth = $DB->prepare('SELECT id FROM feeds WHERE name = ?');
+		$_dbUpdateFeed{'get_feed_id'} = $sth if ( $sth );
+	}
+
+	if ( !$_dbUpdateFeed{'ins_feed'} ) {
+		my $sth = $DB->prepare('
+			INSERT INTO feeds (
+				last_check_t, name
+			) VALUES(
+				?, ?
+			)'
+		);
+		$_dbUpdateFeed{'ins_feed'} = $sth if ( $sth );
+	}
+
+	if ( !$_dbUpdateFeed{'upd_feed'} ) {
+		my $sth = $DB->prepare('UPDATE feeds SET last_check_t = ? WHERE id = ?');
+		$_dbUpdateFeed{'upd_feed'} = $sth if ( $sth );
+	}
+
+	# Execute needed statements
+	$_dbUpdateFeed{'get_feed_id'}->execute($Name);
+	my $ref = $_dbUpdateFeed{'get_feed_id'}->fetchrow_hashref();
+	if ( $ref->{id} ) { # Does feed exist?
+		# Yes, the feed exists.
+		$ret = $ref->{id};
+		$_dbUpdateFeed{'upd_feed'}->execute(time(), $ret);
+	} else { # Feed does not exist
+		my $sth = $_dbUpdateFeed{'ins_feed'}->execute(time(), $Name);
+		$ret = $DB->last_insert_id(undef, undef, undef, undef);
+	}
+
+	die('Assertion failure') if ( !$ret );
+	return $ret;
+}
+
+my %_dbUpdateStream = (
+	'repl_into_stream' => undef
+);
+sub dbUpdateStream($$$) {
+	my $ret = 0;
+	my ( $DB, $FeedKey, $Entry ) = @_;
+	if ( !$_dbUpdateStream{'repl_into_stream'} ) {
+		my $sth = $DB->prepare(
+			'INSERT OR REPLACE INTO streams (
+				feed_id, remotefn, remotelen, localfn
+			) VALUES(
+				?, ?, ?, ?
+			)'
+		);
+		$_dbUpdateStream{'repl_into_stream'} = $sth if ( $sth );
+	}
+	if ( $_dbUpdateStream{'repl_into_stream'} ) {
+		$ret = $_dbUpdateStream{'repl_into_stream'}->execute(
+			$FeedKey,
+			$Entry->{filename},
+			$Entry->{length},
+			$Entry->{filename}
+		);
+	}
+	return $ret;
+}
+
+sub banner($) {
+	my $showLicense = shift;
+	my $doneShbang = 0;
+	my $blankLines = 0;
+
+	if ( open(my $f, '<', $0) ) {
+		while ( my $l = <$f> ) {
+			last if ( $l !~ s/^\#//o ); # Strip comments
+
+			if ( !$doneShbang && $l =~ m/^\!/ ) { # Skip shband
+				$doneShbang++;
+				next;
+			}
+			if ( !$showLicense ) {
+				last if ( $blankLines == 2 );
+				$blankLines++ if ( $l =~ m/^\s*$/ );
+			}
+
+			print $l;
+		}
+		close($f);
+		print(" Use -L to see full license terms.\n") if ( !$showLicense );
+		print("\n");
+	}
+}
+
+sub syntax() {
+	printf("%s [-C config] [-c n...] [-f <file>] [-n <feed>] -d -q\n\n", $0);
+
+	print("-C <config>\n");
+	print("\tSpecify a specific, user-defined config file\n\n");
+
+	print("-n <feed>\n");
+	print("\tOnly download one feed, not all those in the config\n\n");
+
+	print("-f <file>\n");
+	print("\tOverride the database file (default \"$ENV{HOME}/.dlpodget.db)\"\n\n");
+
+	print("-q\n");
+	print("\tQuiet mode - no output (except errors)\n\n");
+
+	print("-c <n...>\n");
+	print("\tOverride maximum children in the feed download pool (see config)\n\n");
+
+	print("-h / -?\n");
+	print("\tSyntax help (this)\n\n");
+	# TODO: You want more specific help by using -h and another option.
+
+	print("-d\n");
+	print("\tdebug\n\n");
+
+	return 0;
+}
+
+sub main() {
 	my $proctitle = $0; # Save original process title
 	my $conf;
 	my @entries = ( );
@@ -165,9 +386,20 @@ sub main()
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('dn:', \%opts) );
+	return 1 if ( !getopts('C:Lf:qc:dn:h?', \%opts) );
+	@confFiles = ( $opts{'C'} ) if ( $opts{'C'} );
+	$Quiet = 1 if ( $opts{'q'} );
+	banner($opts{'L'}) unless ( $Quiet );
+	return syntax() if ( $opts{'h'} || $opts{'?'} );
 	$Debug = 1 if ( $opts{'d'} );
+	$File  = ( $opts{'f'} ) ? ( $opts{'f'} ) : ( "$ENV{HOME}/.dlpodget.db" );
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
+	print(STDERR "Quiet mode enabled by -q\n") if ( $Debug );
+	if ( $opts{'f'} ) {
+		my $n = ' (null device)';
+		$n = '' if ( $File ne DEV_NULL() );
+		printf(STDERR "Overridden database with -f %s%s\n", $File, $n)
+	}
 
 	foreach my $confFile ( @confFiles ) {
 		next unless ( -f $confFile );
@@ -181,7 +413,7 @@ sub main()
 
 	if ( $conf && (@defKeys = $conf->Parameters('main')) ) {
 		if ( !$conf->val('main', 'enable', 1) ) {
-			print(STDERR "Configuration disabled.\n");
+			print(STDERR "Configuration disabled.\n") unless ( $Quiet );
 			$conf = undef;
 		}
 	}
@@ -198,7 +430,7 @@ sub main()
 		}
 		if ( scalar(@defKeys) ) {
 			foreach my $mk ( @defKeys ) {
-				$feeds{main}->{ uc($mk) } = $conf->val('main', $mk);
+				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
 			}
 			# Set debug flag via config if it existed.
 			if ( $feeds{main}->{DEBUG} ) {
@@ -227,7 +459,7 @@ sub main()
 			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
 				next if ( $reserveSec{$sections[$secI]} ); # Skip reserved sections
 				my $v = $conf->val($sections[$secI], $secKeys[$keyI]);
-				$v = ProcessTags(\%feeds, $v);
+				$v = processTags(\%feeds, $v);
 				printf(
 					STDERR
 					'[%s] %s -> %s'."\n",
@@ -240,30 +472,51 @@ sub main()
 		}
 	}
 
+	if ( defined($opts{'c'}) ) {
+		my $max_children_opt = int($opts{'c'});
+		if ( $Debug ) {
+			my $msg;
+			if ( defined($feeds{main}->{MAXCHILDREN}) ) {
+				$msg = sprintf(
+					"Overriding config maxchildren %u via -c %u\n",
+					$feeds{main}->{MAXCHILDREN}, $max_children_opt
+				);
+			} else {
+				$msg = sprintf("Setting maxchildren via -c %u\n", $max_children_opt);
+			}
+			print(STDERR $msg);
+		}
+		$feeds{main}->{MAXCHILDREN} = $max_children_opt;
+	}
+
 	$0 = "$proctitle [MASTER]" if ( $feeds{main}->{MAXCHILDREN} != 0 );
+	my $db = db();
 	foreach my $feedName ( keys(%feeds) ) {
+		my $feed_key;
 		my $reaped_pid;
 		my $child_limit_reached = 0;
 		my $feed = $feeds{$feedName};
 		next if ( !$feed->{enable} );
 		next if ( !$feed->{download} );
 		$feed->{name} = $feedName;
+		$feed_key = dbUpdateFeed($db, $feed->{name}) if ( $db );
 		if ( $feeds{main}->{MAXCHILDREN} == 0 ) { # Master performs downloads
 			$0 = "$proctitle [$feedName]";
-			Child(\%feeds, $feed);
+			child($db, $feed_key, \%feeds, $feed);
 			next;
 		} elsif ( $feeds{main}->{MAXCHILDREN} < 0 || scalar(keys(%pids)) < $feeds{main}->{MAXCHILDREN} ) {
+			sleep($feeds{_main}->{CHILDDELAY}) if ( $feeds{_main}->{CHILDDELAY} && scalar(keys(%pids)) );
 			my $pid = fork();
 			die "cannot fork: $!" if ( !defined($pid) );
 			if ( $pid == 0 ) { # Child process
 				$0 = "$proctitle [$feedName]";
-				Child(\%feeds, $feed);
+				child($db, $feed_key, \%feeds, $feed);
 				exit(0); # Children should not return
 			} else {
 				$pids{$pid} = $feedName;
 			}
 		} else {
-			warn "Not enough children, waiting.";
+			warn "Pending (child limit reached)." unless ( $Quiet );
 			$child_limit_reached = 1;
 		}
 
@@ -289,4 +542,5 @@ sub main()
 	return 0;
 }
 
-exit(main());
+exit(main()) if ( !caller() );
+1;

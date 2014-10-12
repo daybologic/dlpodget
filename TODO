@@ -1,7 +1,6 @@
   * Cached RSS XML files to avoid checking every run (https://bitbucket.org/daybologic/dlpodget.arc)
   * GUI
   * Unit testing (https://bitbucket.org/daybologic/dlpodget.ut)
-  * Process forking - download multiple streams at once (https://bitbucket.org/daybologic/dlpodget.forking)
   * Download rate limiting - on a per-feed basis (https://bitbucket.org/daybologic/dlpodget.rate)
   * Email notifications (https://bitbucket.org/daybologic/dlpodget.email)
   * Transcoding support (https://bitbucket.org/daybologic/dlpodget.codecs)
