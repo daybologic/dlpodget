@@ -130,6 +130,22 @@ sub downloadStream($$$) {
 		if ( !$entry->{length} || $local_length == $entry->{length} ) {
 			printf(STDERR "%s already exists\n", $local_podcast) unless ( $Quiet );
 			return;
+		} elsif ( $local_length > $entry->{length} ) {
+			# Downloaded too much, this might mean we were downloading the stream
+			# from two concurrent downloaders, we should just kill the file and redo.
+			if ( unlink($local_podcast) == 1 ) {
+				printf(
+					STDERR "Deleted %s (bigger than upstream\'s), will download again\n",
+					$local_podcast
+				);
+				$local_length = 0;
+			} else {
+				printf(
+					STDERR "Can\'t delete oversized file %s: %s, skipped.\n",
+					$local_podcast, $!
+				);
+				return;
+			}
 		}
 	}
 	$is_interactive = is_interactive();
