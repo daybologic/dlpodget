@@ -373,6 +373,22 @@ sub syntax() {
 	return 0;
 }
 
+sub listHasMember($@) {
+	my $needle = shift;
+	my @hayStack = @_;
+
+	foreach my $member (@hayStack) {
+		if (!defined($needle) && !defined($member)) {
+			return 1;
+		} elsif (!defined($needle) || !defined($member)) {
+			return 0;
+		} else {
+			return 1 if ($needle eq $member);
+		}
+	}
+	return 0;
+}
+
 sub main() {
 	my $proctitle = $0; # Save original process title
 	my $conf;
@@ -439,7 +455,7 @@ sub main() {
 			}
 		}
 
-		if ( 'paths' ~~ @sections ) { # Has a paths section?
+		if ( listHasMember('paths', @sections) ) { # Has a paths section?
 			my @secKeys;
 			if ( (@secKeys = $conf->Parameters('paths')) ) {
 				foreach my $pk ( @secKeys ) {
