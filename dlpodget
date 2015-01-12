@@ -133,7 +133,12 @@ sub downloadStream($$$) {
 		} elsif ( $local_length > $entry->{length} ) {
 			# Downloaded too much, this might mean we were downloading the stream
 			# from two concurrent downloaders, we should just kill the file and redo.
-			if ( unlink($local_podcast) == 1 ) {
+			if ( $Feeds->{main}->{NOOP} ) {
+				printf(
+					STDERR "Local file %s is bigger than upstream, but not deleted due to noop mode\n",
+					$local_podcast
+				);
+			} elsif ( unlink($local_podcast) == 1 ) {
 				printf(
 					STDERR "Deleted %s (bigger than upstream\'s), will download again\n",
 					$local_podcast
