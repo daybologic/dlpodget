@@ -26,6 +26,13 @@
 ;                 stream or the feed.
 ;   rsleep      = <0-n[r]>, default 0, time in seconds to sleep after a failed
 ;                 read, add 'r' suffix to randomise 1-n seconds, 0r is illegal.
+;   maxcount    = <0-n>, max number of download files to keep per feed,
+;                 default 0 is a synonim for unlimited
+;   maxage      = <0-n[s|h|d|w|m|y]>, maximum age in seconds, hours, days, weeks, months or years,
+;                 for each of the files within a feed.  This is handled by mtime to clean up files,
+;                 because most people would expect this, and it also prevents download of old files
+;                 from feeds, where the date is readable by the script.
+;                 Default 0 is a synonim for unlimited
 
 [main]
 enable    = 1
@@ -272,6 +279,8 @@ rss       = http://downloads.bbc.co.uk/podcasts/radio4/thought/rss.xml
 check     = 1
 download  = 1
 enable    = 1
+maxage    = 1w
+maxcount  = 10
 
 [christian.org.uk]
 localpath = $RELIGION/christian.org.uk
