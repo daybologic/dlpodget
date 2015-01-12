@@ -72,16 +72,34 @@ use URI::Escape;
 use IO::Interactive qw(is_interactive);
 use DBI;
 use POSIX ":sys_wait_h";
+use File::Find;
 
 use strict;
 use warnings;
 use diagnostics;
+
+# for the convenience of &wanted calls, including -eval statements:
+use vars qw/*name *dir *prune/;
+*name   = *File::Find::name;
+*dir    = *File::Find::dir;
+*prune  = *File::Find::prune;
+
+sub wanted;
 
 use constant DEV_NULL => '/dev/null';
 
 my $Debug = 0;
 my $Quiet = 0;
 my $File = '';
+
+sub wanted {
+	my ($dev,$ino,$mode,$nlink,$uid,$gid);
+
+	(($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
+	(int(-M _) > 3) && # FIXME: Three days hard-coded!  DANGER  Will Robinson (also, no noop support)
+	-f _ &&
+	(unlink($_) || warn "$name: $!\n");
+}
 
 sub fileFromURI($) {
 	my $Url = shift;
@@ -124,6 +142,8 @@ sub downloadStream($$$) {
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $rsleep = $Feeds->{$Name}->{rsleep} || $Feeds->{main}->{RSLEEP};
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->{RETRIES};
+	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
+	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
@@ -212,11 +232,25 @@ sub processTags($$) {
 	return $V;
 }
 
+sub cleanupStreams($$$) {
+	my ( $Feeds, $entry, $Name ) = @_;
+
+	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
+	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
+
+	return if (!$maxage && !$maxcount); # Nothing for us to do
+
+	print Dumper File::Find::find({wanted => \&wanted}, $Feeds->{$Name}->{localpath});
+	#TODO 
+	
+}
+
 sub child($$$$) {
 	my ( $DB, $FeedKey, $Feeds, $Feed ) = @_;
 	my @entries = readFeed($Feeds, $Feed);
 	foreach my $entry ( @entries ) {
 		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
+		cleanupStreams($Feeds, $entry, $Feed->{name});
 		downloadStream($Feeds, $entry, $Feed->{name});
 		dbUpdateStream($DB, $FeedKey, $entry) if ( $DB );
 	}
