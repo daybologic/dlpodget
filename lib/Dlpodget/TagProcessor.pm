@@ -31,7 +31,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package Dlpodget::TagProcessor;
-# TODO: Should derive from LocalBase or it's successor.
 use Moose;
 use strict;
 use warnings;
