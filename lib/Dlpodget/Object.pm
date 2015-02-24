@@ -30,28 +30,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-package Dlpodget::Muadeeb; # Father, the sleeper has awakened!
+package Dlpodget::Object; # All Moose objects in the script shall be derived from this.
+
 use Moose;
 use strict;
 use warnings;
 
-extends 'Dlpodget::Object';
+use Dlpodget::Logger;
 
-sub rSleep($$) {
-	my ( $self, $periodSecs ) = @_;
-	return 0 unless ( $periodSecs );
+extends 'Dlpodget::Base';
 
-	if ( $periodSecs =~ m/^(\d+)r$/o ) {
-		$periodSecs = int(rand($1)) + 1;
-	} elsif ( $periodSecs !~ m/^\d+$/o ) {
-		return -1;
-	}
-
-	$self->logger->log(0, "Sleeping %u seconds\n", $periodSecs)
-		if ( $self->debug );
-
-	$periodSecs = sleep($periodSecs) unless( $self->mock );
-	return $periodSecs;
-}
+has 'logger'     => (
+	isa      => 'Dlpodget::Logger',
+	is       => 'rw',
+	default  => sub { Dlpodget::Logger->new(mock => 1) },
+);
 
 1;

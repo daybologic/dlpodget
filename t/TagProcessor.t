@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 use Dlpodget::TagProcessor;
+use Dlpodget::Logger;
 use Test::More 0.96;
 use POSIX;
 use strict;

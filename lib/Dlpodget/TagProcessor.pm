@@ -35,7 +35,7 @@ use Moose;
 use strict;
 use warnings;
 
-extends 'Dlpodget::Base';
+extends 'Dlpodget::Object';
 
 has 'mappings'    => (
 	'isa'     => 'HashRef',
@@ -79,7 +79,8 @@ sub result($$$) {
 		my $var = substr($V, $idx);
 		if ( $var =~ $tagRx ) {
 			my $v = $self->mappings->{ uc($1) };
-			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $self->debug ); #TODO: Use logger
+			$self->logger->log(0, '%s -> %s', $1, $v || '(undef)')
+				if ( $self->debug ); # TODO: Need a debug call in the logger piece!
 			if ( !defined($v) ) {
 				$avoid = $idx+1;
 				next;

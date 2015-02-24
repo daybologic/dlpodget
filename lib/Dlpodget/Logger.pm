@@ -45,9 +45,16 @@ use constant LOGLEVEL_INFO  => (5);
 
 sub log($$$@) {
 	my ( $self, $level, $format, @args ) = @_;
+	my $ret;
 
 	# TODO: Ignore the log level for now.
-	return printf($format, @args);
+	if ( $self->mock ) {
+		$ret = scalar(@args);
+	} else {
+		$ret = printf($format, @args);
+	}
+
+	return $ret;
 }
 
 1;
