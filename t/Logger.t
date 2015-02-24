@@ -31,7 +31,7 @@
 
 package main;
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 use Test::Output;
 use Devel::Cover;
 use Dlpodget::Logger;
@@ -44,8 +44,12 @@ my $Debug = 0; # TODO Need shared getopts() handling!
 
 sub t_log() {
 	my $logger = new Dlpodget::Logger;
+	my ( $format, $args );
+
 	srand(0); # Not so random!
-	stdout_is(sub {$logger->log(0, 'Test message %d', int(rand()*9999))}, 'Test message 4460', 'Message with sprintf args');;
+	($format, $args) = ( 'Test message %d', int(rand()*9999) );
+	stdout_is(sub { $logger->log(0, $format, $args) }, 'Test message 1708', 'Message with sprintf args');;
+	is($logger->log(0, $format, $args), 1, 'Return from printf is as expected');
 }
 
 exit(t_log()) unless ( caller() );
