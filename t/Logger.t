@@ -42,14 +42,27 @@ use diagnostics;
 
 my $Debug = 0; # TODO Need shared getopts() handling!
 
+sub logWrapper($$$@) {
+	my ( $expectOutput, $expectRet, $logger, $level, $format, @args ) = @_;
+	my $ret = undef;
+
+	my $logCall = sub {
+		$ret = $logger->log($level, $format, @args);
+	};
+
+	stdout_is(sub { $logCall->() }, $expectOutput, 'Output as expected');
+	is($ret, $expectRet, 'Return from printf is as expected');
+}
+
 sub t_log() {
 	my $logger = new Dlpodget::Logger;
-	my ( $format, $args );
+	my ( $format, @args );
 
 	srand(0); # Not so random!
-	($format, $args) = ( 'Test message %d', int(rand()*9999) );
-	stdout_is(sub { $logger->log(0, $format, $args) }, 'Test message 1708', 'Message with sprintf args');;
-	is($logger->log(0, $format, $args), 1, 'Return from printf is as expected');
+	( $format, @args ) = ( 'Test message %d', int(rand()*9999) );
+	logWrapper('Test message 1708', scalar(@args), $logger, 0, $format, @args);
+
+	return 0;
 }
 
 exit(t_log()) unless ( caller() );
