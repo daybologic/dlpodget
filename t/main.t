@@ -185,7 +185,7 @@ sub t_processTags() {
 
 	my $F = 'processTags';
 	my %testData = (
-		main => {
+		mappings => {
 			'DUMMYA' => '$DUMMYC',
 			'DUMMYB' => '/tmp/2',
 			'DUMMYC' => '/tmp/3'

@@ -161,8 +161,11 @@ sub processTagsOld($$) {
 }
 
 sub processTags($$) {
-	my ( undef, $V ) = @_;
+	my ( $testData, $V ) = @_;
 
+	while (my ($k, $v) = each(%{$testData->{mappings}})) {
+		$globalTagProcessor->assoc($k, $v);
+	}
 	return $globalTagProcessor->result($V);
 }
 
