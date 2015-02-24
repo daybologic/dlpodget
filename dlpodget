@@ -30,39 +30,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-package LocalBase; # All Moose objects in the script shall be derived from this.
-use Moose;
-
-has [ 'debug', 'mock' ] => (
-	isa     => 'Bool',
-	is      => 'rw',
-	default => 0,
-);
-
-package Muadeeb; # Father, the sleeper has awakened!
-use Moose;
-
-extends 'LocalBase';
-
-sub rSleep($$) {
-	my ( $self, $time ) = @_;
-	return 0 unless ( $time );
-
-	if ( $time =~ m/^(\d+)r$/o ) {
-		$time = int(rand($1)) + 1;
-	} elsif ( $time !~ m/^\d+$/o ) {
-		return -1;
-	}
-
-	printf(STDERR "Sleeping %u seconds\n", $time)
-		if ( $self->debug );
-
-	sleep($time) unless( $self->mock );
-	return $time;
-}
-
 package main;
 use File::Path qw(make_path);
+use Dlpodget::TagProcessor;
 use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
@@ -91,6 +61,7 @@ use constant DEV_NULL => '/dev/null';
 my $Debug = 0;
 my $Quiet = 0;
 my $File = '';
+my $globalTagProcessor = new Dlpodget::TagProcessor;
 
 sub wanted {
 	my ($dev,$ino,$mode,$nlink,$uid,$gid);
@@ -194,7 +165,7 @@ sub downloadStream($$$) {
 	) if ( $local_length );
 
 	my $tries = 1 + ($retries || 0);
-	my $paul = new Muadeeb;
+	my $paul = new Dlpodget::Muadeeb;
 	do {
 		$http_resp = $ua->get(
 			$entry->{uri},
@@ -211,8 +182,8 @@ sub downloadStream($$$) {
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
 }
 
-sub processTags($$) {
-	my ( $Feeds, $V ) = @_;
+sub processTagsOld($$) {
+	my ( $Feeds, $V ) = @_; # Feeds deprecated in this function
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
 	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
@@ -230,6 +201,15 @@ sub processTags($$) {
 		}
 	}
 	return $V;
+}
+
+sub processTags($$) {
+	my ( $testData, $V ) = @_;
+
+	while (my ($k, $v) = each(%{$testData->{mappings}})) {
+		$globalTagProcessor->assoc($k, $v);
+	}
+	return $globalTagProcessor->result($V);
 }
 
 sub cleanupStreams($$$) {
@@ -485,7 +465,8 @@ sub main() {
 		}
 		if ( scalar(@defKeys) ) {
 			foreach my $mk ( @defKeys ) {
-				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
+				#$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
+				$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
 			}
 			# Set debug flag via config if it existed.
 			if ( $feeds{main}->{DEBUG} ) {

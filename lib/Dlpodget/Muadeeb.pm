@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
@@ -30,17 +30,28 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-for t in t/*.t; do
-	if test ! -x $t; then
-		echo Found non executable test $t
-		exit 2;
-	fi
-	echo "Running $t"
-	PERL5LIB=lib $t
-	if test "0" -ne "$?"; then
-		echo $t failed.
-		exit 1;
-	fi
-done
+package Dlpodget::Muadeeb; # Father, the sleeper has awakened!
+use Moose;
+use strict;
+use warnings;
 
-exit 0
+extends 'Dlpodget::Object';
+
+sub rSleep($$) {
+	my ( $self, $periodSecs ) = @_;
+	return 0 unless ( $periodSecs );
+
+	if ( $periodSecs =~ m/^(\d+)r$/o ) {
+		$periodSecs = int(rand($1)) + 1;
+	} elsif ( $periodSecs !~ m/^\d+$/o ) {
+		return -1;
+	}
+
+	$self->logger->log(0, "Sleeping %u seconds\n", $periodSecs)
+		if ( $self->debug );
+
+	$periodSecs = sleep($periodSecs) unless( $self->mock );
+	return $periodSecs;
+}
+
+1;

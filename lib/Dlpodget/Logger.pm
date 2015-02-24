@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
+# Copyright (c) 2012-2015, David Duncan Ross Palmer (2E0EOL), Daybo Logic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,17 +30,31 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-for t in t/*.t; do
-	if test ! -x $t; then
-		echo Found non executable test $t
-		exit 2;
-	fi
-	echo "Running $t"
-	PERL5LIB=lib $t
-	if test "0" -ne "$?"; then
-		echo $t failed.
-		exit 1;
-	fi
-done
+package Dlpodget::Logger;
+use Moose;
+use strict;
+use warnings;
 
-exit 0
+extends 'Dlpodget::Base';
+
+use constant LOGLEVEL_FATAL => (9);
+use constant LOGLEVEL_CRIT  => (8);
+use constant LOGLEVEL_ERROR => (7);
+use constant LOGLEVEL_WARN  => (6);
+use constant LOGLEVEL_INFO  => (5);
+
+sub log($$$@) {
+	my ( $self, $level, $format, @args ) = @_;
+	my $ret;
+
+	# TODO: Ignore the log level for now.
+	if ( $self->mock ) {
+		$ret = scalar(@args);
+	} else {
+		$ret = printf($format, @args);
+	}
+
+	return $ret;
+}
+
+1;

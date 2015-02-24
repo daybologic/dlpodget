@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
@@ -30,17 +30,67 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-for t in t/*.t; do
-	if test ! -x $t; then
-		echo Found non executable test $t
-		exit 2;
-	fi
-	echo "Running $t"
-	PERL5LIB=lib $t
-	if test "0" -ne "$?"; then
-		echo $t failed.
-		exit 1;
-	fi
-done
+package Dlpodget::TagProcessor;
+use Moose;
+use strict;
+use warnings;
 
-exit 0
+extends 'Dlpodget::Object';
+
+has 'mappings'    => (
+	'isa'     => 'HashRef',
+	'is'      => 'ro',
+	'default' => sub {{}},
+);
+
+sub assoc($$$) {
+	my ($self, $k, $v) = @_;
+
+	if ( exists($self->mappings->{$k}) ) {
+		my $old = $self->mappings->{$k};
+		$old = '(undef)' unless (defined($old));
+		warn(sprintf(
+			'%s: Key \'%s\' clobered, old value: \'%s\', new value: \'%s\'',
+			$self, $k, $old, $v
+		));
+	}
+
+	$self->mappings->{$k} = $v;
+	return $self;
+}
+
+sub value($$) {
+	my ( $self, $k ) = @_;
+	if ( exists($self->mappings->{$k}) ) {
+		return $self->mappings->{$k};
+	}
+
+	$k = '(undef)' unless ( defined($k) );
+	warn(sprintf('%s: No key %s found', $self, $k));
+}
+
+# Does this need to effectively call assoc() itsel?!?!
+sub result($$$) {
+	my ( $self, $V ) = @_;
+	$self->debug(1); # FIXME
+	my $tagRx = qr/^\$([A-Z0-9]+)/o;
+	my $avoid = 0;
+	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
+		my $var = substr($V, $idx);
+		if ( $var =~ $tagRx ) {
+			my $v = $self->mappings->{ uc($1) };
+			$self->logger->log(0, '%s -> %s', $1, $v || '(undef)')
+				if ( $self->debug ); # TODO: Need a debug call in the logger piece!
+			if ( !defined($v) ) {
+				$avoid = $idx+1;
+				next;
+			}
+			substr($V, $idx, length($1)+1, $v);
+		} else {
+			$avoid++;
+		}
+	}
+	return $V;
+}
+
+1;

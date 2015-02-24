@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
@@ -30,17 +30,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-for t in t/*.t; do
-	if test ! -x $t; then
-		echo Found non executable test $t
-		exit 2;
-	fi
-	echo "Running $t"
-	PERL5LIB=lib $t
-	if test "0" -ne "$?"; then
-		echo $t failed.
-		exit 1;
-	fi
-done
+package Dlpodget::Object; # All Moose objects in the script shall be derived from this.
 
-exit 0
+use Moose;
+use strict;
+use warnings;
+
+use Dlpodget::Logger;
+
+extends 'Dlpodget::Base';
+
+has 'logger'     => (
+	isa      => 'Dlpodget::Logger',
+	is       => 'rw',
+	default  => sub { Dlpodget::Logger->new(mock => 1) },
+);
+
+1;
