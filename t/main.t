@@ -31,7 +31,7 @@
 
 package main;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 use Test::Output;
 use Devel::Cover;
 use Getopt::Std;
@@ -163,7 +163,7 @@ sub getOpts(%) {
 
 	while ( my ( $o, $v ) = each(%$O) ) {
 		if ( $o eq 'n' ) {
-			unless ( $v ~~ $P{'tests'} ) {
+			unless ( listHasMember($v, @{ $P{'tests'} }) ) {
 				die(sprintf(
 					'Argument %s to -n, is not a known test',
 					$v
@@ -178,6 +178,14 @@ sub getOpts(%) {
 	}
 	$ret = 1;
 	return $ret;
+}
+
+sub t_listHasMember() {
+	is(listHasMember('one', 'one', 'two', 'three'), 1, 'List contains one');
+	is(listHasMember('two', 'one', 'two', 'three'), 1, 'List contains two');
+	is(listHasMember('four', 'one', 'two', 'three'), 0, 'List does not contain four');
+	is(listHasMember(undef, undef, undef), 1, 'undef contained');
+	is(listHasMember(undef, 1234, 4321), 0, 'undef not contained');
 }
 
 sub t_processTags() {
@@ -205,6 +213,7 @@ sub t_main() {
 		'processTags' => \&t_processTags,
 		'db'          => \&t_db,
 		'child'       => \&t_child,
+		'listHasMember' => \&t_listHasMember,
 	);
 	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );
 	$Debug = $opts{'d'};

@@ -100,6 +100,27 @@ sub downloadStream($$$) {
 		if ( !$entry->{length} || $local_length == $entry->{length} ) {
 			printf(STDERR "%s already exists\n", $local_podcast) unless ( $Quiet );
 			return;
+		} elsif ( $local_length > $entry->{length} ) {
+			# Downloaded too much, this might mean we were downloading the stream
+			# from two concurrent downloaders, we should just kill the file and redo.
+			if ( $Feeds->{main}->{NOOP} ) {
+				printf(
+					STDERR "Local file %s is bigger than upstream, but not deleted due to noop mode\n",
+					$local_podcast
+				);
+			} elsif ( unlink($local_podcast) == 1 ) {
+				printf(
+					STDERR "Deleted %s (bigger than upstream\'s), will download again\n",
+					$local_podcast
+				);
+				$local_length = 0;
+			} else {
+				printf(
+					STDERR "Can\'t delete oversized file %s: %s, skipped.\n",
+					$local_podcast, $!
+				);
+				return;
+			}
 		}
 	}
 	$is_interactive = is_interactive();
@@ -302,7 +323,10 @@ sub banner($) {
 }
 
 sub syntax() {
-	printf("%s [-c n...] [-f <file>] [-n <feed>] -d -q\n\n", $0);
+	printf("%s [-C config] [-c n...] [-f <file>] [-n <feed>] -d -q\n\n", $0);
+
+	print("-C <config>\n");
+	print("\tSpecify a specific, user-defined config file\n\n");
 
 	print("-n <feed>\n");
 	print("\tOnly download one feed, not all those in the config\n\n");
@@ -326,6 +350,22 @@ sub syntax() {
 	return 0;
 }
 
+sub listHasMember($@) {
+	my $needle = shift;
+	my @hayStack = @_;
+
+	foreach my $member (@hayStack) {
+		if (!defined($needle) && !defined($member)) {
+			return 1;
+		} elsif (!defined($needle) || !defined($member)) {
+			return 0;
+		} else {
+			return 1 if ($needle eq $member);
+		}
+	}
+	return 0;
+}
+
 sub main() {
 	my $proctitle = $0; # Save original process title
 	my $conf;
@@ -339,7 +379,8 @@ sub main() {
 		"$ENV{HOME}/.dlpodget.rc"
 	);
 
-	return 1 if ( !getopts('Lf:qc:dn:h?', \%opts) );
+	return 1 if ( !getopts('C:Lf:qc:dn:h?', \%opts) );
+	@confFiles = ( $opts{'C'} ) if ( $opts{'C'} );
 	$Quiet = 1 if ( $opts{'q'} );
 	banner($opts{'L'}) unless ( $Quiet );
 	return syntax() if ( $opts{'h'} || $opts{'?'} );
@@ -395,7 +436,7 @@ sub main() {
 			}
 		}
 
-		if ( 'paths' ~~ @sections ) { # Has a paths section?
+		if ( listHasMember('paths', @sections) ) { # Has a paths section?
 			my @secKeys;
 			if ( (@secKeys = $conf->Parameters('paths')) ) {
 				foreach my $pk ( @secKeys ) {
