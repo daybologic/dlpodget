@@ -1,4 +1,4 @@
-#!/usr/bin/make
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
@@ -30,42 +30,28 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+package Dlpodget::Muadeeb; # Father, the sleeper has awakened!
+use Moose;
+use strict;
+use warnings;
 
+extends 'Dlpodget::Base';
 
-all: subdirs
+sub rSleep($$) {
+	my ( $self, $periodSecs ) = @_;
+	return 0 unless ( $periodSecs );
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+	if ( $periodSecs =~ m/^(\d+)r$/o ) {
+		$periodSecs = int(rand($1)) + 1;
+	} elsif ( $periodSecs !~ m/^\d+$/o ) {
+		return -1;
+	}
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+	printf(STDERR "Sleeping %u seconds\n", $periodSecs) # TODO: Need logging component
+		if ( $self->debug );
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+	$periodSecs = sleep($periodSecs) unless( $self->mock );
+	return $periodSecs;
+}
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+1;
