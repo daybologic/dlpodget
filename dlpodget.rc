@@ -289,3 +289,10 @@ check     = 1
 enable    = 1
 download  = 1
 retries   = 3
+
+[r4sunday]
+rss       = http://downloads.bbc.co.uk/podcasts/radio4/sunday/rss.xml
+localpath = $RELIGION/r4sunday
+check     = 1
+enable    = 1
+download  = 1
