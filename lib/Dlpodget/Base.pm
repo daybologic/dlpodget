@@ -33,7 +33,9 @@
 package Dlpodget::Base; # All Moose objects in the script are ultimately derived from this.
                         # Hovever, you should derive most high level objects from Dlpodget::Object
 
+use Cache::Null;
 use Moose;
+
 use strict;
 use warnings;
 
@@ -41,6 +43,11 @@ has [ 'debug', 'mock' ] => (
 	isa     => 'Bool',
 	is      => 'rw',
 	default => 0,
+);
+
+has 'cache' => (
+	is => 'rw',
+	default => sub { Cache::Null->new(default_expires => '600 sec') }
 );
 
 1;
