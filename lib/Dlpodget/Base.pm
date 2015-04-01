@@ -32,7 +32,9 @@
 
 package Dlpodget::Base; # All Moose objects in the script shall be derived from this.
 
+use Cache::Null;
 use Moose;
+
 use strict;
 use warnings;
 
@@ -40,6 +42,11 @@ has [ 'debug', 'mock' ] => (
 	isa     => 'Bool',
 	is      => 'rw',
 	default => 0,
+);
+
+has 'cache' => (
+	is => 'rw',
+	default => sub { Cache::Null->new(default_expires => '600 sec') }
 );
 
 1;
