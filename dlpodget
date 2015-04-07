@@ -466,8 +466,9 @@ sub main() {
 		}
 		if ( scalar(@defKeys) ) {
 			foreach my $mk ( @defKeys ) {
-				#$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
+				# FIXME: This is still busted
 				$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
+				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
 			}
 			# Set debug flag via config if it existed.
 			if ( $feeds{main}->{DEBUG} ) {
