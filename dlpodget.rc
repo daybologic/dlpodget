@@ -49,9 +49,9 @@ radio     = $TECH/radio
 [tranceaddict]
 localpath = $MUSIC/trance/tranceaddict
 rss       = http://tranceaddiction.podomatic.com/rss2.xml
-check     = 1
-download  = 1
-enable    = 1
+check     = 0
+download  = 0
+enable    = 0
 
 [gb2rs]
 localpath = $TECH/hamradio/gb2rs
