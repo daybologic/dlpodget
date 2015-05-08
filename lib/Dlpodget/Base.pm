@@ -49,4 +49,31 @@ has 'cache' => (
 	default => sub { Cache::Null->new(default_expires => '600 sec') }
 );
 
+sub cacheKey {
+	my ( $self, $token ) = @_;
+
+	$token = 0 if ( !defined($token) );
+	return join('/', ref($self), $token);
+}
+
+sub cacheGet {
+	my ( $self, $token ) = @_;
+	my $key = $self->cacheKey($token);
+	return $self->cache->get($key);
+}
+
+sub cacheSet {
+	my ( $self, $token, $data, $ttl ) = @_;
+
+	$ttl = 0 unless ($ttl); # Ensure numeric zero TTL if unspecified
+	#TODO: Ensure ttl is a value, make function for that
+	#TODO: Warn if ttl is not a value, need a logger for that
+	my $key = $self->cacheKey($token);
+	my @setArgs = ( $key, $data );
+	push(@setArgs, $ttl) if ($ttl);
+	$self->cache->set(@setArgs);
+
+	return $data;
+}
+
 1;
