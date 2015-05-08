@@ -32,14 +32,27 @@
 package main;
 use POSIX qw/EXIT_SUCCESS/;
 use Dlpodget::Base;
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 use strict;
 use warnings;
 
+use constant TOKEN => '3db6cd60-f5cf-11e4-a93e-feff0000172f';
+
+my $obj = new Dlpodget::Base;
+
+sub cacheKey {
+	my $ref = 'Dlpodget::Base/';
+	is($obj->cacheKey(TOKEN), $ref.TOKEN, 'token -> key');
+	is($obj->cacheKey(undef), $ref.'0', 'token undef');
+
+	plan tests => 2;
+}
+
 sub main {
-	my $obj = new Dlpodget::Base;
 	can_ok($obj, qw/cacheKey cacheSet cacheGet/);
+
+	subtest 'cacheKey' => \&cacheKey;
 
 	return EXIT_SUCCESS;
 }
