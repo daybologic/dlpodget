@@ -32,12 +32,14 @@
 package main;
 use POSIX qw/EXIT_SUCCESS/;
 use Dlpodget::Base;
-use Test::More tests => 2;
+use Cache::MemoryCache;
+use Test::More tests => 3;
 
 use strict;
 use warnings;
 
 use constant TOKEN => '3db6cd60-f5cf-11e4-a93e-feff0000172f';
+use constant DATA  => '289f33a1-f637-11e4-a93e-feff0000172f';
 
 my $obj = new Dlpodget::Base;
 
@@ -49,10 +51,28 @@ sub cacheKey {
 	plan tests => 2;
 }
 
-sub main {
-	can_ok($obj, qw/cacheKey cacheSet cacheGet/);
+sub cacheGet {
+	is($obj->cacheGet(TOKEN), undef, 'get token not stored');
+	$obj->cacheSet(TOKEN, DATA, 2);
+	is($obj->cacheGet(TOKEN), DATA, 'get token just stored');
+	sleep(2);
+	is($obj->cacheGet(TOKEN), undef, 'get token expired');
 
+	plan tests => 3;
+}
+
+sub cacheSet {
+}
+
+
+sub main {
+	can_ok($obj, qw/cache cacheKey cacheSet cacheGet/);
+	my $cache = new Cache::MemoryCache;
+
+	$obj->cache($cache);
 	subtest 'cacheKey' => \&cacheKey;
+	subtest 'cacheGet' => \&cacheGet;
+	#subtest 'cacheSet' => \&cacheSet;
 
 	return EXIT_SUCCESS;
 }
