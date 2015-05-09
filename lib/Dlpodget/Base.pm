@@ -32,7 +32,7 @@
 
 package Dlpodget::Base; # All Moose objects in the script shall be derived from this.
 
-use Cache::Null;
+use Dlpodget::Cache;
 use Moose;
 
 use strict;
@@ -42,40 +42,23 @@ has [ 'debug', 'mock' ] => (
 	isa     => 'Bool',
 	is      => 'rw',
 	default => 0,
+	trigger => \&propogate,
 );
 
 has 'cache' => (
-	is => 'rw',
-	default => sub { Cache::Null->new(default_expires => '600 sec') }
+	is => 'ro',
+	required => 1,
+	isa => 'Dlpodget::Cache',
+	default => sub { new Dlpodget::Cache },
 );
 
-sub cacheKey {
-	my ( $self, $token ) = @_;
+sub propogate {
+	my $self = shift;
 
-	$token = 0 if ( !defined($token) );
-	return join('/', ref($self), $token);
-}
-
-sub cacheGet {
-	my ( $self, $token ) = @_;
-	my $key = $self->cacheKey($token);
-	warn(sprintf("cache->get(%s)\n", $key));
-	return $self->cache->get($key);
-}
-
-sub cacheSet {
-	my ( $self, $token, $data, $ttl ) = @_;
-
-	$ttl = 0 unless ($ttl); # Ensure numeric zero TTL if unspecified
-	#TODO: Ensure ttl is a value, make function for that
-	#TODO: Warn if ttl is not a value, need a logger for that
-	my $key = $self->cacheKey($token);
-	my @setArgs = ( $key, $data );
-	push(@setArgs, $ttl) if ($ttl);
-	warn(sprintf("cache->set(%s)\n", join(', ', @setArgs)));
-	$self->cache->set(@setArgs);
-
-	return $data;
+	if ( $self->cache ) {
+		$self->cache->debug($self->debug);
+		$self->cache->mock($self->mock);
+	}
 }
 
 1;

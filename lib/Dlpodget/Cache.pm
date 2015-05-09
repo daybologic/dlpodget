@@ -1,4 +1,5 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
+#
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
 # All rights reserved.
@@ -29,68 +30,53 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-package main;
-use POSIX qw/EXIT_SUCCESS/;
-use Dlpodget::Cache;
-use Dlpodget::Base;
-use Cache::MemoryCache;
-use Test::More;
+package Dlpodget::Cache; # Exposed via Dlpodget::Base
+
+use Cache::Null;
+use Moose;
 
 use strict;
 use warnings;
 
-use constant TOKEN => '3db6cd60-f5cf-11e4-a93e-feff0000172f';
-use constant DATA  => '289f33a1-f637-11e4-a93e-feff0000172f';
+has [ 'debug' ] => (
+	isa     => 'Bool',
+	is      => 'rw',
+	default => 0,
+);
 
-my $obj;
+has 'cache' => (
+	is => 'rw',
+	default => sub { Cache::Null->new(default_expires => '600 sec') },
+);
 
 sub cacheKey {
-	my $ref = 'Dlpodget::Cache/';
+	my ( $self, $token ) = @_;
 
-	is($obj->cacheKey(TOKEN), $ref.TOKEN, 'token -> key');
-	is($obj->cacheKey(undef), $ref.'0', 'token undef');
-
-	plan tests => 2;
+	$token = 0 if ( !defined($token) );
+	return join('/', ref($self), $token);
 }
 
 sub cacheGet {
-	is($obj->cacheGet(TOKEN), undef, 'get token not stored');
-	$obj->cacheSet(TOKEN, DATA, 2);
-	is($obj->cacheGet(TOKEN), DATA, 'get token just stored');
-	sleep(2);
-	is($obj->cacheGet(TOKEN), undef, 'get token expired');
-
-	plan tests => 3;
+	my ( $self, $token ) = @_;
+	my $key = $self->cacheKey($token);
+	warn(sprintf("cache->get(%s)\n", $key)) if ( $self->debug );
+	return $self->cache->get($key);
 }
 
-sub xyz {
-	my $base = new Dlpodget::Base;
+sub cacheSet {
+	my ( $self, $token, $data, $ttl ) = @_;
 
-	isa_ok($base, 'Dlpodget::Base');
-	isa_ok($base->cache, 'Dlpodget::Cache');
-	isa_ok($base->cache->cache, 'Cache::Null');
+	$ttl = 0 unless ($ttl); # Ensure numeric zero TTL if unspecified
+	#TODO: Ensure ttl is a value, make function for that
+	#TODO: Warn if ttl is not a value, need a logger for that
+	my $key = $self->cacheKey($token);
+	my @setArgs = ( $key, $data );
+	push(@setArgs, $ttl) if ($ttl);
+	warn(sprintf("cache->set(%s)\n", join(', ', @setArgs))) if ( $self->debug );
+	$self->cache->set(@setArgs);
 
-	$base->cache->cache(new Cache::MemoryCache);
-
-	isa_ok($base->cache->cache, 'Cache::MemoryCache');
-
-	plan tests => 4;
+	return $data;
 }
 
-sub main {
-	$obj = new Dlpodget::Cache;
-	$obj->debug(1) if ( $ENV{'TEST_VERBOSE'} );
+1;
 
-	can_ok($obj, qw/cache cacheKey cacheSet cacheGet/);
-	my $cache = new Cache::MemoryCache;
-
-	$obj->cache($cache);
-	subtest 'cacheKey' => \&cacheKey;
-	subtest 'cacheGet' => \&cacheGet;
-	subtest 'xyz' => \&xyz;
-
-	plan tests => 4;
-	return EXIT_SUCCESS;
-}
-
-exit(main());
