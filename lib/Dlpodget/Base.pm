@@ -59,6 +59,7 @@ sub cacheKey {
 sub cacheGet {
 	my ( $self, $token ) = @_;
 	my $key = $self->cacheKey($token);
+	warn(sprintf("cache->get(%s)\n", $key));
 	return $self->cache->get($key);
 }
 
@@ -71,6 +72,7 @@ sub cacheSet {
 	my $key = $self->cacheKey($token);
 	my @setArgs = ( $key, $data );
 	push(@setArgs, $ttl) if ($ttl);
+	warn(sprintf("cache->set(%s)\n", join(', ', @setArgs)));
 	$self->cache->set(@setArgs);
 
 	return $data;
