@@ -33,6 +33,7 @@
 package main;
 use File::Path qw(make_path);
 use Dlpodget::TagProcessor;
+use Dlpodget::Muadeeb;
 use LWP::UserAgent;
 use XML::Feed;
 use Data::Dumper;
