@@ -32,7 +32,7 @@
 
 package main;
 
-use Test::More tests => 7;
+use Test::More tests => 6;
 use Test::Output;
 use Devel::Cover;
 use Getopt::Std;
@@ -214,7 +214,6 @@ sub t_main() {
 		'processTags' => \&t_processTags,
 		'db'          => \&t_db,
 		'child'       => \&t_child,
-		'listHasMember' => \&t_listHasMember,
 		'listHasMember' => \&t_listHasMember,
 	);
 	return 1 unless ( getOpts(output => \%opts, tests => [ keys(%tests) ]) );

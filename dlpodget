@@ -44,16 +44,35 @@ use URI::Escape;
 use IO::Interactive qw(is_interactive);
 use DBI;
 use POSIX ":sys_wait_h";
+use File::Find;
 
 use strict;
 use warnings;
 use diagnostics;
+
+# for the convenience of &wanted calls, including -eval statements:
+use vars qw/*name *dir *prune/;
+*name   = *File::Find::name;
+*dir    = *File::Find::dir;
+*prune  = *File::Find::prune;
+
+sub wanted;
 
 use constant DEV_NULL => '/dev/null';
 
 my $Debug = 0;
 my $Quiet = 0;
 my $File = '';
+my $globalTagProcessor = new Dlpodget::TagProcessor;
+
+sub wanted {
+	my ($dev,$ino,$mode,$nlink,$uid,$gid);
+
+	(($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
+	(int(-M _) > 3) && # FIXME: Three days hard-coded!  DANGER  Will Robinson (also, no noop support)
+	-f _ &&
+	(unlink($_) || warn "$name: $!\n");
+}
 
 =head2 FileFromURI
 
@@ -169,6 +188,8 @@ sub downloadStream($$$) {
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $rsleep = $Feeds->{$Name}->{rsleep}   || $Feeds->{main}->value('rsleep');
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->value('retries');
+	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
+	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
 	my $local_podcast = $Feeds->{$Name}->{localpath} . '/' . $entry->{filename};
 	if ( -f $local_podcast ) {
 		$local_length = (stat($local_podcast))[7];
@@ -236,8 +257,8 @@ sub downloadStream($$$) {
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
 }
 
-# @Deprecated because $Feeds->{'main'} should be itself a Dlpodget::TagProcessor object!
-#sub processTags($$) {
+sub processTagsOld($$) {
+	my ( $Feeds, $V ) = @_; # Feeds deprecated in this function
 #	my ( undef, $V ) = @_; # Feeds deprecated in this function
 #	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 #	my $avoid = 0;
@@ -259,11 +280,34 @@ sub downloadStream($$$) {
 #	return $V;
 #}
 
+sub processTags($$) {
+	my ( $testData, $V ) = @_;
+
+	while (my ($k, $v) = each(%{$testData->{mappings}})) {
+		$globalTagProcessor->assoc($k, $v);
+	}
+	return $globalTagProcessor->result($V);
+}
+
+sub cleanupStreams($$$) {
+	my ( $Feeds, $entry, $Name ) = @_;
+
+	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
+	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
+
+	return if (!$maxage && !$maxcount); # Nothing for us to do
+
+	print Dumper File::Find::find({wanted => \&wanted}, $Feeds->{$Name}->{localpath});
+	#TODO 
+	
+}
+
 sub child($$$$) {
 	my ( $DB, $FeedKey, $Feeds, $Feed ) = @_;
 	my @entries = readFeed($Feeds, $Feed);
 	foreach my $entry ( @entries ) {
 		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
+		cleanupStreams($Feeds, $entry, $Feed->{name});
 		downloadStream($Feeds, $entry, $Feed->{name});
 		dbUpdateStream($DB, $FeedKey, $entry) if ( $DB );
 	}
@@ -501,9 +545,10 @@ sub main() {
 		}
 		if ( scalar(@defKeys) ) {
 			foreach my $mk ( @defKeys ) {
-				#$globalTagProcessor->assoc($mk, $globalTagProcessor->result($conf->val('main', $mk)));
-				#$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
+				# FIXME: This is still busted
+				$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
 				#$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
+				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
 			}
 			# Set debug flag via config if it existed.
 			if ( $feeds{main}->value('DEBUG') ) {

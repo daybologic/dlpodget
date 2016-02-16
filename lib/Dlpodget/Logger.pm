@@ -1,7 +1,7 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2016, David Duncan Ross Palmer (2E0EOL) and others,
+# Copyright (c) 2012-2015, David Duncan Ross Palmer (2E0EOL), Daybo Logic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,50 +30,31 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-use Dlpodget::TagProcessor;
-use Dlpodget::Logger;
-use Test::More 0.96;
-use POSIX;
+package Dlpodget::Logger;
+use Moose;
 use strict;
 use warnings;
 
-sub t_processTags($) {
-	my $F = 'processTags';
-	my $obj = shift;
-	my %testData = (
-		'DUMMYA' => '$DUMMYC',
-		'DUMMYB' => '/tmp/2',
-		'DUMMYC' => '/tmp/3'
-	);
+extends 'Dlpodget::Base';
 
-	plan tests => keys(%testData) * 2;
+use constant LOGLEVEL_FATAL => (9);
+use constant LOGLEVEL_CRIT  => (8);
+use constant LOGLEVEL_ERROR => (7);
+use constant LOGLEVEL_WARN  => (6);
+use constant LOGLEVEL_INFO  => (5);
 
-	while ( my ( $tag, $subst ) = each(%testData) ) {
-		$obj->assoc($tag, $subst);
+sub log($$$@) {
+	my ( $self, $level, $format, @args ) = @_;
+	my $ret;
+
+	# TODO: Ignore the log level for now.
+	if ( $self->mock ) {
+		$ret = scalar(@args);
+	} else {
+		$ret = printf($format, @args);
 	}
 
-	while ( my ( $tag, $subst ) = each(%testData) ) {
-		is($obj->value($tag), $subst, sprintf('Value of tag %s is %s', $tag, $subst));
-	}
-
-	is($obj->result('blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
-	is($obj->result('blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
-	is($obj->result('$'), '$', "$F: Illegal variable");
+	return $ret;
 }
 
-sub t_main() {
-	plan tests => 3;
-
-	my @methods = qw( assoc value result );
-	my $obj = new Dlpodget::TagProcessor;
-
-	isa_ok($obj, 'Dlpodget::TagProcessor');
-	can_ok($obj, @methods);
-
-	subtest 'processTags' => sub { t_processTags($obj) };
-
-	return EXIT_SUCCESS;
-}
-
-exit(t_main()) unless (caller());
 1;

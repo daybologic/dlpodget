@@ -35,7 +35,7 @@ use Moose;
 use strict;
 use warnings;
 
-extends 'Dlpodget::Base';
+extends 'Dlpodget::Object';
 
 sub rSleep($$) {
 	my ( $self, $periodSecs ) = @_;
@@ -47,7 +47,7 @@ sub rSleep($$) {
 		return -1;
 	}
 
-	printf(STDERR "Sleeping %u seconds\n", $periodSecs) # TODO: Need logging component
+	$self->logger->log(0, "Sleeping %u seconds\n", $periodSecs)
 		if ( $self->debug );
 
 	$periodSecs = sleep($periodSecs) unless( $self->mock );

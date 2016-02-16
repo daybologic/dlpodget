@@ -1,7 +1,6 @@
-#!/usr/bin/perl
-#
+#!/usr/bin/perl -w
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2016, David Duncan Ross Palmer (2E0EOL) and others,
+# Copyright (c) 2012-2015, David Duncan Ross Palmer (2E0EOL), Daybo Logic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,50 +29,41 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-use Dlpodget::TagProcessor;
+package main;
+
+use Test::More tests => 2;
+use Test::Output;
+use Devel::Cover;
 use Dlpodget::Logger;
-use Test::More 0.96;
-use POSIX;
+
 use strict;
 use warnings;
+use diagnostics;
 
-sub t_processTags($) {
-	my $F = 'processTags';
-	my $obj = shift;
-	my %testData = (
-		'DUMMYA' => '$DUMMYC',
-		'DUMMYB' => '/tmp/2',
-		'DUMMYC' => '/tmp/3'
-	);
+my $Debug = 0; # TODO Need shared getopts() handling!
 
-	plan tests => keys(%testData) * 2;
+sub logWrapper($$$@) {
+	my ( $expectOutput, $expectRet, $logger, $level, $format, @args ) = @_;
+	my $ret = undef;
 
-	while ( my ( $tag, $subst ) = each(%testData) ) {
-		$obj->assoc($tag, $subst);
-	}
+	my $logCall = sub {
+		$ret = $logger->log($level, $format, @args);
+	};
 
-	while ( my ( $tag, $subst ) = each(%testData) ) {
-		is($obj->value($tag), $subst, sprintf('Value of tag %s is %s', $tag, $subst));
-	}
-
-	is($obj->result('blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
-	is($obj->result('blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
-	is($obj->result('$'), '$', "$F: Illegal variable");
+	stdout_is(sub { $logCall->() }, $expectOutput, 'Output as expected');
+	is($ret, $expectRet, 'Return from printf is as expected');
 }
 
-sub t_main() {
-	plan tests => 3;
+sub t_log() {
+	my $logger = new Dlpodget::Logger;
+	my ( $format, @args );
 
-	my @methods = qw( assoc value result );
-	my $obj = new Dlpodget::TagProcessor;
+	srand(0); # Not so random!
+	( $format, @args ) = ( 'Test message %d', int(rand()*9999) );
+	logWrapper('Test message 1708', scalar(@args), $logger, 0, $format, @args);
 
-	isa_ok($obj, 'Dlpodget::TagProcessor');
-	can_ok($obj, @methods);
-
-	subtest 'processTags' => sub { t_processTags($obj) };
-
-	return EXIT_SUCCESS;
+	return 0;
 }
 
-exit(t_main()) unless (caller());
+exit(t_log()) unless ( caller() );
 1;

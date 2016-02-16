@@ -30,7 +30,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-package Dlpodget::Base; # All Moose objects in the script shall be derived from this.
+package Dlpodget::Base; # All Moose objects in the script are ultimately derived from this.
+                        # Hovever, you should derive most high level objects from Dlpodget::Object
 
 use Dlpodget::Cache;
 use Moose;
