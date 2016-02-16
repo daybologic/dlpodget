@@ -1,7 +1,7 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
+# Copyright (c) 2012-2016, David Duncan Ross Palmer (2E0EOL) and others,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Question: Would it have been better to implement this as a tie hash container?
+# TODO Question: Would it have been better to implement this as a tie hash container?
 package Dlpodget::TagProcessor;
 
 use Moose;
@@ -74,7 +74,7 @@ sub value($$) {
 	warn(sprintf('%s: No key %s found', $self, $k));
 }
 
-# Does this need to effectively call assoc() itsel?!?!
+# FIXME: BROKEN PRIORITY Does this need to effectively call assoc() itself?!?!
 sub result($$$) {
 	my ( $self, $V ) = @_;
 	$self->debug(1); # FIXME
