@@ -571,14 +571,6 @@ sub main() {
 			$reaped_pid = waitpid(-1, WNOHANG); # Any children finished?
 			next if ( $reaped_pid <= 0 ); # No, carry on.
 		}
-	}
-	unless ( $streamsDefinedCount ) {
-		print "No valid streams defined.\n";
-		return 1;
-	}
-	unless ( $streamsEnabledCount ) {
-		print "No enabled streams.\n";
-		return 0;
 
 		# A child returned, remove it from the PID list
 		die 'Internal error' if ( !exists($pids{$reaped_pid}) );
@@ -586,10 +578,21 @@ sub main() {
 
 		redo if ( $child_limit_reached );
 	}
+
 	while ( scalar(keys(%pids)) ) {
 		my $pid = wait();
 		last if ( $pid == -1 );
 		delete($pids{$pid});
+	}
+
+	unless ( $streamsDefinedCount ) {
+		print "No valid streams defined.\n";
+		return 1;
+	}
+
+	unless ( $streamsEnabledCount ) {
+		print "No enabled streams.\n";
+		return 0;
 	}
 
 	return 0;
