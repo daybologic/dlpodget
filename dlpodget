@@ -257,8 +257,7 @@ sub downloadStream($$$) {
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
 }
 
-sub processTagsOld($$) {
-	my ( $Feeds, $V ) = @_; # Feeds deprecated in this function
+#sub processTagsOld($$) {
 #	my ( undef, $V ) = @_; # Feeds deprecated in this function
 #	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 #	my $avoid = 0;
@@ -298,8 +297,7 @@ sub cleanupStreams($$$) {
 	return if (!$maxage && !$maxcount); # Nothing for us to do
 
 	print Dumper File::Find::find({wanted => \&wanted}, $Feeds->{$Name}->{localpath});
-	#TODO 
-	
+	#TODO
 }
 
 sub child($$$$) {
