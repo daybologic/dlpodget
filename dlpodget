@@ -92,6 +92,39 @@ sub InitConfigDefaults($)
 	}
 }
 
+sub FeedCache($$) {
+	my ( $Name, $Url ) = @_;
+	my ( $resp, $ua );
+	my $cacheFileName = "$ENV{HOME}/.cache/dlpodget/$Name.rss";
+	if ( -f $cacheFileName ) { # Already cached.
+		warn "Feed $Name has been satisfied by existing cache - $cacheFileName" if ( $Debug );
+		return $cacheFileName;
+	}
+
+	$Url = URI->new($Url);
+	$ua = LWP::UserAgent->new();
+
+	$resp = $ua->get($Url);
+	if ( $resp->is_success() ) {
+		if ( open(my $f, '>:raw', $cacheFileName) ) {
+			print $f $resp->content();
+			close($f);
+		} else {
+			printf(STDERR "Local failure on feed %s -- %s: %s\n", $Name, $cacheFileName, $!);
+			$cacheFileName = undef; # Force URL instead
+		}
+	} else {
+		warn $resp->status_line;
+		$cacheFileName = undef;
+	}
+	if ( $cacheFileName ) {
+		warn "Feed $Name has been satisfied by newly written cache file - $cacheFileName" if ( $Debug );
+		return $cacheFileName;
+	}
+	warn "Feed $Name has no cache available" if ( $Debug );
+	return $Url;
+}
+
 sub InitFeedDefaults($$)
 {
 	my ( $Feeds, $Feed ) = @_;
@@ -106,7 +139,7 @@ sub readFeed {
 	my @entries = ( );
 	my ( $Feeds, $Feed ) = @_;
 	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
-	my $feed = XML::Feed->parse(URI->new($Url));
+	my $feed = XML::Feed->parse(FeedCache($Name, $Url));
 
 	$Name ||= 'Untitled feed';
 	if ( !$feed ) {

@@ -33,6 +33,7 @@ noop      = 0
 debug     = 0
 maxchildren  = 5
 childdelay   = 2
+cache     = $HOME/.cache/dlpodget
 retries   = 3
 rsleep    = 90r
 
