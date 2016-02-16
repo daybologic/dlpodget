@@ -1,4 +1,4 @@
-#!/usr/bin/make
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
@@ -30,42 +30,49 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+use Dlpodget::TagProcessor;
+use Test::More 0.96;
+use POSIX;
+use strict;
+use warnings;
 
+sub t_processTags($) {
+	my $F = 'processTags';
+	my $obj = shift;
+	my %testData = (
+		'DUMMYA' => '$DUMMYC',
+		'DUMMYB' => '/tmp/2',
+		'DUMMYC' => '/tmp/3'
+	);
 
-all: subdirs
+	plan tests => keys(%testData) * 2;
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+	while ( my ( $tag, $subst ) = each(%testData) ) {
+		$obj->assoc($tag, $subst);
+	}
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+	while ( my ( $tag, $subst ) = each(%testData) ) {
+		is($obj->value($tag), $subst, sprintf('Value of tag %s is %s', $tag, $subst));
+	}
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+	is($obj->result('blah$DUMMYAbleh'), 'blah/tmp/3bleh', "$F: A");
+	is($obj->result('blah$DUMMYBgrowl'), 'blah/tmp/2growl', "$F: B");
+	is($obj->result('$'), '$', "$F: Illegal variable");
+}
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+sub t_main() {
+	plan tests => 3;
+
+	my @methods = qw( assoc value result );
+	my $obj = new Dlpodget::TagProcessor;
+
+	isa_ok($obj, 'Dlpodget::TagProcessor');
+	can_ok($obj, @methods);
+
+	subtest 'processTags' => sub { t_processTags($obj) };
+
+	return EXIT_SUCCESS;
+}
+
+exit(t_main()) unless (caller());
+1;

@@ -1,7 +1,6 @@
   * Cached RSS XML files to avoid checking every run (https://bitbucket.org/daybologic/dlpodget.arc)
   * GUI
   * Unit testing (https://bitbucket.org/daybologic/dlpodget.ut)
-  * Process forking - download multiple streams at once (https://bitbucket.org/daybologic/dlpodget.forking)
   * Download rate limiting - on a per-feed basis (https://bitbucket.org/daybologic/dlpodget.rate)
   * Email notifications (https://bitbucket.org/daybologic/dlpodget.email)
   * Transcoding support (https://bitbucket.org/daybologic/dlpodget.codecs)
@@ -15,3 +14,32 @@
   * C++ re-write
   * Archive support - frozen feeds (https://bitbucket.org/daybologic/dlpodget.arc)
   * Quiet mode (-q) for use from crontab
+  * Optional rotation of old downloaded streams, requested by https://bitbucket.org/Aggamemnon
+
+The following modules should be broken out from the monolithic script:
+  * LEGACY:
+
+    * Utils
+      * fileFromURI
+      * processTags (this should invoke and execute the new TagProcessor
+
+    * Muadeeb
+      * rSleep
+
+    * Undecided
+      * readFeed
+      * downloadStream
+      * child
+      * db
+      * dbUpdateFeed
+      * dbUpdateStream
+
+    * main
+      * banner
+      * syntax
+
+  * NEW:
+
+    * TagProcessor
+      * assoc
+      * output

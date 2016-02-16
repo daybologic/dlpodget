@@ -1,4 +1,4 @@
-#!/usr/bin/make
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
@@ -30,42 +30,71 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+# Question: Would it have been better to implement this as a tie hash container?
+package Dlpodget::TagProcessor;
 
+use Moose;
+use strict;
+use warnings;
 
-all: subdirs
+extends 'Dlpodget::Base';
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+has 'mappings'    => (
+	'isa'     => 'HashRef',
+	'is'      => 'ro',
+	'default' => sub {{}},
+);
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+sub assoc($$$) {
+	my ($self, $k, $v) = @_;
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+	$k = uc($k); # All keys are uppercase
+	if ( exists($self->mappings->{$k}) ) {
+		my $old = $self->mappings->{$k};
+		$old = '(undef)' unless (defined($old));
+		warn(sprintf(
+			'%s: Key \'%s\' clobered, old value: \'%s\', new value: \'%s\'',
+			$self, $k, $old, $v
+		));
+	}
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+	$self->mappings->{$k} = $v;
+	return $self;
+}
+
+sub value($$) {
+	my ( $self, $k ) = @_;
+
+	$k = uc($k); # All keys are uppercase
+	if ( exists($self->mappings->{$k}) ) {
+		return $self->mappings->{$k};
+	}
+
+	$k = '(undef)' unless ( defined($k) );
+	warn(sprintf('%s: No key %s found', $self, $k));
+}
+
+# Does this need to effectively call assoc() itsel?!?!
+sub result($$$) {
+	my ( $self, $V ) = @_;
+	$self->debug(1); # FIXME
+	my $tagRx = qr/^\$([A-Z0-9]+)/o;
+	my $avoid = 0;
+	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
+		my $var = substr($V, $idx);
+		if ( $var =~ $tagRx ) {
+			my $v = $self->mappings->{ uc($1) };
+			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( $self->debug ); #TODO: Use logger
+			if ( !defined($v) ) {
+				$avoid = $idx+1;
+				next;
+			}
+			substr($V, $idx, length($1)+1, $v);
+		} else {
+			$avoid++;
+		}
+	}
+	return $V;
+}
+
+1;

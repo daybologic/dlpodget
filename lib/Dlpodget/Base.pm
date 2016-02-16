@@ -1,4 +1,4 @@
-#!/usr/bin/make
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
 # Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
@@ -30,42 +30,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+package Dlpodget::Base; # All Moose objects in the script shall be derived from this.
 
+use Dlpodget::Cache;
+use Moose;
 
-all: subdirs
+use strict;
+use warnings;
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+has [ 'debug', 'mock' ] => (
+	isa     => 'Bool',
+	is      => 'rw',
+	default => 0,
+	trigger => \&propogate,
+);
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+has 'cache' => (
+	is => 'ro',
+	required => 1,
+	isa => 'Dlpodget::Cache',
+	default => sub { new Dlpodget::Cache },
+);
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+sub propogate {
+	my $self = shift;
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+	if ( $self->cache ) {
+		$self->cache->debug($self->debug);
+		$self->cache->mock($self->mock);
+	}
+}
+
+1;
