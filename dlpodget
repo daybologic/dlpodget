@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package main;
+use lib 'lib';
 use File::Path qw(make_path);
 use Dlpodget::TagProcessor;
 use Dlpodget::Muadeeb;
