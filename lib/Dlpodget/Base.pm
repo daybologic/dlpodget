@@ -58,7 +58,7 @@ sub propogate {
 
 	if ( $self->cache ) {
 		$self->cache->debug($self->debug);
-		$self->cache->mock($self->mock);
+		#$self->cache->mock($self->mock);
 	}
 }
 
