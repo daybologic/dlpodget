@@ -4,6 +4,7 @@ Priority: extra
 Maintainer: David Duncan Ross Palmer <palmer@overchat.org>
 Build-Depends: debhelper (>= 7), lynx
 Build-Depends-Indep: libwww-perl,
+ libcache-perl,
  libxml-feed-perl,
  libio-interactive-perl,
  libxml-feed-perl,
