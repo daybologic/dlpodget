@@ -205,7 +205,7 @@ sub translationInfo($$) {
 }
 
 
-=head2 FileFromURI
+=head2 fileFromURI
 
 This simple function returns the filename from a URI, eg.
 http://host.domain.dom/path/file.html would return file.html
@@ -213,7 +213,7 @@ If no URL, or an invalid path is passed, undef is returned.
 
 =cut
 
-sub FileFromURI($) {
+sub fileFromURI($) {
 	my $Url = shift;
 	return undef if ( !$Url );
 	my @uri_parts = split('/', $Url);
