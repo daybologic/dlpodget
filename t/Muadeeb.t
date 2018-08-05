@@ -1,7 +1,7 @@
-#!/usr/bin/make
+#!/usr/bin/perl
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
+# Copyright (c) 2012-2016, David Duncan Ross Palmer (2E0EOL) and others,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,42 +30,36 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+package main;
 
+use Test::More tests => 13;
+use Devel::Cover;
+use Dlpodget::Muadeeb;
 
-all: subdirs
+use strict;
+use warnings;
+use diagnostics;
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+my $Debug = 0; # TODO Need shared getopts() handling!
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+sub t_rSleep() {
+	my $paul = new Dlpodget::Muadeeb(mock => 1, debug => $Debug);
+	is($paul->rSleep(undef), 0, 'rSleep undef 0');
+	is($paul->rSleep(0), 0, 'rSleep 0 0');
+	is($paul->rSleep(1), 1, 'rSleep 1 1');
+	is($paul->rSleep(-1), -1, 'rSleep -1 -1');
+	is($paul->rSleep(-2), -1, 'rSleep -2 -1');
+	is($paul->rSleep('blah'), -1, 'rSleep blah -1');
+	is($paul->rSleep(10), 10, 'rSleep 10 10');
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+	# Random tests
+	srand(0); # Ensure we always start from a deterministic point
+	my @sleepTimes = ( qw/2 8 1 9 6/ );
+	is($paul->rSleep('10R'), -1, 'rSleep 10R -1');
+	foreach my $v ( @sleepTimes ) {
+		is($paul->rSleep('10r'), $v, "rSleep 10r $v");
+	}
+}
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+exit(t_rSleep()) unless ( caller() );
+1;

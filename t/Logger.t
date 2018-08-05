@@ -1,7 +1,6 @@
-#!/usr/bin/make
-#
+#!/usr/bin/perl -w
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
+# Copyright (c) 2012-2015, David Duncan Ross Palmer (2E0EOL), Daybo Logic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,42 +29,41 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+package main;
 
+use Test::More tests => 2;
+use Test::Output;
+use Devel::Cover;
+use Dlpodget::Logger;
 
-all: subdirs
+use strict;
+use warnings;
+use diagnostics;
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+my $Debug = 0; # TODO Need shared getopts() handling!
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+sub logWrapper($$$@) {
+	my ( $expectOutput, $expectRet, $logger, $level, $format, @args ) = @_;
+	my $ret = undef;
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+	my $logCall = sub {
+		$ret = $logger->log($level, $format, @args);
+	};
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+	stdout_is(sub { $logCall->() }, $expectOutput, 'Output as expected');
+	is($ret, $expectRet, 'Return from printf is as expected');
+}
+
+sub t_log() {
+	my $logger = new Dlpodget::Logger;
+	my ( $format, @args );
+
+	srand(0); # Not so random!
+	( $format, @args ) = ( 'Test message %d', int(rand()*9999) );
+	logWrapper('Test message 1708', scalar(@args), $logger, 0, $format, @args);
+
+	return 0;
+}
+
+exit(t_log()) unless ( caller() );
+1;

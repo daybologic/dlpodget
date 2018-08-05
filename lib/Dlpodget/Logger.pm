@@ -1,7 +1,7 @@
-#!/usr/bin/make
+#!/usr/bin/perl -w
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
+# Copyright (c) 2012-2015, David Duncan Ross Palmer (2E0EOL), Daybo Logic
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,42 +30,31 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+package Dlpodget::Logger;
+use Moose;
+use strict;
+use warnings;
 
+extends 'Dlpodget::Base';
 
-all: subdirs
+use constant LOGLEVEL_FATAL => (9);
+use constant LOGLEVEL_CRIT  => (8);
+use constant LOGLEVEL_ERROR => (7);
+use constant LOGLEVEL_WARN  => (6);
+use constant LOGLEVEL_INFO  => (5);
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+sub log($$$@) {
+	my ( $self, $level, $format, @args ) = @_;
+	my $ret;
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+	# TODO: Ignore the log level for now.
+	if ( $self->mock ) {
+		$ret = scalar(@args);
+	} else {
+		$ret = printf($format, @args);
+	}
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+	return $ret;
+}
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+1;

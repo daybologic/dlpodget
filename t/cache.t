@@ -1,7 +1,7 @@
-#!/usr/bin/make
+#!/usr/bin/perl
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
+# Copyright (c) 2012-2016, David Duncan Ross Palmer (2E0EOL) and others,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,42 +30,68 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+package main;
+use POSIX qw/EXIT_SUCCESS/;
+use Dlpodget::Cache;
+use Dlpodget::Base;
+use Cache::MemoryCache;
+use Test::More;
 
+use strict;
+use warnings;
 
-all: subdirs
+use constant TOKEN => '3db6cd60-f5cf-11e4-a93e-feff0000172f';
+use constant DATA  => '289f33a1-f637-11e4-a93e-feff0000172f';
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+my $obj;
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+sub cacheKey {
+	my $ref = 'Dlpodget::Cache/';
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+	is($obj->cacheKey(TOKEN), $ref.TOKEN, 'token -> key');
+	is($obj->cacheKey(undef), $ref.'0', 'token undef');
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+	plan tests => 2;
+}
+
+sub cacheGet {
+	is($obj->cacheGet(TOKEN), undef, 'get token not stored');
+	$obj->cacheSet(TOKEN, DATA, 2);
+	is($obj->cacheGet(TOKEN), DATA, 'get token just stored');
+	sleep(2);
+	is($obj->cacheGet(TOKEN), undef, 'get token expired');
+
+	plan tests => 3;
+}
+
+sub xyz {
+	my $base = new Dlpodget::Base;
+
+	isa_ok($base, 'Dlpodget::Base');
+	isa_ok($base->cache, 'Dlpodget::Cache');
+	isa_ok($base->cache->cache, 'Cache::Null');
+
+	$base->cache->cache(new Cache::MemoryCache);
+
+	isa_ok($base->cache->cache, 'Cache::MemoryCache');
+
+	plan tests => 4;
+}
+
+sub main {
+	$obj = new Dlpodget::Cache;
+	$obj->debug(1) if ( $ENV{'TEST_VERBOSE'} );
+
+	can_ok($obj, qw/cache cacheKey cacheSet cacheGet/);
+	my $cache = new Cache::MemoryCache;
+
+	$obj->cache($cache);
+	subtest 'cacheKey' => \&cacheKey;
+	subtest 'cacheGet' => \&cacheGet;
+	subtest 'xyz' => \&xyz;
+
+	plan tests => 4;
+	return EXIT_SUCCESS;
+}
+
+exit(main());

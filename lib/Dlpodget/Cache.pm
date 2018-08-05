@@ -1,7 +1,7 @@
-#!/usr/bin/make
+#!/usr/bin/perl
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2014, David Duncan Ross Palmer (M6KVM), Daybo Logic
+# Copyright (c) 2012-2016, David Duncan Ross Palmer (2E0EOL) and others,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,42 +30,53 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+package Dlpodget::Cache; # Exposed via Dlpodget::Base
 
+use Cache::Null;
+use Moose;
 
-all: subdirs
+use strict;
+use warnings;
 
-install:
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
+has [ 'debug' ] => (
+	isa     => 'Bool',
+	is      => 'rw',
+	default => 0,
+);
 
-check : test
-test:
-	$(SHELL) t/run.sh
-	cover
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+has 'cache' => (
+	is => 'rw',
+	default => sub { Cache::Null->new(default_expires => '600 sec') },
+);
 
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+sub cacheKey {
+	my ( $self, $token ) = @_;
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
+	$token = 0 if ( !defined($token) );
+	return join('/', ref($self), $token);
+}
+
+sub cacheGet {
+	my ( $self, $token ) = @_;
+	my $key = $self->cacheKey($token);
+	warn(sprintf("cache->get(%s)\n", $key)) if ( $self->debug );
+	return $self->cache->get($key);
+}
+
+sub cacheSet {
+	my ( $self, $token, $data, $ttl ) = @_;
+
+	$ttl = 0 unless ($ttl); # Ensure numeric zero TTL if unspecified
+	#TODO: Ensure ttl is a value, make function for that
+	#TODO: Warn if ttl is not a value, need a logger for that
+	my $key = $self->cacheKey($token);
+	my @setArgs = ( $key, $data );
+	push(@setArgs, $ttl) if ($ttl);
+	warn(sprintf("cache->set(%s)\n", join(', ', @setArgs))) if ( $self->debug );
+	$self->cache->set(@setArgs);
+
+	return $data;
+}
+
+1;
+
