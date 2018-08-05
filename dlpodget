@@ -223,7 +223,7 @@ sub FileFromURI($) {
 sub InitConfigDefaults($)
 {
 	my $Feeds = shift;
-	my $confmain = $Feeds->{_main};
+	my $confmain = $Feeds->{main};
 	die 'Assertion failure' unless $confmain;
 
 	$confmain->{TMPDIR} = '/tmp' unless ( $confmain->{TMPDIR} );
@@ -278,7 +278,7 @@ sub FeedCache($$) {
 sub InitFeedDefaults($$)
 {
 	my ( $Feeds, $Feed ) = @_;
-	$Feed->{localpath} = $Feeds->{_main}->{localpfx} unless ( $Feed->{localpath} );
+	$Feed->{localpath} = $Feeds->{main}->{localpfx} unless ( $Feed->{localpath} );
 	$Feed->{rss} = '' unless ( $Feed->{rss} );
 	foreach my $chk ( 'check', 'download', 'enable' ) {
 		$Feed->{$chk} = 1 if ( !$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/ );
@@ -758,7 +758,7 @@ sub main() {
 			child($db, $feed_key, \%feeds, $feed);
 			next;
 		} elsif ( $feeds{main}->{MAXCHILDREN} < 0 || scalar(keys(%pids)) < $feeds{main}->{MAXCHILDREN} ) {
-			sleep($feeds{_main}->{CHILDDELAY}) if ( $feeds{_main}->{CHILDDELAY} && scalar(keys(%pids)) );
+			sleep($feeds{main}->{CHILDDELAY}) if ( $feeds{main}->{CHILDDELAY} && scalar(keys(%pids)) );
 			my $pid = fork();
 			die "cannot fork: $!" if ( !defined($pid) );
 			if ( $pid == 0 ) { # Child process
