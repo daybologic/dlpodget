@@ -45,7 +45,7 @@ application or unit test.
 use Moose;
 use Scalar::Util qw(blessed);
 
-my $singleton = undef; # Global one reference.
+my $singleton = undef; # Global singleton reference.
 
 =head1 ATTRIBUTES
 
@@ -84,8 +84,13 @@ sub BUILD {
 
 	my $deferredDie = $singleton;
 	$singleton = $self;
-	die('Attempt to construct more than one DIC') if ($deferredDie);
+	if ($deferredDie) {
+		die(sprintf('Attempt to construct more than one DIC, this %s, previous %s',
+		    $self, $deferredDie));
+	}
 
+	my $parent = ( caller(1) )[3];
+	warn("Welp, you constructed DIC $self from $parent");
 	return;
 }
 
@@ -101,7 +106,8 @@ Please do not call this method yourself.
 
 sub DEMOLISH {
 	my ($self) = @_;
-	$singleton = undef;
+	undef($singleton);
+	warn("You destroyed $self");
 	return;
 }
 
