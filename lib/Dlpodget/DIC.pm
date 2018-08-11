@@ -43,6 +43,7 @@ application or unit test.
 =cut
 
 use MooseX::Singleton;
+use Readonly;
 use Scalar::Util qw(blessed);
 
 =head1 ATTRIBUTES
@@ -59,7 +60,9 @@ Internal bucket for all objects within the DIC.
 
 =cut
 
-has __bucket => (is => 'ro', isa => 'HashRef[Dlpodget::Base]');
+has __bucket => (is => 'ro', isa => 'HashRef[Dlpodget::Base]', default => sub {
+	return { };
+});
 
 =back
 
@@ -83,10 +86,16 @@ This method return a reference to the DIC for chaining several calls together.
 
 sub set {
 	my ($self, $obj) = @_;
+	Readonly my $BASE => 'Dlpodget::Base';
+
 	die('No object sent to DIC/set') if (!defined($obj));
 
 	my $type = blessed($obj);
 	die('DIC object must be blessed') if (!$type);
+
+	unless ($obj->isa($BASE)) {
+		die("$type is not derived from $BASE");
+	}
 
 	$type =~ s/^Dlpodget:://;
 	if ($self->get($type)) {
@@ -94,6 +103,7 @@ sub set {
 	}
 
 	$self->__bucket->{$type} = $obj;
+
 	return $self;
 }
 

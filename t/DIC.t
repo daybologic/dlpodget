@@ -43,11 +43,16 @@ use Test::Exception;
 use Test::Module::Runnable;
 use Test::More 0.96;
 
+sub setUp {
+	my ($self) = @_;
+	$self->sut(Dlpodget::DIC->instance());
+	return EXIT_SUCCESS;
+}
+
 sub testSingleton {
 	my ($self) = @_;
-	plan tests => 2;
+	plan tests => 1;
 
-	isa_ok($self->sut(Dlpodget::DIC->instance()), 'Dlpodget::DIC', 'instance');
 	is(Dlpodget::DIC->instance(), $self->sut, 'subsequent instance call returns same object');
 
 	return EXIT_SUCCESS;
@@ -55,12 +60,19 @@ sub testSingleton {
 
 sub testMisuse {
 	my ($self) = @_;
-	plan tests => 2;
-
-	isa_ok($self->sut(Dlpodget::DIC->new()), 'Dlpodget::DIC', 'new');
+	plan tests => 4;
 
 	throws_ok { $self->sut->set(undef) } qr@^No object sent to DIC/set @,
 	    'undef passed to set';
+
+	throws_ok { $self->sut->set(0) } qr@DIC object must be blessed @,
+	    'Non-object passed to set: SCALAR simple';
+
+	throws_ok { $self->sut->set({}) } qr@DIC object must be blessed @,
+	    'Non-object passed to set: HASH ref';
+
+	throws_ok { $self->sut->set($self) } qr@DICTests is not derived from Dlpodget::Base @,
+	    'Cannot insert an object not derived from Dlpodget::Base';
 
 	return EXIT_SUCCESS;
 }
