@@ -78,6 +78,7 @@ use constant CODEC_TRANSLATION_ENCODE          => (1);
 use constant CODEC_TRANSLATION_DECODE          => (2);
 
 my $Debug = 0;
+my $Log = undef;
 my $Quiet = 0;
 my $File = '';
 my $globalTagProcessor = new Dlpodget::TagProcessor;
@@ -297,6 +298,7 @@ sub readFeed {
 		return @entries;
 	}
 
+	DownloadLog($Feeds, 'feed', $Url);
 	foreach my $entry ($feed->entries) {
 		my $enclosure = $entry->{'entry'}->{'enclosure'};
 		my $uriDecoded = uri_unescape($enclosure->{'url'});
@@ -313,7 +315,36 @@ sub readFeed {
 	return @entries;
 }
 
-sub downloadStream($$$) {
+sub LocalLog(@)
+{
+	my ( $Feeds, $Type, $Url ) = @_;
+	return unless ( $Feeds->{main}->{LOG} ); # Logging not enabled.
+	$Log ||= OpenLocalLog($Feeds->{main}->{LOG}); # Open log file
+	return print($Log "Downloading $Type: $Url\n");
+}
+
+sub RemoteLog(@)
+{
+	my ( $Feeds, $Type, $Url ) = @_;
+	return unless ( $Feeds->{main}->{POPCON} );
+	my $ua = LWP::UserAgent->new( show_progress => 0 );
+	my $log_feed_notify_uri = sprintf(
+		'http://www.daybologic.co.uk/dlpodget/log.cgi?type=%s&uri=%s',
+		$Type, uri_escape($Url)
+	);
+
+	$ua->get($log_feed_notify_uri);
+	printf(STDERR "Posted to %s\n", $log_feed_notify_uri);
+}
+
+sub DownloadLog($$$)
+{
+	LocalLog(@_);
+	RemoteLog(@_);
+}
+
+sub downloadStream($$$)
+{
 	my ( $ua, $f, %get_params, $is_interactive );
 	my $http_resp;
 	my $local_length = 0;
@@ -367,9 +398,14 @@ sub downloadStream($$$) {
 			return;
 		}
 	}
-	%get_params = (
-		'Range' => "bytes=$local_length-"
-	) if ( $local_length );
+	if ( $local_length ) {
+		%get_params = (
+			'Range' => "bytes=$local_length-"
+		);
+	} else {
+		DownloadLog($Feeds, 'stream', $entry->{uri});
+	}
+
 
 	my $tries = 1 + ($retries || 0);
 	my $paul = new Dlpodget::Muadeeb;
@@ -803,6 +839,7 @@ sub main() {
 		return 0;
 	}
 
+	close($Log) if ( $Log );
 	return 0;
 }
 

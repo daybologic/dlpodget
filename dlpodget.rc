@@ -9,6 +9,7 @@
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
 ;   codec     = <name>, Name of a file format to convert to
+;   popcon    = <1|0>, default 1, Participate in the popularity contest, by informing Daybo Logic of stream usage.
 ;   retries   = <0-n>, default 0, number of times to retry downloading a feed
 ;               or stream (global; can be over-ridden per feed).
 ;   rsleep    = <0-n[r]>, default 0, time in seconds to sleep after a failed
@@ -40,6 +41,8 @@ enable    = 1
 noop      = 0
 debug     = 0
 maxchildren  = 5
+popcon    = 1
+log       = $HOME/dlpodget.log
 childdelay   = 2
 cache     = $HOME/.cache/dlpodget
 retries   = 3
