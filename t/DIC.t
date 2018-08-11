@@ -35,6 +35,7 @@ use Moose;
 extends 'Test::Module::Runnable';
 
 use Cache::MemoryCache;
+use Devel::Cover;
 use Dlpodget::Config;
 use Dlpodget::DIC;
 use Dlpodget::Feeds;
