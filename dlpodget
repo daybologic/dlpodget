@@ -32,6 +32,7 @@
 
 package main;
 use lib 'lib';
+use LWP::Protocol::Net::Curl MAX_RECV_SPEED_LARGE => 10240;
 use File::Path qw(make_path);
 use Dlpodget::TagProcessor;
 use Dlpodget::Muadeeb;
