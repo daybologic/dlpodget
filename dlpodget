@@ -48,7 +48,6 @@ use File::Find;
 
 use strict;
 use warnings;
-use diagnostics;
 
 use constant RATE_LIMIT_LIMIT  => 4; # Limit to 4KB per second
 use constant RATE_LIMIT_PERIOD => (30); # Period in seconds over which to calculate average

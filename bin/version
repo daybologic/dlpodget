@@ -31,7 +31,6 @@
 
 use strict;
 use warnings;
-use diagnostics;
 
 package main;
 use autodie;

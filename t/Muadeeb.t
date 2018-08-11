@@ -38,7 +38,6 @@ use Dlpodget::Muadeeb;
 
 use strict;
 use warnings;
-use diagnostics;
 
 my $Debug = 0; # TODO Need shared getopts() handling!
 

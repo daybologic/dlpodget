@@ -39,7 +39,6 @@ use Getopt::Std;
 
 use strict;
 use warnings;
-use diagnostics;
 
 require 'dlpodget';
 
