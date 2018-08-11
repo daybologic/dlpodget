@@ -42,10 +42,8 @@ application or unit test.
 
 =cut
 
-use Moose;
+use MooseX::Singleton;
 use Scalar::Util qw(blessed);
-
-my $singleton = undef; # Global singleton reference.
 
 =head1 ATTRIBUTES
 
@@ -68,48 +66,6 @@ has __bucket => (is => 'ro', isa => 'HashRef[Dlpodget::Base]');
 =head1 METHODS
 
 =over
-
-=item C<BUILD>
-
-Hook called by L<Moose> when the DIC is created.  This controls a global
-reference to the DIC to ensure no more than two are created at the same time
-(enforcing the singleton).
-
-Please do not call this method yourself.
-
-=cut
-
-sub BUILD {
-	my ($self) = @_;
-
-	my $deferredDie = $singleton;
-	$singleton = $self;
-	if ($deferredDie) {
-		die(sprintf('Attempt to construct more than one DIC, this %s, previous %s',
-		    $self, $deferredDie));
-	}
-
-	my $parent = ( caller(1) )[3];
-	warn("Welp, you constructed DIC $self from $parent");
-	return;
-}
-
-=item C<DEMOLISH>
-
-Hook called by L<Moose> when the DIC is destroyed, usually at the end of the application
-or the unit test.  This hook clears the global reference to the singleton, so that the
-next unit test can re-construct the DIC.
-
-Please do not call this method yourself.
-
-=cut
-
-sub DEMOLISH {
-	my ($self) = @_;
-	undef($singleton);
-	warn("You destroyed $self");
-	return;
-}
 
 =item C<set($obj)>
 
