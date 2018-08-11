@@ -61,6 +61,18 @@ sub testSingleton {
 	return EXIT_SUCCESS;
 }
 
+sub testMisuse {
+	my ($self) = @_;
+	plan tests => 2;
+
+	isa_ok($self->sut(Dlpodget::DIC->new()), 'Dlpodget::DIC', 'new');
+
+	throws_ok { $self->sut->set(undef) } qr@^No object sent to DIC/set @,
+	    'undef passed to set';
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;
