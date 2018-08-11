@@ -98,13 +98,16 @@ sub testMisuseGet {
 
 sub testSetGet {
 	my ($self) = @_;
-	plan tests => 5;
+	plan tests => 6;
 
 	my $config = Dlpodget::Config->new();
 	my $feeds = Dlpodget::Feeds->new();
 
 	is($self->sut->set($config), $self->sut, 'set Config, returns DIC');
 	is($self->sut->set($feeds), $self->sut, 'set Feeds, returns DIC');
+
+	throws_ok { $self->sut->set($config) } qr/^DIC already contains an object of type Config /,
+	    'Set config twice';
 
 	my $name = 'Feed';
 	throws_ok { $self->sut->get($name) } qr/^DIC object $name was not set, when you attempted to fetch it /,
