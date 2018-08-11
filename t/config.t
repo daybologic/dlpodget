@@ -4,17 +4,16 @@ package main;
 use Test::More tests => 1;
 use Devel::Cover;
 use Getopt::Std;
+use Dlpodget::Config;
 use strict;
 use warnings;
-
-require 'dlpodget';
 
 #use constant BLAH             => (10);
 
 sub t_obj() {
 	my $F = 'obj';
-	my $o = new OurConfig;
-	isa_ok($o, 'OurConfig');
+	my $o = new Dlpodget::Config;
+	isa_ok($o, 'Dlpodget::Config');
 }
 
 sub getOpts(%) {

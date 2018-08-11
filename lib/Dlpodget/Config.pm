@@ -30,56 +30,54 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package Dlpodget::Config;
+use strict;
+use warnings;
 
 use Moose;
 use Config::IniFiles;
 
-sub new {
-	my $class = shift;
-	my $obj = {
-		'ini' => undef
-	};
+has confFiles => (is => 'ro', isa => 'ArrayRef[Str]', default => sub {
+	return [];
+});
 
-	$obj = bless($obj, $class);
-	return $obj;
-}
+has ini => (is => 'rw', isa => 'Config::IniFiles');
 
-sub initConfigDefaults($) {
-	my $Feeds = shift;
-	my $confmain = $Feeds->{main};
-	die 'Assertion failure' unless $confmain;
+sub initConfigDefaults {
+	my ($self, $feeds) = @_;
+	my $confmain = $feeds->{main};
+	die('Assertion failure') unless $confmain;
 
-	$confmain->{TMPDIR} = '/tmp' unless ( $confmain->{TMPDIR} );
-	$confmain->{HOME} = $confmain->{TMPDIR} unless ( $confmain->{HOME} );
-	$confmain->{LOCALPFX} = $confmain->{HOME} unless ( $confmain->{LOCALPFX} );
+	$confmain->{TMPDIR} = '/tmp' unless ($confmain->{TMPDIR});
+	$confmain->{HOME} = $confmain->{TMPDIR} unless ($confmain->{HOME});
+	$confmain->{LOCALPFX} = $confmain->{HOME} unless ($confmain->{LOCALPFX});
 
 	my %defaults = (
 		'enable' => 1,
 		'noop'   => 0,
-		'debug'  => 0
+		'debug'  => 0,
 	);
 
-	foreach my $opt ( keys(%defaults) ) {
-		next if ( defined($confmain->{$opt}) && $confmain->{$opt} =~ m/\d$/ );
+	foreach my $opt (keys(%defaults)) {
+		next if (defined($confmain->{$opt}) && $confmain->{$opt} =~ m/\d$/);
 		$confmain->{$opt} = $defaults{$opt};
 	}
 }
 
-sub initFeedDefaults($$) {
-	my ( $Feeds, $Feed ) = @_;
-	$Feed->{localpath} = $Feeds->{main}->{LOCALPFX} unless ( $Feed->{localpath} );
-	$Feed->{rss} = '' unless ( $Feed->{rss} );
-	foreach my $chk ( 'check', 'download', 'enable' ) {
-		$Feed->{$chk} = 1 if ( !$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/ );
+sub initFeedDefaults {
+	my ($self, $feeds, $feed) = @_;
+	$feed->{localpath} = $feeds->{main}->{LOCALPFX} unless ($feed->{localpath});
+	$feed->{rss} = '' unless ($feed->{rss});
+	foreach my $chk ('check', 'download', 'enable') {
+		$feed->{$chk} = 1 if ( !$feed->{$chk} || $feed->{$chk} !~ m/\^d$/ );
 	}
 }
 
-sub load($) {
-	my $self = shift;
-	foreach my $confFile ( @confFiles ) {
-		next unless ( -f $confFile );
-		$self->{'ini'} = Config::IniFiles->new(-file => $confFile, -commentchar => ';');
-		if ( !$self->{'ini'} ) {
+sub load {
+	my ($self) = @_;
+	foreach my $confFile (@{ $self->confFiles }) {
+		next unless (-f $confFile);
+		$self->ini(Config::IniFiles->new(-file => $confFile, -commentchar => ';'));
+		if (!$self->ini) {
 			print(STDERR "Fault with $confFile: " . join(',', @Config::IniFiles::errors) . "\n");
 			return 1;
 		}
