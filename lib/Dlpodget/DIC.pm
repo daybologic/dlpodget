@@ -148,7 +148,7 @@ sub get {
 	my ($self, $name) = @_;
 	die('No name sent to DIC/get') if (!$name);
 
-	if (my $obj = $self->__bucket->{$type}) {
+	if (my $obj = $self->__bucket->{$name}) {
 		return $obj;
 	}
 
