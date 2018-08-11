@@ -61,7 +61,7 @@ sub testSingleton {
 	return EXIT_SUCCESS;
 }
 
-sub testMisuse {
+sub testMisuseSet {
 	my ($self) = @_;
 	plan tests => 4;
 
@@ -76,6 +76,22 @@ sub testMisuse {
 
 	throws_ok { $self->sut->set($self) } qr@DICTests is not derived from Dlpodget::Base @,
 	    'Cannot insert an object not derived from Dlpodget::Base';
+
+	return EXIT_SUCCESS;
+}
+
+sub testMisuseGet {
+	my ($self) = @_;
+	plan tests => 3;
+
+	throws_ok { $self->sut->get(0) } qr@No name sent to DIC/get @,
+	    'Attempt to get 0';
+
+	throws_ok { $self->sut->get(undef) } qr@No name sent to DIC/get @,
+	    'Attempt to get <undef>';
+
+	throws_ok { $self->sut->get('') } qr@No name sent to DIC/get @,
+	    'Attempt to get \'\'';
 
 	return EXIT_SUCCESS;
 }
