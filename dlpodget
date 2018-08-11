@@ -364,10 +364,10 @@ sub DownloadLog($$$)
 	RemoteLog(@_);
 }
 
-sub downloadStream($$$)
+sub downloadStream($$$$)
 	my $http_resp;
 	my $local_length = 0;
-	my ( $Feeds, $entry, $Name ) = @_;
+	my ( $Feeds, $entry, $Name, $tries ) = @_;
 	my $rsleep = $Feeds->{$Name}->{rsleep}   || $Feeds->{main}->value('rsleep');
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->value('retries');
 	my $chunkCB = \&Chunk;
@@ -408,6 +408,12 @@ sub downloadStream($$$)
 		agent => 'dlpodget'
 	);
 	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive && !$Quiet );
+	printf(
+		STDERR "Setting timeout %u and retries %d\n",
+		$Feeds->{main}->{TIMEOUT}, $Feeds->{main}->{MAXTRIES}
+	) if ( $Debug );
+	$ua->timeout($Feeds->{main}->{TIMEOUT});
+	$tries = $Feeds->{main}->{MAXTRIES};
 
 	unless ( $Feeds->{main}->value('noop') ) {
 		make_path($Feeds->{$Name}->{localpath});
@@ -434,6 +440,9 @@ sub downloadStream($$$)
 		$http_resp = $ua->get(
 			$entry->{uri},
 			%get_params,
+			':content_cb' => sub {
+				my ( $chunk ) = @_;
+				print $f $chunk unless ( $Feeds->{main}->{NOOP} );
 		':content_cb' => $chunkCB
 		);
 		$paul->rSleep($rsleep) if ( ($tries-1) && $http_resp->code() != 200 );
@@ -524,13 +533,14 @@ sub db() {
 		);
 	}
 	return $dbh;
-}
+			}
 
 my %_dbUpdateFeed = (
 	'get_feed_id' => undef,
 	'ins_feed' => undef,
 	'upd_feed' => undef
-);
+	);
+	}
 sub dbUpdateFeed($$) {
 	my $ret = 0;
 	my $sth;
