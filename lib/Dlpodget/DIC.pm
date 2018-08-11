@@ -98,7 +98,7 @@ sub set {
 	}
 
 	$type =~ s/^Dlpodget:://;
-	if ($self->get($type)) {
+	if ($self->__get($type)) {
 		die("DIC already contains an object of type $type")
 	}
 
@@ -118,11 +118,29 @@ sub get {
 	my ($self, $name) = @_;
 	die('No name sent to DIC/get') if (!$name);
 
-	if (my $obj = $self->__bucket->{$name}) {
+	if (my $obj = $self->__get($name)) {
 		return $obj;
 	}
 
 	die("DIC object $name was not set, when you attempted to fetch it");
+}
+
+=back
+
+=head1 PRIVATE METHODS
+
+=over
+
+=item C<__get($name)>
+
+Internal method which returns an object associated with the name,
+or return C<undef>, if the object is not set.
+
+=cut
+
+sub __get {
+	my ($self, $name) = @_;
+	return $self->__bucket->{$name};
 }
 
 =back

@@ -36,6 +36,8 @@ use warnings;
 use Moose;
 use Config::IniFiles;
 
+extends 'Dlpodget::Base';
+
 has confFiles => (is => 'ro', isa => 'ArrayRef[Str]', default => sub {
 	return [];
 });
