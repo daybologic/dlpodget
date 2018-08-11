@@ -50,6 +50,9 @@ use strict;
 use warnings;
 use diagnostics;
 
+use constant RATE_LIMIT_LIMIT  => 4; # Limit to 4KB per second
+use constant RATE_LIMIT_PERIOD => (30); # Period in seconds over which to calculate average
+
 # for the convenience of &wanted calls, including -eval statements:
 use vars qw/*name *dir *prune/;
 *name   = *File::Find::name;
@@ -79,6 +82,7 @@ use constant CODEC_TRANSLATION_DECODE          => (2);
 
 my $Debug = 0;
 my $Log = undef;
+my $OutputHandle = undef;
 my $Quiet = 0;
 my $File = '';
 my $globalTagProcessor = new Dlpodget::TagProcessor;
@@ -332,6 +336,23 @@ sub RemoteLog(@)
 		'http://www.daybologic.co.uk/dlpodget/log.cgi?type=%s&uri=%s',
 		$Type, uri_escape($Url)
 	);
+#TODO: Move these out of global scope!
+my $chunks;
+my $total_size;
+sub Chunk {
+	my ( $chunk ) = @_;
+	my $chunk_len = length($chunk);
+	print $OutputHandle $chunk;
+	printf(
+		STDERR "Now we have %u chunks. This chunk was %u in size\n",
+		++$chunks, $chunk_len
+	) if ( $Debug );
+	$total_size += $chunk_len;
+}
+
+sub NullChunk {
+	return;
+}
 
 	$ua->get($log_feed_notify_uri);
 	printf(STDERR "Posted to %s\n", $log_feed_notify_uri);
@@ -344,13 +365,12 @@ sub DownloadLog($$$)
 }
 
 sub downloadStream($$$)
-{
-	my ( $ua, $f, %get_params, $is_interactive );
 	my $http_resp;
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name ) = @_;
 	my $rsleep = $Feeds->{$Name}->{rsleep}   || $Feeds->{main}->value('rsleep');
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->value('retries');
+	my $chunkCB = \&Chunk;
 	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
 	my $local_podcast = join('/', $Feeds->{$Name}->{localpath}, $entry->{localFilename});
 	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
@@ -391,13 +411,14 @@ sub downloadStream($$$)
 
 	unless ( $Feeds->{main}->value('noop') ) {
 		make_path($Feeds->{$Name}->{localpath});
-		if ( open($f, '>>:raw', $local_podcast) ) {
-			binmode($f);
+		if ( open($OutputHandle, '>>:raw', $local_podcast) ) {
+			binmode($OutputHandle);
 		} else {
 			printf(STDERR "Local failure on stream %s -- %s: %s\n", $Name, $local_podcast, $!);
 			return;
 		}
 	}
+	$chunkCB = \&NullChunk if ( $Feeds->{main}->{NOOP} );
 	if ( $local_length ) {
 		%get_params = (
 			'Range' => "bytes=$local_length-"
@@ -413,13 +434,12 @@ sub downloadStream($$$)
 		$http_resp = $ua->get(
 			$entry->{uri},
 			%get_params,
-			':content_cb' => sub {
-				my ( $chunk ) = @_;
-				print $f $chunk unless ( $Feeds->{main}->value('noop') );
-			}
+		':content_cb' => $chunkCB
 		);
 		$paul->rSleep($rsleep) if ( ($tries-1) && $http_resp->code() != 200 );
 	} while ( $http_resp->code() != 200 && --$tries );
+	close($OutputHandle) if ( !$Feeds->{main}->{NOOP} );
+	$OutputHandle = undef;
 
 	close($f) if ( !$Feeds->{main}->value('noop') );
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
