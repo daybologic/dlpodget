@@ -3,46 +3,49 @@ package URLTests;
 use strict;
 use warnings;
 use Moose;
-extends 'Dlpodget::Tester';
+
+extends 'Test::Module::Runnable';
 
 use Cache::MemoryCache;
 use Dlpodget::URL;
 use English qw(-no_match_vars);
-use Dlpodget::Config::Mock;
-#use Dlpodget::DB::Mock;
 use Dlpodget::DIC;
-use Dlpodget::Log::Mock 1.4.0;
 use POSIX;
 use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::Exception;
 use Test::More;
+use Readonly;
+
+Readonly my $DEFAULT_SCHEME => 'http';
 
 sub setUp {
 	my ($self) = @_;
 
-	$self->dic(Dlpodget::DIC->new(
-		logger => Dlpodget::Log::Mock->new,
-		cache => Cache::MemoryCache->new,
-		config => Dlpodget::Config::Mock->new({
-			#VOIPDB => Dlpodget::DB::Mock->makeConfig(), # Enable this if you will call an init() to set up DBs
-		}),
-		#voipdb => Dlpodget::DB::Mock->new, # Enable this if you want to pass a DB directly
-	));
-
 	$self->sut(Dlpodget::URL->new(
-		dic => $self->dic,
-		#dicRequire => 1, # Enable this for new libraries which should only use the DIC
+		value => sprintf('x%d.test', $self->unique),
 	));
 
-	$self->forcePlan();
-	$self->dic->logger->warnFatal(1); # disable in specific tests if needed
+	#$self->forcePlan();
 
 	return EXIT_SUCCESS;
 }
 
-sub testSomething {
+sub testDefaultScheme {
+	my ($self) = @_;
 	plan tests => 1;
-	fail("You were supposed to remove this (facepalm)");
+
+	is($self->sut->scheme, $DEFAULT_SCHEME, "default scheme is $DEFAULT_SCHEME");
+
+	return EXIT_SUCCESS;
+}
+
+sub testToString {
+	my ($self) = @_;
+	plan tests => 1;
+
+	is($self->sut->toString(), sprintf('%s://%s', $self->sut->scheme, $self->sut->value), 'toString');
+
+	return EXIT_SUCCESS;
 }
 
 package main;
