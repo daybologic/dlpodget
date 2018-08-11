@@ -8,6 +8,8 @@
 ;   check     = <1|0>, default 1, whether to automatically check for new files on each run
 ;   download  = <1|0>, default 1, whether to automatically download new files
 ;   enable    = <1|0>, default 1, set to 0 to disable the section, or comment it out.
+;   notify    = <1|0>, or a mailto:, ftp: or an http: link
+;   attach    = <1|0>, Send the downloaded file (optional for mailto:, http:, ftp: is pretty useless without it)
 ;   codec     = <name>, Name of a file format to convert to
 ;   popcon    = <1|0>, default 1, Participate in the popularity contest, by informing Daybo Logic of stream usage.
 ;   timeout   = <secs>, default 30, set to 0 to move back to library defined defaults (180)
@@ -21,6 +23,7 @@
 ;
 ;   enable      = <1|0>, default 1, set to 0 for a convenient way to ignore the entire file.
 ;   noop        = <1|0>, default 0, set to 1 to disable modification of local files.
+;   notify      = a mailto:, ftp: or http: link
 ;   debug       = <1|0>, default 0, Enable verbose maintainer information
 ;   maxchildren = <0-n>, default 0, max concurrent downloads. nb. setting this to 1
 ;                 is less efficient than 0, since a dedicated child is cloned for each feed.
@@ -43,6 +46,7 @@ enable    = 1
 noop      = 0
 debug     = 0
 timeout   = 10
+notify    = mailto:palmer@overchat.org
 maxtries  = 5
 maxchildren  = 5
 popcon    = 1
@@ -85,6 +89,7 @@ check     = 1
 download  = 1
 enable    = 1
 codec     = mp2
+notify    = 1
 
 [bsec]
 localpath = $RELIGION/bsec
@@ -108,6 +113,8 @@ download  = 1
 enable    = 1
 codec     = ogg
 quality   = -1
+notify    = 1
+attach    = 1
 
 [bsdtalk]
 localpath = $TECH/bsdtalk

@@ -427,6 +427,7 @@ sub downloadStream($$$$)
 	my $rsleep = $Feeds->{$Name}->{rsleep}   || $Feeds->{main}->value('rsleep');
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->value('retries');
 	my $chunkCB = \&Chunk;
+	my $notify = $Feeds->{$Name}->{notify} || $Feeds->{main}->{NOTIFY};
 	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
 	my $local_podcast = join('/', $Feeds->{$Name}->{localpath}, $entry->{localFilename});
 	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
@@ -508,6 +509,8 @@ sub downloadStream($$$$)
 
 	close($f) if ( !$Feeds->{main}->value('noop') );
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
+
+	Notify($local_podcast) if ( $notify );
 }
 
 #sub processTagsOld($$) {
@@ -665,6 +668,13 @@ sub dbUpdateStream($$$) {
 		);
 	}
 	return $ret;
+}
+
+sub Notify($) {
+	my $local_feed = shift;
+	system(
+		"echo \"Feed $local_feed\" | mail -s \"New feed available\" palmer\@overchat.org"
+	);
 }
 
 sub banner($) {
