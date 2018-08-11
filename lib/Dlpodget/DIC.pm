@@ -82,11 +82,9 @@ Please do not call this method yourself.
 sub BUILD {
 	my ($self) = @_;
 
-	if ($singleton) {
-		die('Attempt to construct more than one DIC');
-	} else {
-		$singleton = $self;
-	}
+	my $deferredDie = $singleton;
+	$singleton = $self;
+	die('Attempt to construct more than one DIC') if ($deferredDie);
 
 	return;
 }

@@ -45,9 +45,18 @@ use Test::More 0.96;
 
 sub testSingleton {
 	my ($self) = @_;
-	plan tests => 1;
+	plan tests => 5;
 
 	isa_ok($self->sut(Dlpodget::DIC->new()), 'Dlpodget::DIC', 'new');
+
+	for (0..1) {
+		throws_ok { Dlpodget::DIC->new() } qr/^Attempt to construct more than one DIC /,
+		    'Subsequent new attempt fails';
+	}
+
+	ok(!$self->sut(undef), 'Cleared (sut) DIC');
+
+	isa_ok($self->sut(Dlpodget::DIC->new()), 'Dlpodget::DIC', 'new works again');
 
 	return EXIT_SUCCESS;
 }
