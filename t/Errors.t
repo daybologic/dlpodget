@@ -12,6 +12,7 @@ use POSIX;
 use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::Exception;
 use Test::More 0.96;
+use Readonly;
 
 sub setUp {
 	my ($self) = @_;
@@ -23,7 +24,7 @@ sub setUp {
 	return EXIT_SUCCESS;
 }
 
-sub testSomething {
+sub testFetchAndToString {
 	my ($self) = @_;
 	plan tests => 10;
 
@@ -55,6 +56,17 @@ sub testSomething {
 	is($error->toString(), 'Internal error', 'INTERNAL');
 
 	$error = $self->sut->fetchById($Dlpodget::Errors::NO_SUCH_ERROR);
+	is($error->toString(), 'No such error', 'NO_SUCH_ERROR');
+
+	return EXIT_SUCCESS;
+}
+
+sub testFetchInvalid {
+	my ($self) = @_;
+	plan tests => 1;
+
+	Readonly my $FAKE_ERROR_UUID_STR => '03078508-a308-11e8-89e8-f23c9173fe51';
+	my $error = $self->sut->fetchById($FAKE_ERROR_UUID_STR);
 	is($error->toString(), 'No such error', 'NO_SUCH_ERROR');
 
 	return EXIT_SUCCESS;
