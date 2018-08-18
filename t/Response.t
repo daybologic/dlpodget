@@ -15,7 +15,7 @@ use Dlpodget::Errors;
 
 sub testSuccess {
 	my ($self) = @_;
-	plan tests => 1;
+	plan tests => 2;
 
 	Readonly my $DATA => 'e6a01ea4-25c2-4df3-8e85-50eb29d6485c';
 
@@ -27,7 +27,17 @@ sub testSuccess {
 			getData => $DATA,
 			toString => "Success <$DATA>",
 		),
-	), 'deep state');
+	), 'deep state, with data');
+
+	$response = Dlpodget::Response->new(success => 1);
+	cmp_deeply($response, all(
+		isa('Dlpodget::Response'),
+		methods(
+			success => bool(1),
+			getData => undef,
+			toString => "Success <no data>",
+		),
+	), 'deep state, without data');
 
 	return EXIT_SUCCESS;
 }
