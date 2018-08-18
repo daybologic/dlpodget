@@ -77,8 +77,8 @@ Returns a human-readable and loggable version of the response.
 sub toString {
 	my ($self) = @_;
 	my $str = ($self->success) ? 'Success' : 'Failure';
-	if (defined($self->data)) {
-		$str = sprintf('%s <%s>', $str, (ref($self->data) ? ref($self->data) : $self->data));
+	if (defined($self->__data)) {
+		$str = sprintf('%s <%s>', $str, (ref($self->__data) ? ref($self->__data) : $self->__data));
 	} else {
 		$str = sprintf('%s <no data>', $str);
 	}
