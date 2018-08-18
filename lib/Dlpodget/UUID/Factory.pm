@@ -112,7 +112,7 @@ Returns true if objects C<$a> and C<$b> represent the same UUID.
 sub equals {
 	my ($self, $a, $b) = @_;
 
-	if ($a && $b) {
+	if ($a && $b && blessed($a) && blessed($b)) {
 		return 1 if ($a eq $b); # Same object
 		if ($a->isa('Dlpodget::UUID') && $b->isa('Dlpodget::UUID')) {
 			return 1 if (uuid_eq($a->value, $b->value));
