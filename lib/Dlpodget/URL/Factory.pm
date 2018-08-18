@@ -11,6 +11,7 @@ Generate a L<Dlpodget::URL> object
 =cut
 
 use Moose;
+use MooseX::Singleton;
 
 =head1 ATTRIBUTES
 
