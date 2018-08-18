@@ -35,7 +35,7 @@ The scheme, ie. 'http'.  The following schemes are supported:
 
 =cut
 
-enum Scheme => [qw/mailto https http ftp/];
+enum Scheme => [qw/mailto https http ftp ssh/];
 has scheme => (is => 'ro', isa => 'Scheme', required => 1);
 
 =item C<value>

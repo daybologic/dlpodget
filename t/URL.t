@@ -55,7 +55,7 @@ sub testSchemeUnacceptable {
 sub testSchemeAcceptable {
 	my ($self) = @_;
 
-	Readonly my @VALID_SCHEMES => (qw(http https ftp mailto));
+	Readonly my @VALID_SCHEMES => (qw(http https ftp mailto ssh));
 	plan tests => scalar(@VALID_SCHEMES);
 
 	foreach my $scheme (@VALID_SCHEMES) {
@@ -67,7 +67,7 @@ sub testSchemeAcceptable {
 
 sub testParseSuccess {
 	my ($self) = @_;
-	plan tests => 4;
+	plan tests => 6;
 
 	my $url = 'https://www.forbes.com/sites/timworstall/2013/04/29/the-possibility-of-peak-facebook/#67380a786d64';
 	cmp_deeply($self->sut->create($url), all(
@@ -161,18 +161,74 @@ sub testParseSuccess {
 		),
 	), $url);
 
+	$url = 'ftp://username:password@host/path';
+	cmp_deeply($self->sut->create($url), all(
+		isa('Dlpodget::Response'),
+		methods(
+			success => bool(1),
+			getData => all(
+				isa('Dlpodget::URL'),
+				methods(
+					value    => $url,
+					toString => $url,
+					scheme   => 'ftp',
+					user     => 'username',
+					pass     => 'password',
+					host     => 'host',
+					port     => undef,
+					path     => '/path',
+					query    => undef,
+					fragment => undef,
+				),
+			),
+		),
+	), $url);
+
+	$url = 'ssh://username@host/path';
+	cmp_deeply($self->sut->create($url), all(
+		isa('Dlpodget::Response'),
+		methods(
+			success => bool(1),
+			getData => all(
+				isa('Dlpodget::URL'),
+				methods(
+					value    => $url,
+					toString => $url,
+					scheme   => 'ssh',
+					user     => 'username',
+					pass     => undef,
+					host     => 'host',
+					port     => undef,
+					path     => '/path',
+					query    => undef,
+					fragment => undef,
+				),
+			),
+		),
+	), $url);
+
 	return EXIT_SUCCESS;
 }
 
 sub testParseFailure {
 	my ($self) = @_;
-	plan tests => 1;
+	plan tests => 2;
+
+	Readonly my $PORT => $self->unique;
 
 	my $url = 'invalid_scheme://www.daybologic.co.uk/secret/file';
 	cmp_deeply($self->sut->create($url), all(
 		isa('Dlpodget::Response'),
 		methods(
 			success => bool(0),
+		),
+	), $url);
+
+	$url = sprintf('http://%s:%d/path/dir', $self->uniqueDomain(), $PORT);
+	cmp_deeply($self->sut->create($url), all(
+		isa('Dlpodget::Response'),
+		methods(
+			success => bool(1),
 		),
 	), $url);
 
