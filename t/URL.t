@@ -17,8 +17,6 @@ use Test::Exception;
 use Test::More;
 use Readonly;
 
-Readonly my $DEFAULT_SCHEME => 'http';
-
 sub setUp {
 	my ($self) = @_;
 
@@ -29,21 +27,16 @@ sub setUp {
 	return EXIT_SUCCESS;
 }
 
-sub testToString {
-	my ($self) = @_;
-	plan tests => 1;
-
-	is($self->sut->toString(), sprintf('%s://%s', $self->sut->scheme, $self->sut->value), 'toString');
-
-	return EXIT_SUCCESS;
-}
-
 sub testRO {
 	my ($self) = @_;
 	plan tests => 2;
 
-	throws_ok { $self->sut->scheme($self->sut->scheme) } qr/read-only/, 'scheme cannot be changed';
-	throws_ok { $self->sut->value($self->sut->value) } qr/read-only/, 'value cannot be changed';
+	my $response = $self->sut->create('https://' . $self->uniqueDomain());
+	BAIL_OUT($response->toString()) unless ($response->success);
+
+	my $url = $response->getData();
+	throws_ok { $url->scheme($url->scheme) } qr/read-only/, 'scheme cannot be changed';
+	throws_ok { $url->value($url->value) } qr/read-only/, 'value cannot be changed';
 
 	return EXIT_SUCCESS;
 }
@@ -52,8 +45,9 @@ sub testSchemeUnacceptable {
 	my ($self) = @_;
 	plan tests => 1;
 
-	throws_ok { ref($self->sut)->new(value => $self->uniqueDomain(), scheme => $self->unique) } qr/constraint/,
-	    'Constraint fail';
+	throws_ok {
+		Dlpodget::URL->new(value => 'http://' . $self->uniqueDomain(), host => $self->uniqueDomain, scheme => $self->unique);
+	} qr/constraint/, 'Constraint fail';
 
 	return EXIT_SUCCESS;
 }
@@ -84,6 +78,7 @@ sub testParseSuccess {
 				isa('Dlpodget::URL'),
 				methods(
 					value    => $url,
+					toString => $url,
 					scheme   => 'https',
 					user     => undef,
 					pass     => undef,
@@ -106,6 +101,7 @@ sub testParseSuccess {
 				isa('Dlpodget::URL'),
 				methods(
 					value    => $url,
+					toString => $url,
 					scheme   => 'http',
 					user     => undef,
 					pass     => undef,
@@ -128,6 +124,7 @@ sub testParseSuccess {
 				isa('Dlpodget::URL'),
 				methods(
 					value    => $url,
+					toString => $url,
 					scheme   => 'mailto',
 					user     => 'palmer',
 					pass     => undef,
@@ -150,6 +147,7 @@ sub testParseSuccess {
 				isa('Dlpodget::URL'),
 				methods(
 					value    => $url,
+					toString => $url,
 					scheme   => 'ftp',
 					user     => undef,
 					pass     => undef,
@@ -160,6 +158,21 @@ sub testParseSuccess {
 					fragment => undef,
 				),
 			),
+		),
+	), $url);
+
+	return EXIT_SUCCESS;
+}
+
+sub testParseFailure {
+	my ($self) = @_;
+	plan tests => 1;
+
+	my $url = 'invalid_scheme://www.daybologic.co.uk/secret/file';
+	cmp_deeply($self->sut->create($url), all(
+		isa('Dlpodget::Response'),
+		methods(
+			success => bool(0),
 		),
 	), $url);
 

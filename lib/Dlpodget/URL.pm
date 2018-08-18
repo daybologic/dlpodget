@@ -60,7 +60,7 @@ The path which follows the hostname
 
 =cut
 
-has path => (is => 'ro', isa => 'Str');
+has path => (is => 'ro', isa => 'Maybe[Str]');
 
 =item C<port>
 
