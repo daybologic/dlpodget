@@ -135,7 +135,7 @@ No such error
 
 =cut
 
-Readonly my $NO_SUCH_ERROR => 'e2f0bc64-a2ec-11e8-89e8-f23c9173fe51';
+Readonly our $NO_SUCH_ERROR => 'e2f0bc64-a2ec-11e8-89e8-f23c9173fe51';
 
 =back
 
@@ -200,7 +200,7 @@ sub fetchById {
 	}
 	# $uuidResponse is certainly valid at this point
 
-	my $uuid = $uuidResponse->getData();
+	my $uuid = Dlpodget::UUID::Factory->instance->pop();
 	if ($ERR{ $uuid->canon }) {
 		return Dlpodget::Error->new(value => $uuid, owner => $self);
 	} else {

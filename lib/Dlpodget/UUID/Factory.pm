@@ -52,7 +52,7 @@ sub create {
 			return Dlpodget::Response->new(
 				success => 0,
 				error   => Dlpodget::Errors->instance->fetchById(
-					$Dlpodget::Errors::INVALID_UUID
+					$Dlpodget::Errors::INVALID_UUID,
 				),
 			);
 		}

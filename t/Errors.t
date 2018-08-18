@@ -24,6 +24,12 @@ sub setUp {
 	return EXIT_SUCCESS;
 }
 
+sub tearDown {
+	my ($self) = @_;
+	$self->clearMocks();
+	return EXIT_SUCCESS;
+}
+
 sub testFetchAndToString {
 	my ($self) = @_;
 	plan tests => 10;
@@ -68,7 +74,7 @@ sub testFetchInvalid {
 	my $error = $self->sut->fetchById('03078508-a308-11e8-89e8-f23c9173fe51');
 	is($error->toString(), 'No such error', 'NO_SUCH_ERROR');
 
-	my $error = $self->sut->fetchById($self->unique);
+	$error = $self->sut->fetchById($self->unique);
 	is($error->toString(), 'The UUID is corrupt or illegal', 'INVALID_UUID');
 
 	return EXIT_SUCCESS;
