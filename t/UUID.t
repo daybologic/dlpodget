@@ -140,6 +140,21 @@ sub testCreateSpecificCompareMismatch {
 	return EXIT_SUCCESS;
 }
 
+sub testCompareMismatchMisuse {
+	my ($self) = @_;
+	plan tests => 3;
+
+	my $response = $self->sut->create();
+	BAIL_OUT($response->toString()) unless ($response->success);
+	my $uuid = $response->getData();
+
+	ok(!$self->sut->equals(undef, undef), 'a <undef>, b <undef>');
+	ok(!$self->sut->equals($uuid, undef), 'a <UUID>, b <undef>');
+	ok(!$self->sut->equals(undef, $uuid), 'a <undef>, b <UUID>');
+
+	return EXIT_SUCCESS;
+}
+
 sub testCreateSpecific {
 	my ($self) = @_;
 	plan tests => 1;
