@@ -15,7 +15,7 @@ use Dlpodget::Errors;
 
 sub testSuccess {
 	my ($self) = @_;
-	plan tests => 2;
+	plan tests => 4;
 
 	Readonly my $DATA => 'e6a01ea4-25c2-4df3-8e85-50eb29d6485c';
 
@@ -38,6 +38,26 @@ sub testSuccess {
 			toString => "Success <no data>",
 		),
 	), 'deep state, without data');
+
+	$response = Dlpodget::Response->new(success => 1, data => $self);
+	cmp_deeply($response, all(
+		isa('Dlpodget::Response'),
+		methods(
+			success => bool(1),
+			getData => $self,
+			toString => "Success <ResponseTests>",
+		),
+	), 'deep state, with blessed data');
+
+	$response = Dlpodget::Response->new(success => 1, data => { });
+	cmp_deeply($response, all(
+		isa('Dlpodget::Response'),
+		methods(
+			success => bool(1),
+			getData => { },
+			toString => "Success <HASH>",
+		),
+	), 'deep state, with HASH ref data');
 
 	return EXIT_SUCCESS;
 }
