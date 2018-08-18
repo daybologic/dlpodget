@@ -63,11 +63,32 @@ sub testFetchAndToString {
 
 sub testFetchInvalid {
 	my ($self) = @_;
+	plan tests => 2;
+
+	my $error = $self->sut->fetchById('03078508-a308-11e8-89e8-f23c9173fe51');
+	is($error->toString(), 'No such error', 'NO_SUCH_ERROR');
+
+	my $error = $self->sut->fetchById($self->unique);
+	is($error->toString(), 'The UUID is corrupt or illegal', 'INVALID_UUID');
+
+	return EXIT_SUCCESS;
+}
+
+sub testFetchTheoreticaFail {
+	my ($self) = @_;
 	plan tests => 1;
 
-	Readonly my $FAKE_ERROR_UUID_STR => '03078508-a308-11e8-89e8-f23c9173fe51';
-	my $error = $self->sut->fetchById($FAKE_ERROR_UUID_STR);
-	is($error->toString(), 'No such error', 'NO_SUCH_ERROR');
+	$self->mock('Dlpodget::UUID::Factory', 'create', [
+		sub {
+			return Dlpodget::Response->new(success => 0);
+		}, sub {
+			return Dlpodget::Response->new(success => 0);
+		}
+	]);
+
+	throws_ok {
+		$self->sut->fetchById($self->unique);
+	} qr/^$Dlpodget::Errors::INTERNAL /, 'Fatal INTERNAL';
 
 	return EXIT_SUCCESS;
 }
