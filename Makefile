@@ -52,7 +52,7 @@ check : test
 test:
 	cover -delete
 	$(SHELL) t/run.sh
-	cover -report html_basic
+	cover -report html
 	lynx -dump cover_db/coverage.html | ./bin/cover_check
 
 clean:
