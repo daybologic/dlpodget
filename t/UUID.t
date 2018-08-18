@@ -142,7 +142,7 @@ sub testCreateSpecificCompareMismatch {
 
 sub testCompareMismatchMisuse {
 	my ($self) = @_;
-	plan tests => 3;
+	plan tests => 5;
 
 	my $response = $self->sut->create();
 	BAIL_OUT($response->toString()) unless ($response->success);
@@ -151,6 +151,8 @@ sub testCompareMismatchMisuse {
 	ok(!$self->sut->equals(undef, undef), 'a <undef>, b <undef>');
 	ok(!$self->sut->equals($uuid, undef), 'a <UUID>, b <undef>');
 	ok(!$self->sut->equals(undef, $uuid), 'a <undef>, b <UUID>');
+	ok(!$self->sut->equals($uuid, $self), 'a <UUID>, b <Tester>');
+	ok(!$self->sut->equals($self, $uuid), 'a <Tester>, b <UUID>');
 
 	return EXIT_SUCCESS;
 }
