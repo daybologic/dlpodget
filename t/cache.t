@@ -36,6 +36,7 @@ use Dlpodget::Cache;
 use Dlpodget::Base;
 use Cache::MemoryCache;
 use Test::More;
+use Devel::Cover;
 
 use strict;
 use warnings;

@@ -34,6 +34,7 @@ use Dlpodget::TagProcessor;
 use Dlpodget::Logger;
 use Test::More 0.96;
 use POSIX;
+use Devel::Cover;
 use strict;
 use warnings;
 

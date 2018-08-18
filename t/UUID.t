@@ -13,6 +13,7 @@ use Test::Exception;
 use Test::More 0.96;
 use Readonly;
 use Data::UUID::LibUUID qw(uuid_to_binary);
+use Devel::Cover;
 
 sub setUp {
 	my ($self) = @_;

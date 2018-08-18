@@ -16,6 +16,7 @@ use POSIX;
 use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::Exception;
 use Test::More;
+use Devel::Cover;
 
 sub setUp {
 	my ($self) = @_;
