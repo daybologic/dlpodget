@@ -6,6 +6,7 @@ extends 'Test::Module::Runnable';
 
 use Cache::MemoryCache;
 use English qw(-no_match_vars);
+use Dlpodget::UUID;
 use Dlpodget::UUID::Factory;
 use POSIX qw(EXIT_SUCCESS);
 use Test::Deep qw(cmp_deeply all isa methods bool re);

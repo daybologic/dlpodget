@@ -35,7 +35,7 @@ for t in t/*.t; do
 		echo Found non executable test $t
 	else
 		echo "Running $t"
-		PERL5LIB=lib $t
+		PERL5OPT=-MDevel::Cover PERL5LIB=lib $t
 		if test "0" -ne "$?"; then
 			echo $t failed.
 			exit 1;
