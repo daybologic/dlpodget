@@ -58,6 +58,17 @@ sub testFailure {
 	return EXIT_SUCCESS;
 }
 
+sub testRO {
+	my ($self) = @_;
+	plan tests => 2;
+
+	my $response = Dlpodget::Response->new(success => 0);
+	throws_ok { $response->__data($self->unique) } qr/read-only/, 'cannot set __data (RO)';
+	throws_ok { $response->success(1) } qr/read-only/, 'cannot set success (RO)';
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 exit(ResponseTests->new->run);
