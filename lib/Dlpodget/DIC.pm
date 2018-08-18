@@ -42,6 +42,7 @@ application or unit test.
 
 =cut
 
+use Moose;
 use MooseX::Singleton;
 use Readonly;
 use Scalar::Util qw(blessed);

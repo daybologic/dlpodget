@@ -4,6 +4,7 @@ Priority: extra
 Maintainer: David Duncan Ross Palmer <palmer@overchat.org>
 Build-Depends: debhelper (>= 7), lynx
 Build-Depends-Indep: libwww-perl,
+ libdata-uuid-libuuid-perl,
  libcache-perl,
  libxml-feed-perl,
  libio-interactive-perl,
@@ -20,6 +21,7 @@ Homepage: http://www.daybologic.co.uk/
 Package: dlpodget
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends},
+ libdata-uuid-libuuid-perl,
  libcache-perl,
  libwww-perl,
  libxml-feed-perl,
