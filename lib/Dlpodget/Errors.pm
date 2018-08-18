@@ -202,7 +202,7 @@ sub fetchById {
 
 	my $uuid = $uuidResponse->getData();
 	if ($ERR{ $uuid->canon }) {
-		return Dlpodget::Error->new(value => $uuid);
+		return Dlpodget::Error->new(value => $uuid, owner => $self);
 	} else {
 		return $self->fetchById($NO_SUCH_ERROR);
 	}
