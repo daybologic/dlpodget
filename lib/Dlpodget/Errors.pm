@@ -46,6 +46,8 @@ use MooseX::Singleton;
 use Readonly;
 use Scalar::Util qw(blessed);
 use Carp qw(confess);
+use Dlpodget::Error;
+use Dlpodget::UUID::Factory;
 
 =head1 CONSTANTS
 
