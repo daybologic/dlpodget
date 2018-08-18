@@ -22,20 +22,9 @@ Readonly my $DEFAULT_SCHEME => 'http';
 sub setUp {
 	my ($self) = @_;
 
-	$self->sut(Dlpodget::URL->new(
-		value => $self->uniqueDomain(),
-	));
+	$self->sut(Dlpodget::URL::Factory->instance());
 
 	#$self->forcePlan();
-
-	return EXIT_SUCCESS;
-}
-
-sub testDefaultScheme {
-	my ($self) = @_;
-	plan tests => 1;
-
-	is($self->sut->scheme, $DEFAULT_SCHEME, "default scheme is $DEFAULT_SCHEME");
 
 	return EXIT_SUCCESS;
 }
@@ -86,48 +75,91 @@ sub testParseSuccess {
 	my ($self) = @_;
 	plan tests => 4;
 
-	my $factory = Dlpodget::URL::Factory->instance();
 	my $url = 'https://www.forbes.com/sites/timworstall/2013/04/29/the-possibility-of-peak-facebook/#67380a786d64';
-	cmp_deeply($factory->create($url), all(
-		isa('Dlpodget::URL'),
+	cmp_deeply($self->sut->create($url), all(
+		isa('Dlpodget::Response'),
 		methods(
-			scheme => 'https',
-			uri => 'www.forbes.com/sites/timworstall/2013/04/29/the-possibility-of-peak-facebook/#67380a786d64',
-			host => 'www.forbes.com',
-			url => $url,
+			success => bool(1),
+			getData => all(
+				isa('Dlpodget::URL'),
+				methods(
+					value    => $url,
+					scheme   => 'https',
+					user     => undef,
+					pass     => undef,
+					host     => 'www.forbes.com',
+					port     => undef,
+					path     => '/the-possibility-of-peak-facebook',
+					query    => undef,
+					fragment => '#67380a786d64',
+				),
+			),
 		),
 	), $url);
 
 	$url = 'http://thehill.com/policy/technology/technology/402063-fcc-shuts-down-pirate-radio-station-alex-jones';
-	cmp_deeply($factory->create($url), all(
-		isa('Dlpodget::URL'),
+	cmp_deeply($self->sut->create($url), all(
+		isa('Dlpodget::Response'),
 		methods(
-			scheme => 'http',
-			uri => 'thehill.com/policy/technology/technology/402063-fcc-shuts-down-pirate-radio-station-alex-jones',
-			host => 'thehill.com',
-			url => $url,
+			success => bool(1),
+			getData => all(
+				isa('Dlpodget::URL'),
+				methods(
+					value    => $url,
+					scheme   => 'http',
+					user     => undef,
+					pass     => undef,
+					host     => 'thehill.com',
+					port     => undef,
+					path     => '/402063-fcc-shuts-down-pirate-radio-station-alex-jones',
+					query    => undef,
+					fragment => undef,
+				),
+			),
 		),
 	), $url);
 
 	$url = 'mailto:palmer@overchat.org';
-	cmp_deeply($factory->create($url), all(
-		isa('Dlpodget::URL'),
+	cmp_deeply($self->sut->create($url), all(
+		isa('Dlpodget::Response'),
 		methods(
-			scheme => 'mailto',
-			uri => 'palmer@overchat.org',
-			host => 'overchat.org',
-			url => $url,
+			success => bool(1),
+			getData => all(
+				isa('Dlpodget::URL'),
+				methods(
+					value    => $url,
+					scheme   => 'mailto',
+					user     => 'palmer',
+					pass     => undef,
+					host     => 'overchat.org',
+					port     => undef,
+					path     => undef,
+					query    => undef,
+					fragment => undef,
+				),
+			),
 		),
 	), $url);
 
 	$url = 'ftp://ftp.freebsd.org/pub/FreeBSD/README.TXT',
-	cmp_deeply($factory->create($url), all(
-		isa('Dlpodget::URL'),
+	cmp_deeply($self->sut->create($url), all(
+		isa('Dlpodget::Response'),
 		methods(
-			scheme => 'ftp',
-			uri => 'ftp.freebsd.org/pub/FreeBSD/README.TXT',
-			host => 'ftp.freebsd.org',
-			url => $url,
+			success => bool(1),
+			getData => all(
+				isa('Dlpodget::URL'),
+				methods(
+					value    => $url,
+					scheme   => 'ftp',
+					user     => undef,
+					pass     => undef,
+					host     => 'ftp.freebsd.org',
+					port     => undef,
+					path     => '/pub',
+					query    => undef,
+					fragment => undef,
+				),
+			),
 		),
 	), $url);
 
