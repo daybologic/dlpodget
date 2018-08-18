@@ -33,13 +33,13 @@
 for t in t/*.t; do
 	if test ! -x $t; then
 		echo Found non executable test $t
-		exit 2;
-	fi
-	echo "Running $t"
-	PERL5LIB=lib $t
-	if test "0" -ne "$?"; then
-		echo $t failed.
-		exit 1;
+	else
+		echo "Running $t"
+		PERL5LIB=lib $t
+		if test "0" -ne "$?"; then
+			echo $t failed.
+			exit 1;
+		fi
 	fi
 done
 

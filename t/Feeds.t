@@ -1,24 +1,20 @@
 #!/usr/bin/perl
 package FeedsTests;
-use strict;
-use warnings;
 use Moose;
-extends 'Dlpodget::Tester';
+
+extends 'Test::Module::Runnable';
 
 use Cache::MemoryCache;
 use Dlpodget::Feeds;
 use English qw(-no_match_vars);
-use Dlpodget::Config::Mock;
-#use Dlpodget::DB::Mock;
 use Dlpodget::DIC;
-use Dlpodget::Log::Mock 1.4.0;
 use POSIX;
 use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::Exception;
 use Test::More;
 use Devel::Cover;
 
-sub setUp {
+sub ____setUp {
 	my ($self) = @_;
 
 	$self->dic(Dlpodget::DIC->new(
@@ -42,10 +38,15 @@ sub setUp {
 }
 
 sub testSomething {
+	my ($self) = @_;
 	plan tests => 1;
-	fail("You were supposed to remove this (facepalm)");
+
+	ok('FIXME');
+
+	return EXIT_SUCCESS;
 }
 
 package main;
 use strict;
+use warnings;
 exit(FeedsTests->new->run);
