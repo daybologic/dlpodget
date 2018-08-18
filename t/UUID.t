@@ -203,6 +203,32 @@ sub testVersion {
 	return EXIT_SUCCESS;
 }
 
+sub testCreateInvalid {
+	my ($self) = @_;
+	plan tests => 1;
+
+	my $response = $self->sut->create($self->unique);
+	cmp_deeply($response, all(
+		isa('Dlpodget::Response'),
+		methods(
+			success => bool(0),
+			error   => all(
+				isa('Dlpodget::Error'),
+				methods(
+					value => all(
+						isa('Dlpodget::UUID'),
+						methods(
+							canon => $Dlpodget::Errors::INVALID_UUID,
+						),
+					),
+				),
+			),
+		),
+	), 'INVALID_UUID');
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;

@@ -25,15 +25,16 @@ Whether the call succeeded.
 
 has success => (is => 'ro', isa => 'Bool', required => 1);
 
-=item C<errorNo>
+=item C<error>
 
 Software-specific error message pattern number.
-This is looked up via L<Dlpodget::Errors>.
+This is a L<Dlpodget::Error>.
+
 This must be set when L</success> is false, otherwise, it must B<not> be set.
 
 =cut
 
-has errorNo => (is => 'ro', isa => 'Int');
+has error => (is => 'ro', isa => 'Dlpodget::Error');
 
 =back
 

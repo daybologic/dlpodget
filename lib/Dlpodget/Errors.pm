@@ -45,6 +45,7 @@ use Moose;
 use MooseX::Singleton;
 use Readonly;
 use Scalar::Util qw(blessed);
+use Carp qw(confess);
 
 =head1 CONSTANTS
 
@@ -126,6 +127,14 @@ Internal error
 
 Readonly our $INTERNAL => '710c0b4e-a279-11e8-89e8-f23c9173fe51';
 
+=item C<$NO_SUCH_ERROR>
+
+No such error
+
+=cut
+
+Readonly my $NO_SUCH_ERROR => 'e2f0bc64-a2ec-11e8-89e8-f23c9173fe51';
+
 =back
 
 =cut
@@ -134,12 +143,13 @@ Readonly my %ERR => (
 	$URL_PARSE => 'The URL cannot be parsed',
 	$INVALID_UUID => 'The UUID is corrupt or illegal',
 	$INVALID_DIRECTION => 'Direction must be encode or decode',
-	$MUST_SUPPLY_FILENAME_ => 'Must supply filename',
+	$MUST_SUPPLY_FILENAME => 'Must supply filename',
 	$FILE_NOT_FOUND => 'File does not exist',
 	$UNKNOWN_CODEC => 'Unknown codec',
 	$ASSERT_FAIL => 'Assertion failure',
 	$FORK => 'Process fork/spawn failure',
 	$INTERNAL => 'Internal error',
+	$NO_SUCH_ERROR => 'No such error',
 );
 
 =head1 METHODS
@@ -166,6 +176,34 @@ sub toString {
 	}
 
 	return $error;
+}
+
+=item C<fetchById($id)>
+
+Returns a L<Dlpodget::Error> identified by its UUID, which is a string, not an object.
+The appropriate, complex object is returned.  If the error does not exist, we will return
+$NO_SUCH_ERROR.  If the L<Dlpodget::UUID> cannot be constructed, we will return L<$INVALID_UUID>.
+
+=cut
+
+sub fetchById {
+	my ($self, $id) = @_;
+
+	my $uuidResponse = Dlpodget::UUID::Factory->instance->create($id);
+	if (!$uuidResponse->success) {
+		$uuidResponse = Dlpodget::UUID::Factory->instance->create($INVALID_UUID);
+		if (!$uuidResponse->success) {
+			confess($INTERNAL); # Can't do anything else
+		}
+	}
+	# $uuidResponse is certainly valid at this point
+
+	my $uuid = $uuidResponse->getData();
+	if ($ERR{ $uuid->canon }) {
+		return Dlpodget::Error->new(value => $uuid);
+	} else {
+		return $self->fetchById($NO_SUCH_ERROR);
+	}
 }
 
 =back

@@ -13,6 +13,8 @@ Global singleton which produces L<Dlpodget::UUID> objects.
 use Moose;
 use MooseX::Singleton;
 use Data::UUID::LibUUID qw(uuid_eq new_uuid_binary uuid_to_binary);
+use Dlpodget::Error;
+use Dlpodget::Errors;
 use Dlpodget::UUID;
 use Dlpodget::Response;
 
@@ -49,7 +51,9 @@ sub create {
 		unless ($value) {
 			return Dlpodget::Response->new(
 				success => 0,
-				errorNo => $Dlpodget::Errors::INVALID_UUID,
+				error   => Dlpodget::Errors->instance->fetchById(
+					$Dlpodget::Errors::INVALID_UUID
+				),
 			);
 		}
 	} else {
