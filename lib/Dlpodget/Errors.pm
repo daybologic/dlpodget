@@ -1,6 +1,7 @@
+package Dlpodget::Errors;
 #
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2018, Duncan Ross Palmer (2E0EOL) and others,
+# Copyright (C) 2012-2024, Ducan Ross Palmer (M6KVM, 2E0EOL), all rights reserved.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,8 +29,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
-package Dlpodget::Errors;
 
 =head1 NAME
 

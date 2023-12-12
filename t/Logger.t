@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # Daybo Logic Podcast downloader
-# Copyright (c) 2012-2015, David Duncan Ross Palmer (2E0EOL), Daybo Logic
+# Copyright (C) 2012-2024, Ducan Ross Palmer (M6KVM, 2E0EOL), all rights reserved.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
