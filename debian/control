@@ -1,6 +1,6 @@
 Source: dlpodget
 Section: net
-Priority: extra
+Priority: optional
 Maintainer: David Duncan Ross Palmer <palmer@overchat.org>
 Build-Depends: debhelper (>= 13), lynx
 Build-Depends-Indep: libwww-perl,
