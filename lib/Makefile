@@ -1,4 +1,4 @@
-#!/usr/bin/make
+#!/usr/bin/make -k
 #
 # Daybo Logic Podcast downloader
 # Copyright (C) 2012-2024, Ducan Ross Palmer (M6KVM, 2E0EOL), all rights reserved.
@@ -30,52 +30,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+pms = $(shell ls Dlpodget/*.pm)
 
+all:
+	@echo Nothing to do.
 
-all: subdirs
-
-install: install_subdirs
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
-
-check : test
-test:
-	cover -delete
-	$(SHELL) t/run.sh
-	cover -report html
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
-
-clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
+install:
+	mkdir -p $(DESTDIR)/usr/share/perl5/Dlpodget
+	for pm in $(pms); do \
+		install -m 444 $$pm $(DESTDIR)/usr/share/perl5/Dlpodget/; \
 	done
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
-subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make all; \
-		cd ..; \
-	done
-
-install_subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make install; \
-		cd ..; \
-	done
-
-.PHONY: all install check test clean subdirs install_subdirs
+.PHONY: all install
