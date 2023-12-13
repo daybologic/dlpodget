@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package ResponseTests;
+use lib 'externals/libtest-module-runnable-perl/lib';
 use Moose;
 
 extends 'Test::Module::Runnable';

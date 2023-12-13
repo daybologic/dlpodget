@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package ConfigTests;
+use lib 'externals/libtest-module-runnable-perl/lib';
 use Moose;
 use Test::More 0.96;
 #use Devel::Cover;

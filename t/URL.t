@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package URLTests;
+use lib 'externals/libtest-module-runnable-perl/lib';
 use strict;
 use warnings;
 use Moose;
