@@ -56,7 +56,7 @@ use Dlpodget::UUID::Factory;
 
 Could not parse a URL (in L<Dlpodget::URL::Factory>.
 Check the scheme is supported and the URI is well-formed.
-If you are sure, report a bug to L<mailto:palmer@overchat.org>
+If you are sure, report a bug to L<mailto:2e0eol@gmail.com>
 
 =cut
 
