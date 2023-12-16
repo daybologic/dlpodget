@@ -40,7 +40,7 @@ use Getopt::Std;
 use strict;
 use warnings;
 
-require 'dlpodget';
+require './dlpodget';
 
 use constant MIN_FEED_STREAMS => (10);
 use constant TEST_FEED        => 'http://xml.nfowars.net/Alex.rss'; # Requires an internet connection
