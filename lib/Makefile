@@ -30,15 +30,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-pms = $(shell ls Dlpodget/*.pm)
+pms = $(shell find Dlpodget -name "*.pm")
 
 all:
 	@echo Nothing to do.
 
 install:
-	mkdir -p $(DESTDIR)/usr/share/perl5/Dlpodget
+	mkdir -p \
+		$(DESTDIR)/usr/share/perl5/Dlpodget/Feed \
+		$(DESTDIR)/usr/share/perl5/Dlpodget/URL \
+		$(DESTDIR)/usr/share/perl5/Dlpodget/UUID \
+		;
+	\
 	for pm in $(pms); do \
-		install -m 444 $$pm $(DESTDIR)/usr/share/perl5/Dlpodget/; \
+		dn=`dirname $$pm`; \
+		install -m 444 $$pm $(DESTDIR)/usr/share/perl5/$$dn/; \
 	done
 
 .PHONY: all install
