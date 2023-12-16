@@ -335,9 +335,12 @@ sub RemoteLog(@)
 		'http://www.daybologic.co.uk/dlpodget/log.cgi?type=%s&uri=%s',
 		$Type, uri_escape($Url)
 	);
+}
+
 #TODO: Move these out of global scope!
 my $chunks;
 my $total_size;
+my %get_params;
 sub Chunk {
 	my ( $chunk ) = @_;
 	my $chunk_len = length($chunk);
@@ -353,17 +356,17 @@ sub NullChunk {
 	return;
 }
 
-	$ua->get($log_feed_notify_uri);
-	printf(STDERR "Posted to %s\n", $log_feed_notify_uri);
-}
+# FIXME: Is this related to a duff merge?
+#	$ua->get($log_feed_notify_uri);
+#	printf(STDERR "Posted to %s\n", $log_feed_notify_uri);
+#}
 
-sub DownloadLog($$$)
-{
+sub DownloadLog {
 	LocalLog(@_);
 	RemoteLog(@_);
 }
 
-sub downloadStream($$$$)
+sub downloadStream {
 	my $http_resp;
 	my $local_length = 0;
 	my ( $Feeds, $entry, $Name, $tries ) = @_;
@@ -402,8 +405,9 @@ sub downloadStream($$$$)
 			}
 		}
 	}
-	$is_interactive = is_interactive();
-	$ua = LWP::UserAgent->new(
+
+	my $is_interactive = is_interactive();
+	my $ua = LWP::UserAgent->new(
 		show_progress => $is_interactive && !$Quiet,
 		agent => 'dlpodget'
 	);
@@ -434,7 +438,7 @@ sub downloadStream($$$$)
 	}
 
 
-	my $tries = 1 + ($retries || 0);
+	$tries = 1 + ($retries || 0);
 	my $paul = new Dlpodget::Muadeeb;
 	do {
 		$http_resp = $ua->get(
