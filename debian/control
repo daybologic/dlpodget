@@ -5,6 +5,7 @@ Maintainer: Duncan Ross Palmer <2e0eol@gmail.com>
 Build-Depends: debhelper (>= 13), lynx
 Build-Depends-Indep: libwww-perl,
  libdata-uuid-libuuid-perl,
+ libcache-perl,
  libcache-cache-perl,
  libcache-perl,
  libxml-feed-perl,
@@ -20,7 +21,10 @@ Build-Depends-Indep: libwww-perl,
  libmoosex-singleton-perl,
  libreadonly-perl,
  libtest-deep-perl,
- libtest-mockmodule-perl
+ libtest-mockmodule-perl,
+ libwww-curl-perl,
+ libxml-feed-perl,
+ perl-modules
 Standards-Version: 4.5.1
 Homepage: http://www.daybologic.co.uk/
 
@@ -28,6 +32,7 @@ Package: dlpodget
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends},
  libdata-uuid-libuuid-perl,
+ libcache-perl,
  libcache-cache-perl,
  libcache-perl,
  libwww-perl,
@@ -38,7 +43,8 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
  libdbd-sqlite3-perl,
  libmoose-perl,
  libmoosex-singleton-perl,
- libreadonly-perl
+ libreadonly-perl,
+ libxml-feed-perl
 Description: Podcast downloader and management system
  Daybo Logic's podcast system keeps track of new podcasts posted on an RSS
  feed and downloads whatever you do not yet have, checking file lengths
