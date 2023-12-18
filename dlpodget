@@ -35,6 +35,7 @@ use lib './lib';
 use Config::IniFiles;
 #use LWP::Protocol::Net::Curl MAX_RECV_SPEED_LARGE => 10240;
 use File::Path qw(make_path);
+use Dlpodget::Config;
 use Dlpodget::TagProcessor;
 use Dlpodget::Muadeeb;
 use LWP::UserAgent;
@@ -443,15 +444,16 @@ sub downloadStream {
 			%get_params,
 			':content_cb' => sub {
 				my ( $chunk ) = @_;
-				print $f $chunk unless ( $Feeds->{main}->{NOOP} );
-		':content_cb' => $chunkCB
+				#print $f $chunk unless ( $Feeds->{main}->{NOOP} ); # FIXME; $f out of scope
+		#':content_cb' => $chunkCB
+			},
 		);
 		$paul->rSleep($rsleep) if ( ($tries-1) && $http_resp->code() != 200 );
 	} while ( $http_resp->code() != 200 && --$tries );
 	close($OutputHandle) if ( !$Feeds->{main}->{NOOP} );
 	$OutputHandle = undef;
 
-	close($f) if ( !$Feeds->{main}->value('noop') );
+	#close($f) if ( !$Feeds->{main}->value('noop') ); # FIXME: $f out of scope
 	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
 
 	Notify($local_podcast) if ( $notify );
@@ -693,7 +695,7 @@ sub listHasMember {
 
 sub main {
 	my $proctitle = $0; # Save original process title
-	my $ourConfig = new OurConfig; # Replaces $conf
+	my $ourConfig = Dlpodget::Config->new(); # Replaces $conf
 	my @entries = ( );
 	my @defKeys;
 	my %feeds = ( );
@@ -720,7 +722,8 @@ sub main {
 		printf(STDERR "Overridden database with -f %s%s\n", $File, $n)
 	}
 
-	if ( $conf && (@defKeys = $conf->Parameters('main')) ) {
+	my $conf = { }; # FIXME: What's going on with this?  Look at config module in lib/
+	if ( $conf && (@defKeys = $conf->Parameters('main')) ) { # FIXME
 		if ( !$conf->val('main', 'enable', 1) ) {
 			print(STDERR "Configuration disabled.\n") unless ( $Quiet );
 			$conf = undef;
