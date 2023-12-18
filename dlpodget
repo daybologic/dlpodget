@@ -45,13 +45,14 @@ use URI::Escape;
 use IO::Interactive qw(is_interactive);
 use DBI;
 use POSIX ":sys_wait_h";
+#use Readonly;
 use File::Find;
 
 use strict;
 use warnings;
 
-use constant RATE_LIMIT_LIMIT  => 4; # Limit to 4KB per second
-use constant RATE_LIMIT_PERIOD => (30); # Period in seconds over which to calculate average
+#Readonly my $RATE_LIMIT_LIMIT  => 4; # Limit to 4KB per second
+#Readonly my $RATE_LIMIT_PERIOD => 30; # Period in seconds over which to calculate average
 
 # for the convenience of &wanted calls, including -eval statements:
 use vars qw/*name *dir *prune/;
