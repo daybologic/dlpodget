@@ -31,6 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package main;
+use lib './lib';
 use Config::IniFiles;
 #use LWP::Protocol::Net::Curl MAX_RECV_SPEED_LARGE => 10240;
 use File::Path qw(make_path);
