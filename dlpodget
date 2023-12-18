@@ -97,7 +97,7 @@ sub wanted {
 	(unlink($_) || warn "$name: $!\n");
 }
 
-sub codecInfo($) {
+sub codecInfo {
 	my $codec = shift;
 	my %codecs = (
 		CODEC_MP3() => {
@@ -121,7 +121,7 @@ sub codecInfo($) {
 	return $codecs{$codec};
 }
 
-sub validateDirection($) {
+sub validateDirection {
 	my $direction = shift;
 	if ( defined($direction) && $direction =~ m/^(\d)$/ ) {
 		return $direction if ( $direction >= 1 && $direction <= 2 );
@@ -129,20 +129,20 @@ sub validateDirection($) {
 	die 'Direction must be encode or decode';
 }
 
-sub validateFilename($) {
+sub validateFilename {
 	my $fileName = shift;
 	die 'Must supply filename' if ( !$fileName );
 	die 'File does not exist' unless ( -f $fileName );
 }
 
-sub validateCodec($) {
+sub validateCodec {
 	my $codecInfo = codecInfo(shift);
 	return $codecInfo if ( $codecInfo );
 
 	die 'Unknown codec';
 }
 
-sub transcodePCM($$$) {
+sub transcodePCM {
 	# Nb. 'file', CODEC_OGG(), CODEC_TRANSLATION_ENCODE() means convert a .wav to .ogg
 	my ( $fileName, $codec, $direction ) = @_;
 
@@ -153,7 +153,7 @@ sub transcodePCM($$$) {
 	#my %translations
 }
 
-sub translationInfo($$) {
+sub translationInfo {
 	my ( $fromCodec, $toCodec ) = @_;
 	my ( $fCodec, $tCodec );
 
@@ -210,7 +210,6 @@ sub translationInfo($$) {
 	return $fCodec;
 }
 
-
 =head2 fileFromURI
 
 This simple function returns the filename from a URI, eg.
@@ -219,15 +218,14 @@ If no URL, or an invalid path is passed, undef is returned.
 
 =cut
 
-sub fileFromURI($) {
+sub fileFromURI {
 	my $Url = shift;
 	return undef if ( !$Url );
 	my @uri_parts = split('/', $Url);
 	return $uri_parts[-1];
 }
 
-sub InitConfigDefaults($)
-{
+sub InitConfigDefaults {
 	my $Feeds = shift;
 	my $confmain = $Feeds->{main};
 	die 'Assertion failure' unless $confmain;
@@ -248,7 +246,7 @@ sub InitConfigDefaults($)
 	}
 }
 
-sub FeedCache($$) {
+sub FeedCache {
 	my ( $Name, $Url ) = @_;
 	my ( $resp, $ua );
 	my $cacheFileName = "$ENV{HOME}/.cache/dlpodget/$Name.rss";
@@ -281,8 +279,7 @@ sub FeedCache($$) {
 	return $Url;
 }
 
-sub InitFeedDefaults($$)
-{
+sub InitFeedDefaults {
 	my ( $Feeds, $Feed ) = @_;
 	$Feed->{localpath} = $Feeds->{main}->{localpfx} unless ( $Feed->{localpath} );
 	$Feed->{rss} = '' unless ( $Feed->{rss} );
@@ -320,16 +317,14 @@ sub readFeed {
 	return @entries;
 }
 
-sub LocalLog(@)
-{
+sub LocalLog {
 	my ( $Feeds, $Type, $Url ) = @_;
 	return unless ( $Feeds->{main}->{LOG} ); # Logging not enabled.
 	$Log ||= OpenLocalLog($Feeds->{main}->{LOG}); # Open log file
 	return print($Log "Downloading $Type: $Url\n");
 }
 
-sub RemoteLog(@)
-{
+sub RemoteLog {
 	my ( $Feeds, $Type, $Url ) = @_;
 	return unless ( $Feeds->{main}->{POPCON} );
 	my $ua = LWP::UserAgent->new( show_progress => 0 );
@@ -484,7 +479,7 @@ sub downloadStream {
 #	return $V;
 #}
 
-sub processTags($$) {
+sub processTags {
 	my ( $testData, $V ) = @_;
 
 	while (my ($k, $v) = each(%{$testData->{mappings}})) {
@@ -493,7 +488,7 @@ sub processTags($$) {
 	return $globalTagProcessor->result($V);
 }
 
-sub cleanupStreams($$$) {
+sub cleanupStreams {
 	my ( $Feeds, $entry, $Name ) = @_;
 
 	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
@@ -505,7 +500,7 @@ sub cleanupStreams($$$) {
 	#TODO
 }
 
-sub child($$$$) {
+sub child {
 	my ( $DB, $FeedKey, $Feeds, $Feed ) = @_;
 	my @entries = readFeed($Feeds, $Feed);
 	foreach my $entry ( @entries ) {
@@ -516,7 +511,7 @@ sub child($$$$) {
 	}
 }
 
-sub db() {
+sub db {
 	my $dbh;
 
 	return undef if ( $File eq DEV_NULL() );
@@ -544,12 +539,12 @@ sub db() {
 			}
 
 my %_dbUpdateFeed = (
-	'get_feed_id' => undef,
-	'ins_feed' => undef,
-	'upd_feed' => undef
-	);
-	}
-sub dbUpdateFeed($$) {
+	get_feed_id => undef,
+	ins_feed    => undef,
+	upd_feed    => undef,
+);
+#	} # Duff merge?
+sub dbUpdateFeed {
 	my $ret = 0;
 	my $sth;
 	my ( $DB, $Name ) = @_;
@@ -593,9 +588,9 @@ sub dbUpdateFeed($$) {
 }
 
 my %_dbUpdateStream = (
-	'repl_into_stream' => undef
+	repl_into_stream => undef,
 );
-sub dbUpdateStream($$$) {
+sub dbUpdateStream {
 	my $ret = 0;
 	my ( $DB, $FeedKey, $Entry ) = @_;
 	if ( !$_dbUpdateStream{'repl_into_stream'} ) {
@@ -619,14 +614,14 @@ sub dbUpdateStream($$$) {
 	return $ret;
 }
 
-sub Notify($) {
+sub Notify {
 	my $local_feed = shift;
 	system(
 		"echo \"Feed $local_feed\" | mail -s \"New feed available\" palmer\@overchat.org"
 	);
 }
 
-sub banner($) {
+sub banner {
 	my $showLicense = shift;
 	my $doneShbang = 0;
 	my $blankLines = 0;
@@ -652,7 +647,7 @@ sub banner($) {
 	}
 }
 
-sub syntax() {
+sub syntax {
 	printf("%s [-C config] [-c n...] [-f <file>] [-n <feed>] -d -q\n\n", $0);
 
 	print("-C <config>\n");
@@ -680,7 +675,7 @@ sub syntax() {
 	return 0;
 }
 
-sub listHasMember($@) {
+sub listHasMember {
 	my $needle = shift;
 	my @hayStack = @_;
 
@@ -696,7 +691,7 @@ sub listHasMember($@) {
 	return 0;
 }
 
-sub main() {
+sub main {
 	my $proctitle = $0; # Save original process title
 	my $ourConfig = new OurConfig; # Replaces $conf
 	my @entries = ( );
@@ -732,7 +727,7 @@ sub main() {
 		}
 	}
 
-	$feeds{'main'} = new Dlpodget::TagProcessor;
+	$feeds{'main'} = Dlpodget::TagProcessor->new();
 	if ( $conf ) {
 		my %reserveSec = map {  $_ => 1 } ( 'main', 'paths' ); # Reserved section names
 		my ( @sections, $secC );
