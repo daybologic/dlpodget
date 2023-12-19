@@ -31,19 +31,84 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package ConfigTests;
-use lib 'externals/libtest-module-runnable-perl/lib';
 use Moose;
+
+use lib 'externals/libtest-module-runnable-perl/lib';
+use Dlpodget::Config;
+use File::Temp qw(tempfile);
+use POSIX qw(EXIT_FAILURE EXIT_SUCCESS);
+use Readonly;
 use Test::More 0.96;
 #use Devel::Cover;
-use Getopt::Std;
-use Dlpodget::Config;
-use POSIX qw(EXIT_SUCCESS);
 
 extends 'Test::Module::Runnable';
 
-sub test {
+Readonly my $NON_EXISTENT_FILE => '/tmp/4d687206-9eb1-11ee-98ed-a7fe17edd902';
+
+sub setUp {
 	my ($self) = @_;
+	$self->sut(Dlpodget::Config->new());
+	return EXIT_SUCCESS;
+}
+
+sub testType {
+	my ($self) = @_;
+	plan tests => 1;
+
 	isa_ok($self->sut(Dlpodget::Config->new()), 'Dlpodget::Config', 'new type');
+
+	return EXIT_SUCCESS;
+}
+
+sub testLoadNothing {
+	my ($self) = @_;
+	plan tests => 2;
+
+	is($self->sut->load(), EXIT_SUCCESS, 'success (no-op)');
+	is($self->sut->ini, undef, 'ini <undef>');
+
+	return EXIT_SUCCESS;
+}
+
+sub testLoadSuccess {
+	my ($self) = @_;
+	plan tests => 2;
+
+	my ($fh, $filename) = tempfile();
+	$self->sut(Dlpodget::Config->new({
+		confFiles => [
+			$NON_EXISTENT_FILE,
+			$filename,
+		],
+	}));
+
+	print($fh "; Comment\n");
+	print($fh "[section]\n");
+	print($fh "key = 'value'\n");
+
+	close($fh);
+
+	is($self->sut->load(), EXIT_SUCCESS, 'returned success');
+	isa_ok($self->sut->ini, 'Config::IniFiles', 'ini');
+
+	return EXIT_SUCCESS;
+}
+
+sub testLoadFailure {
+	my ($self) = @_;
+	plan tests => 2;
+
+	my ($fh, $filename) = tempfile();
+	$self->sut(Dlpodget::Config->new({
+		confFiles => [
+			$NON_EXISTENT_FILE,
+			$filename,
+		],
+	}));
+
+	is($self->sut->load(), EXIT_FAILURE, 'returned failure');
+	is($self->sut->ini, undef, 'ini <undef>');
+
 	return EXIT_SUCCESS;
 }
 

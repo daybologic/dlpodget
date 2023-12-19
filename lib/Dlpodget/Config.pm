@@ -32,9 +32,10 @@ package Dlpodget::Config;
 
 use strict;
 use warnings;
-
 use Moose;
+
 use Config::IniFiles;
+use POSIX qw(EXIT_FAILURE EXIT_SUCCESS);
 
 extends 'Dlpodget::Base';
 
@@ -77,17 +78,21 @@ sub initFeedDefaults {
 
 sub load {
 	my ($self) = @_;
+
 	foreach my $confFile (@{ $self->confFiles }) {
 		next unless (-f $confFile);
 
-		$self->ini(Config::IniFiles->new(-file => $confFile, -commentchar => ';'));
-		if (!$self->ini) {
+		if (my $ini = Config::IniFiles->new(-file => $confFile, -commentchar => ';')) {
+			$self->ini($ini);
+		} else {
 			print(STDERR "Fault with $confFile: " . join(',', @Config::IniFiles::errors) . "\n");
-			return 1;
+			return EXIT_FAILURE;
 		}
 
 		last;
 	}
+
+	return EXIT_SUCCESS;
 }
 
 1;
