@@ -46,6 +46,7 @@ has ini => (is => 'rw', isa => 'Config::IniFiles');
 
 sub initConfigDefaults {
 	my ($self, $feeds) = @_;
+
 	my $confmain = $feeds->{main};
 	die('Assertion failure') unless $confmain;
 
@@ -54,9 +55,9 @@ sub initConfigDefaults {
 	$confmain->{LOCALPFX} = $confmain->{HOME} unless ($confmain->{LOCALPFX});
 
 	my %defaults = (
-		'enable' => 1,
-		'noop'   => 0,
-		'debug'  => 0,
+		enable => 1,
+		noop   => 0,
+		debug  => 0,
 	);
 
 	foreach my $opt (keys(%defaults)) {
@@ -70,7 +71,7 @@ sub initFeedDefaults {
 	$feed->{localpath} = $feeds->{main}->{LOCALPFX} unless ($feed->{localpath});
 	$feed->{rss} = '' unless ($feed->{rss});
 	foreach my $chk ('check', 'download', 'enable') {
-		$feed->{$chk} = 1 if ( !$feed->{$chk} || $feed->{$chk} !~ m/\^d$/ );
+		$feed->{$chk} = 1 if (!$feed->{$chk} || $feed->{$chk} !~ m/\^d$/);
 	}
 }
 
@@ -78,11 +79,13 @@ sub load {
 	my ($self) = @_;
 	foreach my $confFile (@{ $self->confFiles }) {
 		next unless (-f $confFile);
+
 		$self->ini(Config::IniFiles->new(-file => $confFile, -commentchar => ';'));
 		if (!$self->ini) {
 			print(STDERR "Fault with $confFile: " . join(',', @Config::IniFiles::errors) . "\n");
 			return 1;
 		}
+
 		last;
 	}
 }

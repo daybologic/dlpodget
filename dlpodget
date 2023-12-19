@@ -287,19 +287,6 @@ sub FeedCache {
 	return $Url;
 }
 
-sub InitFeedDefaults {
-	my ($Feeds, $Feed) = @_;
-
-	$Feed->{localpath} = $Feeds->{main}->{localpfx} unless ( $Feed->{localpath} );
-	$Feed->{rss} = '' unless ($Feed->{rss});
-
-	foreach my $chk ('check', 'download', 'enable') {
-		$Feed->{$chk} = 1 if (!$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/);
-	}
-
-	return;
-}
-
 sub readFeed {
 	my @entries = ( );
 	my ($Feeds, $Feed) = @_;
@@ -711,7 +698,7 @@ sub listHasMember {
 
 sub main {
 	my $proctitle = $0; # Save original process title
-	my $ourConfig = Dlpodget::Config->new(); # Replaces $conf
+	my $conf = Dlpodget::Config->new(); # Replaces $conf
 	my @entries = ( );
 	my @defKeys;
 	my %feeds = ( );
@@ -738,8 +725,7 @@ sub main {
 		printf(STDERR "Overridden database with -f %s%s\n", $File, $n)
 	}
 
-	my $conf = { }; # FIXME: What's going on with this?  Look at config module in lib/
-	if ( $conf && (@defKeys = $conf->Parameters('main')) ) { # FIXME: URGENT XXX
+	if ($conf && (@defKeys = $conf->Parameters('main'))) {
 		unless ($conf->val('main', 'enable', 1)) {
 			print(STDERR "Configuration disabled.\n") unless ($Quiet);
 			$conf = undef;
@@ -747,7 +733,7 @@ sub main {
 	}
 
 	$feeds{main} = Dlpodget::TagProcessor->new();
-	if ($conf) { # FIXME: $conf has been replaced
+	if ($conf) {
 		my %reserveSec = map {  $_ => 1 } ('main', 'paths'); # Reserved section names
 		my (@sections, $secC);
 		@sections = $conf->Sections();
@@ -772,7 +758,7 @@ sub main {
 			}
 		}
 
-		$ourConfig->initConfigDefaults(\%feeds);
+		$conf->initConfigDefaults(\%feeds);
 		if (listHasMember('paths', @sections)) { # Has a paths section?
 			my @secKeys;
 			if ((@secKeys = $conf->Parameters('paths'))) {
@@ -831,7 +817,7 @@ sub main {
 		my $reaped_pid;
 		my $child_limit_reached = 0;
 		my $feed = $feeds{$feedName};
-		$ourConfig->initFeedDefaults(\%feeds, $feed);
+		$conf->initFeedDefaults(\%feeds, $feed);
 		$streamsDefinedCount++ if ($feed->{rss});
 		next unless ($feed->{enable});
 		next unless ($feed->{download});
