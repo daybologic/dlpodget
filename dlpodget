@@ -46,7 +46,7 @@ use URI::Escape;
 use IO::Interactive qw(is_interactive);
 use DBI;
 use POSIX ":sys_wait_h";
-#use Readonly;
+use Readonly;
 use File::Find;
 
 use strict;
@@ -63,24 +63,24 @@ use vars qw/*name *dir *prune/;
 
 sub wanted;
 
-use constant DEV_NULL => '/dev/null';
+Readonly my $DEV_NULL => '/dev/null';
 
-use constant CODEC_MP3   => (1);
-use constant CODEC_MIN   => (CODEC_MP3());
-use constant CODEC_PCM   => (2);
-use constant CODEC_FLAC  => (3);
-use constant CODEC_OGG   => (4);
-use constant CODEC_MAX   => (CODEC_OGG());
+Readonly my $CODEC_MP3   => 1;
+Readonly my $CODEC_MIN   => $CODEC_MP3;
+Readonly my $CODEC_PCM   => 2;
+Readonly my $CODEC_FLAC  => 3;
+Readonly my $CODEC_OGG   => 4;
+Readonly my $CODEC_MAX   => $CODEC_OGG;
 
-use constant CODEC_ERR_UNSUPPORTED_CODEC       => (1);
-use constant CODEC_ERR_UNSUPPORTED_TRANSLATION => (2);
-use constant CODEC_ERR_REDUNDANT               => (3);
+Readonly my $CODEC_ERR_UNSUPPORTED_CODEC       => 1;
+Readonly my $CODEC_ERR_UNSUPPORTED_TRANSLATION => 2;
+Readonly my $CODEC_ERR_REDUNDANT               => 3;
 
-use constant CODEC_TRANSLATION_OUTPUT_FIRST    => (1);
-use constant CODEC_TRANSLATION_OUTPUT_LAST     => (2);
+Readonly my $CODEC_TRANSLATION_OUTPUT_FIRST    => 1;
+Readonly my $CODEC_TRANSLATION_OUTPUT_LAST     => 2;
 
-use constant CODEC_TRANSLATION_ENCODE          => (1);
-use constant CODEC_TRANSLATION_DECODE          => (2);
+Readonly my $CODEC_TRANSLATION_ENCODE          => 1;
+Readonly my $CODEC_TRANSLATION_DECODE          => 2;
 
 my $Debug = 0;
 my $Log = undef;
@@ -99,53 +99,57 @@ sub wanted {
 }
 
 sub codecInfo {
-	my $codec = shift;
+	my ($codec) = @_;
 	my %codecs = (
-		CODEC_MP3() => {
+		$CODEC_MP3 => {
 			'fileExt' => 'mp3',
 			'label'   => 'mp3',
-			'desc'    => 'MPEG II Layer III'
-		}, CODEC_PCM()    => {
+			'desc'    => 'MPEG II Layer III',
+		},
+		$CODEC_PCM => {
 			'fileExt' => 'wav',
 			'label'   => 'wav',
-			'desc'    => 'PCM Wave'
-		}, CODEC_FLAC()   => {
+			'desc'    => 'PCM Wave',
+		},
+		$CODEC_FLAC => {
 			'fileExt' => 'flac',
 			'label'   => 'flac',
-			'desc'    => 'Flac'
-		}, CODEC_OGG()    => {
+			'desc'    => 'Flac',
+		},
+		$CODEC_OGG => {
 			'fileExt' => 'ogg',
 			'label'   => 'ogg',
-			'desc'    => 'Ogg Vorbis'
-		}
+			'desc'    => 'Ogg Vorbis',
+		},
 	);
 	return $codecs{$codec};
 }
 
 sub validateDirection {
-	my $direction = shift;
-	if ( defined($direction) && $direction =~ m/^(\d)$/ ) {
-		return $direction if ( $direction >= 1 && $direction <= 2 );
+	my ($direction) = @_;
+	if (defined($direction) && $direction =~ m/^(\d)$/) {
+		return $direction if ($direction >= 1 && $direction <= 2);
 	}
-	die 'Direction must be encode or decode';
+	die('Direction must be encode or decode');
 }
 
 sub validateFilename {
-	my $fileName = shift;
-	die 'Must supply filename' if ( !$fileName );
-	die 'File does not exist' unless ( -f $fileName );
+	my ($fileName) = @_;
+	die 'Must supply filename' if (!$fileName);
+	die 'File does not exist' unless (-f $fileName);
 }
 
 sub validateCodec {
-	my $codecInfo = codecInfo(shift);
-	return $codecInfo if ( $codecInfo );
+	my (@params) = @_;
+	my $codecInfo = codecInfo($params[0]);
+	return $codecInfo if ($codecInfo);
 
-	die 'Unknown codec';
+	die('Unknown codec');
 }
 
 sub transcodePCM {
-	# Nb. 'file', CODEC_OGG(), CODEC_TRANSLATION_ENCODE() means convert a .wav to .ogg
-	my ( $fileName, $codec, $direction ) = @_;
+	# Nb. 'file', $CODEC_OGG, $CODEC_TRANSLATION_ENCODE means convert a .wav to .ogg
+	my ($fileName, $codec, $direction) = @_;
 
 	validateFilename($fileName);
 	validateCodec($codec);
@@ -155,58 +159,59 @@ sub transcodePCM {
 }
 
 sub translationInfo {
-	my ( $fromCodec, $toCodec ) = @_;
-	my ( $fCodec, $tCodec );
+	my ($fromCodec, $toCodec) = @_;
+	my ($fCodec, $tCodec);
 
 	my %translations = (
-		CODEC_MP3()             => {
-			CODEC_MP3()     => undef,
-			CODEC_PCM()     => {
-				'cmd'   => 'mpg321 "%s" -w "%s"',
-				'order' => CODEC_TRANSLATION_OUTPUT_LAST()
+		$CODEC_MP3 => {
+			$CODEC_MP3  => undef,
+			$CODEC_PCM  => {
+				cmd   => 'mpg321 "%s" -w "%s"',
+				order => $CODEC_TRANSLATION_OUTPUT_LAST,
 			},
-			CODEC_FLAC()    => "",
-			CODEC_OGG()     => ""
-		}, CODEC_PCM()          => {
-			CODEC_MP3()     => {
-				'cmd'   => 'lame "%s" "%s"',
-				'order' => CODEC_TRANSLATION_OUTPUT_LAST()
+			$CODEC_FLAC => '',
+			$CODEC_OGG  => '',
+		},
+		$CODEC_PCM => {
+			$CODEC_MP3 => {
+				cmd   => 'lame "%s" "%s"',
+				order => $CODEC_TRANSLATION_OUTPUT_LAST,
 			},
-			CODEC_PCM()     => undef,
-			CODEC_FLAC()    => {
-				'cmd'   => 'flac -o "%s" "%s"',
-				'order' => CODEC_TRANSLATION_OUTPUT_FIRST()
+			$CODEC_PCM  => undef,
+			$CODEC_FLAC => {
+				cmd   => 'flac -o "%s" "%s"',
+				order => $CODEC_TRANSLATION_OUTPUT_FIRST,
 			},
-			CODEC_OGG()     => {
-				'cmd'   => 'oggenc -o "%s" "%s"',
-				'order' => CODEC_TRANSLATION_OUTPUT_FIRST()
-			}
-		}, CODEC_FLAC()         => {
-			CODEC_MP3()     => "",
-			CODEC_PCM()     => {
-				'cmd'   => 'flac -d -o "%s" "%s"',
-				'order' => CODEC_TRANSLATION_OUTPUT_FIRST()
+			$CODEC_OGG => {
+				cmd   => 'oggenc -o "%s" "%s"',
+				order => $CODEC_TRANSLATION_OUTPUT_FIRST,
 			},
-			CODEC_FLAC()    => undef,
-			CODEC_OGG()     => ""
-		}, CODEC_OGG()          => {
-			CODEC_MP3()     => "",
-			CODEC_PCM()     => {
-				'cmd'   => 'oggdec -o "%s" "%s"',
-				'order' => CODEC_TRANSLATION_OUTPUT_FIRST()
+		}, $CODEC_FLAC => {
+			$CODEC_MP3  => '',
+			$CODEC_PCM  => {
+				cmd   => 'flac -d -o "%s" "%s"',
+				order => $CODEC_TRANSLATION_OUTPUT_FIRST,
 			},
-			CODEC_FLAC()    => "",
-			CODEC_OGG()     => undef
+			$CODEC_FLAC => undef,
+			$CODEC_OGG  => ''
+		}, $CODEC_OGG => {
+			$CODEC_MP3  => '',
+			$CODEC_PCM  => {
+				cmd   => 'oggdec -o "%s" "%s"',
+				order => $CODEC_TRANSLATION_OUTPUT_FIRST,
+			},
+			$CODEC_FLAC => '',
+			$CODEC_OGG  => undef,
 		}
 	);
 
 	$fCodec = $translations{$fromCodec};
-	return CODEC_ERR_UNSUPPORTED_CODEC() unless ( $fCodec );
-	return CODEC_ERR_UNSUPPORTED_TRANSLATION()
-		unless ( exists($fCodec->{$toCodec}) );
+	return $CODEC_ERR_UNSUPPORTED_CODEC unless ($fCodec);
+	return $CODEC_ERR_UNSUPPORTED_TRANSLATION
+	    unless (exists($fCodec->{$toCodec}));
 
 	$tCodec = $fCodec->{$toCodec};
-	return CODEC_ERR_REDUNDANT() if ( !$tCodec );
+	return $CODEC_ERR_REDUNDANT unless ($tCodec);
 
 	return $fCodec;
 }
@@ -220,39 +225,41 @@ If no URL, or an invalid path is passed, undef is returned.
 =cut
 
 sub fileFromURI {
-	my $Url = shift;
-	return undef if ( !$Url );
-	my @uri_parts = split('/', $Url);
+	my ($url) = @_;
+	return undef unless ($url);
+	my @uri_parts = split('/', $url);
 	return $uri_parts[-1];
 }
 
 sub InitConfigDefaults {
-	my $Feeds = shift;
+	my ($Feeds) = @_;
 	my $confmain = $Feeds->{main};
-	die 'Assertion failure' unless $confmain;
+	die('Assertion failure') unless ($confmain);
 
-	$confmain->{TMPDIR} = '/tmp' unless ( $confmain->{TMPDIR} );
-	$confmain->{HOME} = $confmain->{TMPDIR} unless ( $confmain->{HOME} );
-	$confmain->{localpfx} = $confmain->{HOME} unless ( $confmain->{localpfx} );
+	$confmain->{TMPDIR} = '/tmp' unless ($confmain->{TMPDIR});
+	$confmain->{HOME} = $confmain->{TMPDIR} unless ($confmain->{HOME});
+	$confmain->{localpfx} = $confmain->{HOME} unless ($confmain->{localpfx});
 
 	my %defaults = (
-		'enable' => 1,
-		'noop'   => 0,
-		'debug'  => 0
+		enable => 1,
+		noop   => 0,
+		debug  => 0,
 	);
 
-	foreach my $opt ( keys(%defaults) ) {
-		next if ( defined($confmain->{$opt}) && $confmain->{$opt} =~ m/\d$/ );
+	foreach my $opt (keys(%defaults)) {
+		next if (defined($confmain->{$opt}) && $confmain->{$opt} =~ m/\d$/);
 		$confmain->{$opt} = $defaults{$opt};
 	}
+
+	return;
 }
 
 sub FeedCache {
-	my ( $Name, $Url ) = @_;
-	my ( $resp, $ua );
+	my ($Name, $Url) = @_;
+	my ($resp, $ua);
 	my $cacheFileName = "$ENV{HOME}/.cache/dlpodget/$Name.rss";
-	if ( -f $cacheFileName ) { # Already cached.
-		warn "Feed $Name has been satisfied by existing cache - $cacheFileName" if ( $Debug );
+	if (-f $cacheFileName) { # Already cached.
+		warn "Feed $Name has been satisfied by existing cache - $cacheFileName" if ($Debug);
 		return $cacheFileName;
 	}
 
@@ -260,8 +267,8 @@ sub FeedCache {
 	$ua = LWP::UserAgent->new();
 
 	$resp = $ua->get($Url);
-	if ( $resp->is_success() ) {
-		if ( open(my $f, '>:raw', $cacheFileName) ) {
+	if ($resp->is_success()) {
+		if (open(my $f, '>:raw', $cacheFileName)) {
 			print $f $resp->content();
 			close($f);
 		} else {
@@ -272,31 +279,35 @@ sub FeedCache {
 		warn $resp->status_line;
 		$cacheFileName = undef;
 	}
-	if ( $cacheFileName ) {
-		warn "Feed $Name has been satisfied by newly written cache file - $cacheFileName" if ( $Debug );
+	if ($cacheFileName) {
+		warn "Feed $Name has been satisfied by newly written cache file - $cacheFileName" if ($Debug);
 		return $cacheFileName;
 	}
-	warn "Feed $Name has no cache available" if ( $Debug );
+	warn "Feed $Name has no cache available" if ($Debug);
 	return $Url;
 }
 
 sub InitFeedDefaults {
-	my ( $Feeds, $Feed ) = @_;
+	my ($Feeds, $Feed) = @_;
+
 	$Feed->{localpath} = $Feeds->{main}->{localpfx} unless ( $Feed->{localpath} );
-	$Feed->{rss} = '' unless ( $Feed->{rss} );
-	foreach my $chk ( 'check', 'download', 'enable' ) {
-		$Feed->{$chk} = 1 if ( !$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/ );
+	$Feed->{rss} = '' unless ($Feed->{rss});
+
+	foreach my $chk ('check', 'download', 'enable') {
+		$Feed->{$chk} = 1 if (!$Feed->{$chk} || $Feed->{$chk} !~ m/\^d$/);
 	}
+
+	return;
 }
 
 sub readFeed {
 	my @entries = ( );
-	my ( $Feeds, $Feed ) = @_;
-	my ( $Url, $Name ) = ( $Feed->{rss}, $Feed->{name} );
+	my ($Feeds, $Feed) = @_;
+	my ($Url, $Name) = ($Feed->{rss}, $Feed->{name});
 	my $feed = XML::Feed->parse(FeedCache($Name, $Url));
 
 	$Name ||= 'Untitled feed';
-	if ( !$feed ) {
+	if (!$feed) {
 		printf(STDERR "Stream %s error: %s\n", $Name, $@);
 		return @entries;
 	}
@@ -313,25 +324,25 @@ sub readFeed {
 			title          => $entry->title,
 			type           => $enclosure->{'type'},
 			length         => $enclosure->{'length'}
-		}) if ( $filename );
+		}) if ($filename);
 	}
 	return @entries;
 }
 
 sub LocalLog {
-	my ( $Feeds, $Type, $Url ) = @_;
-	return unless ( $Feeds->{main}->{LOG} ); # Logging not enabled.
+	my ($Feeds, $Type, $Url) = @_;
+	return unless ($Feeds->{main}->{LOG}); # Logging not enabled.
 	$Log ||= OpenLocalLog($Feeds->{main}->{LOG}); # Open log file
 	return print($Log "Downloading $Type: $Url\n");
 }
 
 sub RemoteLog {
-	my ( $Feeds, $Type, $Url ) = @_;
-	return unless ( $Feeds->{main}->{POPCON} );
-	my $ua = LWP::UserAgent->new( show_progress => 0 );
+	my ($Feeds, $Type, $Url) = @_;
+	return unless ($Feeds->{main}->{POPCON});
+	my $ua = LWP::UserAgent->new(show_progress => 0);
 	my $log_feed_notify_uri = sprintf(
 		'http://www.daybologic.co.uk/dlpodget/log.cgi?type=%s&uri=%s',
-		$Type, uri_escape($Url)
+		$Type, uri_escape($Url),
 	);
 }
 
@@ -340,13 +351,13 @@ my $chunks;
 my $total_size;
 my %get_params;
 sub Chunk {
-	my ( $chunk ) = @_;
+	my ($chunk) = @_;
 	my $chunk_len = length($chunk);
 	print $OutputHandle $chunk;
 	printf(
 		STDERR "Now we have %u chunks. This chunk was %u in size\n",
 		++$chunks, $chunk_len
-	) if ( $Debug );
+	) if ($Debug);
 	$total_size += $chunk_len;
 }
 
@@ -367,7 +378,7 @@ sub DownloadLog {
 sub downloadStream {
 	my $http_resp;
 	my $local_length = 0;
-	my ( $Feeds, $entry, $Name, $tries ) = @_;
+	my ($Feeds, $entry, $Name, $tries) = @_;
 	my $rsleep = $Feeds->{$Name}->{rsleep}   || $Feeds->{main}->value('rsleep');
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->value('retries');
 	my $chunkCB = \&Chunk;
@@ -375,20 +386,20 @@ sub downloadStream {
 	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
 	my $local_podcast = join('/', $Feeds->{$Name}->{localpath}, $entry->{localFilename});
 	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
-	if ( -f $local_podcast ) {
+	if (-f $local_podcast) {
 		$local_length = (stat($local_podcast))[7];
-		if ( !$entry->{length} || $local_length == $entry->{length} ) {
-			printf(STDERR "%s already exists\n", $local_podcast) unless ( $Quiet );
+		if (!$entry->{length} || $local_length == $entry->{length}) {
+			printf(STDERR "%s already exists\n", $local_podcast) unless ($Quiet);
 			return;
-		} elsif ( $local_length > $entry->{length} ) {
+		} elsif ($local_length > $entry->{length}) {
 			# Downloaded too much, this might mean we were downloading the stream
 			# from two concurrent downloaders, we should just kill the file and redo.
-			if ( $Feeds->{main}->{NOOP} ) {
+			if ($Feeds->{main}->{NOOP}) {
 				printf(
 					STDERR "Local file %s is bigger than upstream, but not deleted due to noop mode\n",
 					$local_podcast
 				);
-			} elsif ( unlink($local_podcast) == 1 ) {
+			} elsif (unlink($local_podcast) == 1) {
 				printf(
 					STDERR "Deleted %s (bigger than upstream\'s), will download again\n",
 					$local_podcast
@@ -397,7 +408,7 @@ sub downloadStream {
 			} else {
 				printf(
 					STDERR "Can\'t delete oversized file %s: %s, skipped.\n",
-					$local_podcast, $!
+					$local_podcast, $!,
 				);
 				return;
 			}
@@ -407,29 +418,29 @@ sub downloadStream {
 	my $is_interactive = is_interactive();
 	my $ua = LWP::UserAgent->new(
 		show_progress => $is_interactive && !$Quiet,
-		agent => 'dlpodget'
+		agent => 'dlpodget',
 	);
-	printf(STDERR "Downloading %s ... ", $entry->{uri}) if ( !$is_interactive && !$Quiet );
+	printf(STDERR "Downloading %s ... ", $entry->{uri}) if (!$is_interactive && !$Quiet);
 	printf(
 		STDERR "Setting timeout %u and retries %d\n",
-		$Feeds->{main}->{TIMEOUT}, $Feeds->{main}->{MAXTRIES}
-	) if ( $Debug );
+		$Feeds->{main}->{TIMEOUT}, $Feeds->{main}->{MAXTRIES},
+	) if ($Debug);
 	$ua->timeout($Feeds->{main}->{TIMEOUT});
 	$tries = $Feeds->{main}->{MAXTRIES};
 
-	unless ( $Feeds->{main}->value('noop') ) {
+	unless ($Feeds->{main}->value('noop')) {
 		make_path($Feeds->{$Name}->{localpath});
-		if ( open($OutputHandle, '>>:raw', $local_podcast) ) {
+		if (open($OutputHandle, '>>:raw', $local_podcast)) {
 			binmode($OutputHandle);
 		} else {
 			printf(STDERR "Local failure on stream %s -- %s: %s\n", $Name, $local_podcast, $!);
 			return;
 		}
 	}
-	$chunkCB = \&NullChunk if ( $Feeds->{main}->{NOOP} );
-	if ( $local_length ) {
+	$chunkCB = \&NullChunk if ($Feeds->{main}->{NOOP});
+	if ($local_length) {
 		%get_params = (
-			'Range' => "bytes=$local_length-"
+			'Range' => "bytes=$local_length-",
 		);
 	} else {
 		DownloadLog($Feeds, 'stream', $entry->{uri});
@@ -437,7 +448,7 @@ sub downloadStream {
 
 
 	$tries = 1 + ($retries || 0);
-	my $paul = new Dlpodget::Muadeeb;
+	my $paul = Dlpodget::Muadeeb->new();
 	do {
 		$http_resp = $ua->get(
 			$entry->{uri},
@@ -448,15 +459,15 @@ sub downloadStream {
 		#':content_cb' => $chunkCB
 			},
 		);
-		$paul->rSleep($rsleep) if ( ($tries-1) && $http_resp->code() != 200 );
-	} while ( $http_resp->code() != 200 && --$tries );
-	close($OutputHandle) if ( !$Feeds->{main}->{NOOP} );
+		$paul->rSleep($rsleep) if (($tries-1) && $http_resp->code() != 200);
+	} while ($http_resp->code() != 200 && --$tries);
+	close($OutputHandle) if (!$Feeds->{main}->{NOOP});
 	$OutputHandle = undef;
 
 	#close($f) if ( !$Feeds->{main}->value('noop') ); # FIXME: $f out of scope
-	printf(STDERR "done.\n") if ( !$is_interactive && !$Quiet );
+	printf(STDERR "done.\n") if (!$is_interactive && !$Quiet);
 
-	Notify($local_podcast) if ( $notify );
+	Notify($local_podcast) if ($notify);
 }
 
 #sub processTagsOld($$) {
@@ -482,7 +493,7 @@ sub downloadStream {
 #}
 
 sub processTags {
-	my ( $testData, $V ) = @_;
+	my ($testData, $V) = @_;
 
 	while (my ($k, $v) = each(%{$testData->{mappings}})) {
 		$globalTagProcessor->assoc($k, $v);
@@ -491,7 +502,7 @@ sub processTags {
 }
 
 sub cleanupStreams {
-	my ( $Feeds, $entry, $Name ) = @_;
+	my ($Feeds, $entry, $Name) = @_;
 
 	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
 	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
@@ -503,22 +514,24 @@ sub cleanupStreams {
 }
 
 sub child {
-	my ( $DB, $FeedKey, $Feeds, $Feed ) = @_;
+	my ($DB, $FeedKey, $Feeds, $Feed) = @_;
 	my @entries = readFeed($Feeds, $Feed);
-	foreach my $entry ( @entries ) {
-		print STDERR 'Processing entry: ' . Dumper $entry if ( $Debug );
+	foreach my $entry (@entries) {
+		print STDERR 'Processing entry: ' . Dumper $entry if ($Debug);
 		cleanupStreams($Feeds, $entry, $Feed->{name});
 		downloadStream($Feeds, $entry, $Feed->{name});
-		dbUpdateStream($DB, $FeedKey, $entry) if ( $DB );
+		dbUpdateStream($DB, $FeedKey, $entry) if ($DB);
 	}
+
+	return;
 }
 
 sub db {
 	my $dbh;
 
-	return undef if ( $File eq DEV_NULL() );
+	return undef if ($File eq $DEV_NULL);
 	$dbh = DBI->connect("DBI:SQLite:$File");
-	if ( $dbh ) {
+	if ($dbh) {
 		$dbh->do(
 			'CREATE TABLE IF NOT EXISTS feeds (
 				id INTEGER PRIMARY KEY NOT NULL,
@@ -538,7 +551,7 @@ sub db {
 		);
 	}
 	return $dbh;
-			}
+}
 
 my %_dbUpdateFeed = (
 	get_feed_id => undef,
@@ -549,15 +562,15 @@ my %_dbUpdateFeed = (
 sub dbUpdateFeed {
 	my $ret = 0;
 	my $sth;
-	my ( $DB, $Name ) = @_;
+	my ($DB, $Name) = @_;
 
 	# Prepare all of the possible statements
-	if ( !$_dbUpdateFeed{'get_feed_id'} ) {
+	if (!$_dbUpdateFeed{'get_feed_id'}) {
 		my $sth = $DB->prepare('SELECT id FROM feeds WHERE name = ?');
 		$_dbUpdateFeed{'get_feed_id'} = $sth if ( $sth );
 	}
 
-	if ( !$_dbUpdateFeed{'ins_feed'} ) {
+	if (!$_dbUpdateFeed{'ins_feed'}) {
 		my $sth = $DB->prepare('
 			INSERT INTO feeds (
 				last_check_t, name
@@ -565,10 +578,10 @@ sub dbUpdateFeed {
 				?, ?
 			)'
 		);
-		$_dbUpdateFeed{'ins_feed'} = $sth if ( $sth );
+		$_dbUpdateFeed{'ins_feed'} = $sth if ($sth);
 	}
 
-	if ( !$_dbUpdateFeed{'upd_feed'} ) {
+	if (!$_dbUpdateFeed{'upd_feed'}) {
 		my $sth = $DB->prepare('UPDATE feeds SET last_check_t = ? WHERE id = ?');
 		$_dbUpdateFeed{'upd_feed'} = $sth if ( $sth );
 	}
@@ -576,7 +589,7 @@ sub dbUpdateFeed {
 	# Execute needed statements
 	$_dbUpdateFeed{'get_feed_id'}->execute($Name);
 	my $ref = $_dbUpdateFeed{'get_feed_id'}->fetchrow_hashref();
-	if ( $ref->{id} ) { # Does feed exist?
+	if ($ref->{id}) { # Does feed exist?
 		# Yes, the feed exists.
 		$ret = $ref->{id};
 		$_dbUpdateFeed{'upd_feed'}->execute(time(), $ret);
@@ -585,7 +598,7 @@ sub dbUpdateFeed {
 		$ret = $DB->last_insert_id(undef, undef, undef, undef);
 	}
 
-	die('Assertion failure') if ( !$ret );
+	die('Assertion failure') unless ($ret);
 	return $ret;
 }
 
@@ -594,8 +607,8 @@ my %_dbUpdateStream = (
 );
 sub dbUpdateStream {
 	my $ret = 0;
-	my ( $DB, $FeedKey, $Entry ) = @_;
-	if ( !$_dbUpdateStream{'repl_into_stream'} ) {
+	my ($DB, $FeedKey, $Entry) = @_;
+	if (!$_dbUpdateStream{'repl_into_stream'}) {
 		my $sth = $DB->prepare(
 			'INSERT OR REPLACE INTO streams (
 				feed_id, remotefn, remotelen, localfn
@@ -603,9 +616,9 @@ sub dbUpdateStream {
 				?, ?, ?, ?
 			)'
 		);
-		$_dbUpdateStream{'repl_into_stream'} = $sth if ( $sth );
+		$_dbUpdateStream{'repl_into_stream'} = $sth if ($sth);
 	}
-	if ( $_dbUpdateStream{'repl_into_stream'} ) {
+	if ($_dbUpdateStream{'repl_into_stream'}) {
 		$ret = $_dbUpdateStream{'repl_into_stream'}->execute(
 			$FeedKey,
 			$Entry->{remoteFilename},
@@ -617,9 +630,9 @@ sub dbUpdateStream {
 }
 
 sub Notify {
-	my $local_feed = shift;
+	my ($localFeed) = @_;
 	system(
-		"echo \"Feed $local_feed\" | mail -s \"New feed available\" palmer\@overchat.org"
+		"echo \"Feed $localFeed\" | mail -s \"New feed available\" palmer\@overchat.org"
 	);
 }
 
@@ -628,25 +641,28 @@ sub banner {
 	my $doneShbang = 0;
 	my $blankLines = 0;
 
-	if ( open(my $f, '<', $0) ) {
-		while ( my $l = <$f> ) {
-			last if ( $l !~ s/^\#//o ); # Strip comments
+	if (open(my $f, '<', $0)) {
+		while (my $l = <$f>) {
+			last if ($l !~ s/^\#//o); # Strip comments
 
-			if ( !$doneShbang && $l =~ m/^\!/ ) { # Skip shband
+			if (!$doneShbang && $l =~ m/^\!/) { # Skip shbang
 				$doneShbang++;
 				next;
 			}
-			if ( !$showLicense ) {
-				last if ( $blankLines == 2 );
-				$blankLines++ if ( $l =~ m/^\s*$/ );
+
+			if (!$showLicense) {
+				last if ($blankLines == 2);
+				$blankLines++ if ($l =~ m/^\s*$/);
 			}
 
 			print $l;
 		}
 		close($f);
-		print(" Use -L to see full license terms.\n") if ( !$showLicense );
+		print(" Use -L to see full license terms.\n") unless ($showLicense);
 		print("\n");
 	}
+
+	return;
 }
 
 sub syntax {
@@ -701,48 +717,48 @@ sub main {
 	my %feeds = ( );
 	my %opts = ( );
 	my %pids;
-	my ( $streamsEnabledCount, $streamsDefinedCount ) = ( 0, 0 );
+	my ($streamsEnabledCount, $streamsDefinedCount) = (0, 0);
 	my @confFiles = (
 		'dlpodget.rc',
-		"$ENV{HOME}/.dlpodget.rc"
+		"$ENV{HOME}/.dlpodget.rc",
 	);
 
-	return 1 if ( !getopts('C:Lf:qc:dn:h?', \%opts) );
-	@confFiles = ( $opts{'C'} ) if ( $opts{'C'} );
-	$Quiet = 1 if ( $opts{'q'} );
-	banner($opts{'L'}) unless ( $Quiet );
-	return syntax() if ( $opts{'h'} || $opts{'?'} );
-	$Debug = 1 if ( $opts{'d'} );
-	$File  = ( $opts{'f'} ) ? ( $opts{'f'} ) : ( "$ENV{HOME}/.dlpodget.db" );
+	return 1 unless (getopts('C:Lf:qc:dn:h?', \%opts));
+	@confFiles = ($opts{C}) if ($opts{C});
+	$Quiet = 1 if ($opts{q});
+	banner($opts{L}) unless ($Quiet);
+	return syntax() if ($opts{h} || $opts{'?'});
+	$Debug = 1 if ($opts{d});
+	$File  = $opts{f} ? $opts{f} : "$ENV{HOME}/.dlpodget.db";
 	print(STDERR "Explicit debug mode enabled by -d\n") if ( $Debug );
 	print(STDERR "Quiet mode enabled by -q\n") if ( $Debug );
-	if ( $opts{'f'} ) {
+	if ($opts{f}) {
 		my $n = ' (null device)';
-		$n = '' if ( $File ne DEV_NULL() );
+		$n = '' if ($File ne $DEV_NULL);
 		printf(STDERR "Overridden database with -f %s%s\n", $File, $n)
 	}
 
 	my $conf = { }; # FIXME: What's going on with this?  Look at config module in lib/
-	if ( $conf && (@defKeys = $conf->Parameters('main')) ) { # FIXME
-		if ( !$conf->val('main', 'enable', 1) ) {
-			print(STDERR "Configuration disabled.\n") unless ( $Quiet );
+	if ( $conf && (@defKeys = $conf->Parameters('main')) ) { # FIXME: URGENT XXX
+		unless ($conf->val('main', 'enable', 1)) {
+			print(STDERR "Configuration disabled.\n") unless ($Quiet);
 			$conf = undef;
 		}
 	}
 
-	$feeds{'main'} = Dlpodget::TagProcessor->new();
-	if ( $conf ) {
-		my %reserveSec = map {  $_ => 1 } ( 'main', 'paths' ); # Reserved section names
-		my ( @sections, $secC );
+	$feeds{main} = Dlpodget::TagProcessor->new();
+	if ($conf) { # FIXME: $conf has been replaced
+		my %reserveSec = map {  $_ => 1 } ('main', 'paths'); # Reserved section names
+		my (@sections, $secC);
 		@sections = $conf->Sections();
 		$secC = scalar(@sections);
 
 		# First load the generation configuration information
 		# Include environment variables.
-		foreach my $ek ( keys(%ENV) ) {
-			$feeds{'main'}->assoc(uc($ek), $ENV{$ek});
+		foreach my $ek (keys(%ENV)) {
+			$feeds{main}->assoc(uc($ek), $ENV{$ek});
 		}
-		if ( scalar(@defKeys) ) {
+		if (scalar(@defKeys)) {
 			foreach my $mk ( @defKeys ) {
 				# FIXME: This is still busted
 				$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
@@ -750,33 +766,33 @@ sub main {
 				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
 			}
 			# Set debug flag via config if it existed.
-			if ( $feeds{main}->value('DEBUG') ) {
+			if ($feeds{main}->value('DEBUG')) {
 				$Debug = $feeds{main}->value('DEBUG');
 				printf(STDERR "Set Debug via config: %s\n", $Debug);
 			}
 		}
 
 		$ourConfig->initConfigDefaults(\%feeds);
-		if ( listHasMember('paths', @sections) ) { # Has a paths section?
+		if (listHasMember('paths', @sections)) { # Has a paths section?
 			my @secKeys;
-			if ( (@secKeys = $conf->Parameters('paths')) ) {
-				foreach my $pk ( @secKeys ) {
-					$feeds{'main'}->assoc(uc($pk), $conf->val('paths', $pk));
+			if ((@secKeys = $conf->Parameters('paths'))) {
+				foreach my $pk (@secKeys) {
+					$feeds{main}->assoc(uc($pk), $conf->val('paths', $pk));
 				}
 				# For backward compatibility, set localpfx with [paths] root
-				if ( $feeds{'main'}->value('root') ) {
-					$feeds{'main'}->assoc('localpfx', $feeds{'main'}->value('root'));
+				if ($feeds{main}->value('root')) {
+					$feeds{main}->assoc('localpfx', $feeds{main}->value('root'));
 				}
 			}
 		}
 
-		for ( my $secI = 0; $secI < $secC; $secI++ ) {
-			my ( @secKeys, $keyC );
-			next if ( $opts{'n'} && $sections[$secI] ne $opts{'n'} );
+		for (my $secI = 0; $secI < $secC; $secI++) {
+			my (@secKeys, $keyC);
+			next if ($opts{n} && $sections[$secI] ne $opts{n});
 			@secKeys = $conf->Parameters($sections[$secI]);
 			$keyC = scalar(@secKeys);
-			foreach ( my $keyI = 0; $keyI < $keyC; $keyI++ ) {
-				next if ( $reserveSec{$sections[$secI]} ); # Skip reserved sections
+			foreach (my $keyI = 0; $keyI < $keyC; $keyI++) {
+				next if ($reserveSec{$sections[$secI]}); # Skip reserved sections
 				my $v = $conf->val($sections[$secI], $secKeys[$keyI]);
 				#$v = processTags(\%feeds, $v);
 				printf(
@@ -785,17 +801,17 @@ sub main {
 					$sections[$secI],
 					$secKeys[$keyI],
 					$v
-				) if ( $Debug );
+				) if ($Debug);
 				$feeds{ $sections[$secI] }->{ $secKeys[$keyI] } = $v;
 			}
 		}
 	}
 
-	if ( defined($opts{'c'}) ) {
-		my $max_children_opt = int($opts{'c'});
-		if ( $Debug ) {
+	if (defined($opts{c})) {
+		my $max_children_opt = int($opts{c});
+		if ($Debug) {
 			my $msg;
-			if ( defined($feeds{'main'}->value('maxchildren')) ) {
+			if (defined($feeds{main}->value('maxchildren'))) {
 				$msg = sprintf(
 					"Overriding config maxchildren %u via -c %u\n",
 					$feeds{main}->value('maxchildren'), $max_children_opt
@@ -805,33 +821,33 @@ sub main {
 			}
 			print(STDERR $msg);
 		}
-		$feeds{'main'}->assoc('maxchildren', $max_children_opt);
+		$feeds{main}->assoc('maxchildren', $max_children_opt);
 	}
 
 	$0 = "$proctitle [MASTER]" if ( $feeds{main}->value('maxchildren') != 0 );
 	my $db = db();
-	foreach my $feedName ( keys(%feeds) ) {
+	foreach my $feedName (keys(%feeds)) {
 		my $feed_key;
 		my $reaped_pid;
 		my $child_limit_reached = 0;
 		my $feed = $feeds{$feedName};
 		$ourConfig->initFeedDefaults(\%feeds, $feed);
-		$streamsDefinedCount++ if ( $feed->{rss} );
-		next if ( !$feed->{enable} );
-		next if ( !$feed->{download} );
+		$streamsDefinedCount++ if ($feed->{rss});
+		next unless ($feed->{enable});
+		next unless ($feed->{download});
 		$feed->{name} = $feedName;
-		$feed_key = dbUpdateFeed($db, $feed->{name}) if ( $db );
+		$feed_key = dbUpdateFeed($db, $feed->{name}) if ($db);
 			$streamsEnabledCount++;
-		if ( $feeds{main}->{MAXCHILDREN} == 0 ) { # Master performs downloads
+		if ($feeds{main}->{MAXCHILDREN} == 0) { # Master performs downloads
 			$streamsEnabledCount++;
 			$0 = "$proctitle [$feedName]";
 			child($db, $feed_key, \%feeds, $feed);
 			next;
-		} elsif ( $feeds{main}->{MAXCHILDREN} < 0 || scalar(keys(%pids)) < $feeds{main}->{MAXCHILDREN} ) {
-			sleep($feeds{main}->{CHILDDELAY}) if ( $feeds{main}->{CHILDDELAY} && scalar(keys(%pids)) );
+		} elsif ($feeds{main}->{MAXCHILDREN} < 0 || scalar(keys(%pids)) < $feeds{main}->{MAXCHILDREN}) {
+			sleep($feeds{main}->{CHILDDELAY}) if ($feeds{main}->{CHILDDELAY} && scalar(keys(%pids)));
 			my $pid = fork();
-			die "cannot fork: $!" if ( !defined($pid) );
-			if ( $pid == 0 ) { # Child process
+			die "cannot fork: $!" if (!defined($pid));
+			if ($pid == 0) { # Child process
 				$0 = "$proctitle [$feedName]";
 				child($db, $feed_key, \%feeds, $feed);
 				exit(0); # Children should not return
@@ -839,51 +855,53 @@ sub main {
 				$pids{$pid} = $feedName;
 			}
 		} else {
-			warn "Pending (child limit reached)." unless ( $Quiet );
+			warn "Pending (child limit reached)." unless ($Quiet);
 			$child_limit_reached = 1;
 		}
 
-		if ( $child_limit_reached ) {
+		if ($child_limit_reached) {
 			$reaped_pid = wait();
 		} else {
 			$reaped_pid = waitpid(-1, WNOHANG); # Any children finished?
-			next if ( $reaped_pid <= 0 ); # No, carry on.
+			next if ($reaped_pid <= 0); # No, carry on.
 		}
 
 		# A child returned, remove it from the PID list
-		die 'Internal error' if ( !exists($pids{$reaped_pid}) );
+		die('Internal error') if (!exists($pids{$reaped_pid}));
 		delete($pids{$reaped_pid});
 
-		redo if ( $child_limit_reached );
+		redo if ($child_limit_reached);
 	}
 
-	while ( scalar(keys(%pids)) ) {
+	while (scalar(keys(%pids))) {
 		my $pid = wait();
-		last if ( $pid == -1 );
+		last if ($pid == -1);
 		delete($pids{$pid});
 	}
-	unless ( $streamsDefinedCount ) {
-		print "No valid streams defined.\n";
-		return 1;
-	}
-	unless ( $streamsEnabledCount ) {
-		print "No enabled streams.\n";
-		return 0;
-	}
 
-	unless ( $streamsDefinedCount ) {
+	unless ($streamsDefinedCount) {
 		print "No valid streams defined.\n";
 		return 1;
 	}
 
-	unless ( $streamsEnabledCount ) {
+	unless ($streamsEnabledCount) {
 		print "No enabled streams.\n";
 		return 0;
 	}
 
-	close($Log) if ( $Log );
+	unless ($streamsDefinedCount) {
+		print "No valid streams defined.\n";
+		return 1;
+	}
+
+	unless ($streamsEnabledCount) {
+		print "No enabled streams.\n";
+		return 0;
+	}
+
+	close($Log) if ($Log);
 	return 0;
 }
 
-exit(main()) if ( !caller() );
+exit(main()) unless (caller());
 1;
