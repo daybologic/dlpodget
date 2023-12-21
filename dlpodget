@@ -704,6 +704,20 @@ sub initDic {
 	return;
 }
 
+sub installSignalHandlers {
+	$SIG{__WARN__} = sub {
+		my (@args) = @_;
+		$dic->logger->warn(@args);
+	};
+
+	$SIG{__DIE__} = sub {
+		my (@args) = @_;
+		$dic->logger->fatal(@args);
+	};
+
+	return;
+}
+
 sub main {
 	my $proctitle = $0; # Save original process title
 	my $conf = Dlpodget::Config->new();
@@ -719,6 +733,7 @@ sub main {
 	);
 
 	initDic();
+	installSignalHandlers();
 	return 1 unless (getopts('C:Lf:qc:dn:h?', \%opts));
 	@confFiles = ($opts{C}) if ($opts{C});
 	$Quiet = 1 if ($opts{q});
