@@ -88,8 +88,7 @@ sub result {
 		my $var = substr($V, $idx);
 		if ($var =~ $tagRx ) {
 			my $v = $self->mappings->{ uc($1) };
-			$self->logger->log(0, '%s -> %s', $1, $v || '(undef)')
-				if ($self->debug); # TODO: Need a debug call in the logger piece!
+			$self->dic->logger->debug(sprintf('%s -> %s', $1, ($v || '(undef)')));
 			if (!defined($v)) {
 				$avoid = $idx+1;
 				next;

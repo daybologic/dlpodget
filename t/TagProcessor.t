@@ -30,17 +30,18 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+use Dlpodget::DIC;
 use Dlpodget::TagProcessor;
-use Dlpodget::Logger;
 use Test::More 0.96;
-use POSIX;
+use POSIX qw(EXIT_SUCCESS);
 use Devel::Cover;
 use strict;
 use warnings;
 
-sub t_processTags($) {
+sub t_processTags {
 	my $F = 'processTags';
-	my $obj = shift;
+	my ($obj) = @_;
+
 	my %testData = (
 		'DUMMYA' => '$DUMMYC',
 		'DUMMYB' => '/tmp/2',
@@ -49,11 +50,11 @@ sub t_processTags($) {
 
 	plan tests => keys(%testData) * 2;
 
-	while ( my ( $tag, $subst ) = each(%testData) ) {
+	while (my ($tag, $subst) = each(%testData)) {
 		$obj->assoc($tag, $subst);
 	}
 
-	while ( my ( $tag, $subst ) = each(%testData) ) {
+	while (my ($tag, $subst) = each(%testData)) {
 		is($obj->value($tag), $subst, sprintf('Value of tag %s is %s', $tag, $subst));
 	}
 
@@ -62,11 +63,11 @@ sub t_processTags($) {
 	is($obj->result('$'), '$', "$F: Illegal variable");
 }
 
-sub t_main() {
+sub t_main {
 	plan tests => 3;
 
 	my @methods = qw( assoc value result );
-	my $obj = new Dlpodget::TagProcessor;
+	my $obj = Dlpodget::TagProcessor->new(dic => Dlpodget::DIC->new());
 
 	isa_ok($obj, 'Dlpodget::TagProcessor');
 	can_ok($obj, @methods);
