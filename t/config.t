@@ -72,7 +72,7 @@ sub testLoadNothing {
 
 sub testLoadSuccess {
 	my ($self) = @_;
-	plan tests => 2;
+	plan tests => 4;
 
 	my ($fh, $filename) = tempfile();
 	$self->sut(Dlpodget::Config->new({
@@ -90,6 +90,9 @@ sub testLoadSuccess {
 
 	is($self->sut->load(), EXIT_SUCCESS, 'returned success');
 	isa_ok($self->sut->ini, 'Config::IniFiles', 'ini');
+
+	is($self->sut->disable(), undef, 'called disabled; return undef');
+	is($self->sut->ini, undef, 'ini object is undef');
 
 	return EXIT_SUCCESS;
 }
