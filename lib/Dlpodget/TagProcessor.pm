@@ -63,30 +63,34 @@ sub assoc {
 }
 
 sub value {
-	my ( $self, $k ) = @_;
+	my ($self, $k) = @_;
 
 	$k = uc($k); # All keys are uppercase
-	if ( exists($self->mappings->{$k}) ) {
+	if (exists($self->mappings->{$k})) {
 		return $self->mappings->{$k};
 	}
 
-	$k = '(undef)' unless ( defined($k) );
+	$k = '(undef)' unless (defined($k));
 	warn(sprintf('%s: No key %s found', $self, $k));
+	return;
 }
 
 # FIXME: BROKEN PRIORITY Does this need to effectively call assoc() itself?!?!
 sub result {
-	my ( $self, $V ) = @_;
+	my ($self, $V) = @_;
+
 	$self->debug(1); # FIXME
+
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;
-	while ( (my $idx = index($V, '$', $avoid)) > -1 ) { # Find remaining user-variable references
+
+	while ((my $idx = index($V, '$', $avoid)) > -1) { # Find remaining user-variable references
 		my $var = substr($V, $idx);
-		if ( $var =~ $tagRx ) {
+		if ($var =~ $tagRx ) {
 			my $v = $self->mappings->{ uc($1) };
 			$self->logger->log(0, '%s -> %s', $1, $v || '(undef)')
-				if ( $self->debug ); # TODO: Need a debug call in the logger piece!
-			if ( !defined($v) ) {
+				if ($self->debug); # TODO: Need a debug call in the logger piece!
+			if (!defined($v)) {
 				$avoid = $idx+1;
 				next;
 			}
@@ -95,6 +99,7 @@ sub result {
 			$avoid++;
 		}
 	}
+
 	return $V;
 }
 

@@ -161,7 +161,7 @@ Readonly my %ERR => (
 
 Returns the error message associcated with the error identifier.
 If such an error cannot be found, the error identifier is used.
-Both L</Dlpodget::UUID> and bare strings are supported.
+Both L<Dlpodget::UUID> and bare strings are supported.
 
 =cut
 

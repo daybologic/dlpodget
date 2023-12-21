@@ -87,7 +87,7 @@ my $Log = undef;
 my $OutputHandle = undef;
 my $Quiet = 0;
 my $File = '';
-my $globalTagProcessor = new Dlpodget::TagProcessor;
+my $globalTagProcessor = Dlpodget::TagProcessor->new();
 
 sub wanted {
 	my ($dev,$ino,$mode,$nlink,$uid,$gid);
@@ -137,6 +137,7 @@ sub validateFilename {
 	my ($fileName) = @_;
 	die 'Must supply filename' if (!$fileName);
 	die 'File does not exist' unless (-f $fileName);
+	return;
 }
 
 sub validateCodec {
@@ -156,6 +157,7 @@ sub transcodePCM {
 	validateDirection($direction);
 
 	#my %translations
+	return;
 }
 
 sub translationInfo {
@@ -226,7 +228,7 @@ If no URL, or an invalid path is passed, undef is returned.
 
 sub fileFromURI {
 	my ($url) = @_;
-	return undef unless ($url);
+	return unless ($url);
 	my @uri_parts = split('/', $url);
 	return $uri_parts[-1];
 }
@@ -265,12 +267,13 @@ sub FeedCache {
 }
 
 sub readFeed {
-	my @entries = ( );
 	my ($Feeds, $Feed) = @_;
+
 	my ($Url, $Name) = ($Feed->{rss}, $Feed->{name});
 	my $feed = XML::Feed->parse(FeedCache($Name, $Url));
-
 	$Name ||= 'Untitled feed';
+
+	my @entries = ( );
 	if (!$feed) {
 		printf(STDERR "Stream %s error: %s\n", $Name, $@);
 		return @entries;
@@ -302,12 +305,16 @@ sub LocalLog {
 
 sub RemoteLog {
 	my ($Feeds, $Type, $Url) = @_;
+
 	return unless ($Feeds->{main}->{POPCON});
+
 	my $ua = LWP::UserAgent->new(show_progress => 0);
 	my $log_feed_notify_uri = sprintf(
 		'http://www.daybologic.co.uk/dlpodget/log.cgi?type=%s&uri=%s',
 		$Type, uri_escape($Url),
 	);
+
+	return;
 }
 
 #TODO: Move these out of global scope!
@@ -335,14 +342,17 @@ sub NullChunk {
 #}
 
 sub DownloadLog {
-	LocalLog(@_);
-	RemoteLog(@_);
+	my (@args) = @_;
+	LocalLog(@args);
+	RemoteLog(@args);
+	return;
 }
 
 sub downloadStream {
+	my ($Feeds, $entry, $Name, $tries) = @_;
+
 	my $http_resp;
 	my $local_length = 0;
-	my ($Feeds, $entry, $Name, $tries) = @_;
 	my $rsleep = $Feeds->{$Name}->{rsleep}   || $Feeds->{main}->value('rsleep');
 	my $retries = $Feeds->{$Name}->{retries} || $Feeds->{main}->value('retries');
 	my $chunkCB = \&Chunk;
@@ -350,6 +360,7 @@ sub downloadStream {
 	my $maxcount = $Feeds->{$Name}->{maxcount} || $Feeds->{main}->{MAXCOUNT};
 	my $local_podcast = join('/', $Feeds->{$Name}->{localpath}, $entry->{localFilename});
 	my $maxage = $Feeds->{$Name}->{maxage} || $Feeds->{main}->{MAXAGE};
+
 	if (-f $local_podcast) {
 		$local_length = (stat($local_podcast))[7];
 		if (!$entry->{length} || $local_length == $entry->{length}) {
@@ -389,6 +400,7 @@ sub downloadStream {
 		STDERR "Setting timeout %u and retries %d\n",
 		$Feeds->{main}->{TIMEOUT}, $Feeds->{main}->{MAXTRIES},
 	) if ($Debug);
+
 	$ua->timeout($Feeds->{main}->{TIMEOUT});
 	$tries = $Feeds->{main}->{MAXTRIES};
 
@@ -410,7 +422,6 @@ sub downloadStream {
 		DownloadLog($Feeds, 'stream', $entry->{uri});
 	}
 
-
 	$tries = 1 + ($retries || 0);
 	my $paul = Dlpodget::Muadeeb->new();
 	do {
@@ -425,6 +436,7 @@ sub downloadStream {
 		);
 		$paul->rSleep($rsleep) if (($tries-1) && $http_resp->code() != 200);
 	} while ($http_resp->code() != 200 && --$tries);
+
 	close($OutputHandle) if (!$Feeds->{main}->{NOOP});
 	$OutputHandle = undef;
 
@@ -432,6 +444,7 @@ sub downloadStream {
 	printf(STDERR "done.\n") if (!$is_interactive && !$Quiet);
 
 	Notify($local_podcast) if ($notify);
+	return;
 }
 
 #sub processTagsOld($$) {
@@ -462,6 +475,7 @@ sub processTags {
 	while (my ($k, $v) = each(%{$testData->{mappings}})) {
 		$globalTagProcessor->assoc($k, $v);
 	}
+
 	return $globalTagProcessor->result($V);
 }
 
@@ -475,10 +489,13 @@ sub cleanupStreams {
 
 	print Dumper File::Find::find({wanted => \&wanted}, $Feeds->{$Name}->{localpath});
 	#TODO
+
+	return;
 }
 
 sub child {
 	my ($DB, $FeedKey, $Feeds, $Feed) = @_;
+
 	my @entries = readFeed($Feeds, $Feed);
 	foreach my $entry (@entries) {
 		print STDERR 'Processing entry: ' . Dumper $entry if ($Debug);
@@ -493,7 +510,8 @@ sub child {
 sub db {
 	my $dbh;
 
-	return undef if ($File eq $DEV_NULL);
+	return if ($File eq $DEV_NULL);
+
 	$dbh = DBI->connect("DBI:SQLite:$File");
 	if ($dbh) {
 		$dbh->do(
@@ -524,9 +542,9 @@ my %_dbUpdateFeed = (
 );
 #	} # Duff merge?
 sub dbUpdateFeed {
+	my ($DB, $Name) = @_;
 	my $ret = 0;
 	my $sth;
-	my ($DB, $Name) = @_;
 
 	# Prepare all of the possible statements
 	if (!$_dbUpdateFeed{'get_feed_id'}) {
@@ -570,8 +588,9 @@ my %_dbUpdateStream = (
 	repl_into_stream => undef,
 );
 sub dbUpdateStream {
-	my $ret = 0;
 	my ($DB, $FeedKey, $Entry) = @_;
+	my $ret = 0;
+
 	if (!$_dbUpdateStream{'repl_into_stream'}) {
 		my $sth = $DB->prepare(
 			'INSERT OR REPLACE INTO streams (
@@ -582,6 +601,7 @@ sub dbUpdateStream {
 		);
 		$_dbUpdateStream{'repl_into_stream'} = $sth if ($sth);
 	}
+
 	if ($_dbUpdateStream{'repl_into_stream'}) {
 		$ret = $_dbUpdateStream{'repl_into_stream'}->execute(
 			$FeedKey,
@@ -590,18 +610,22 @@ sub dbUpdateStream {
 			$Entry->{localFilename}
 		);
 	}
+
 	return $ret;
 }
 
 sub Notify {
 	my ($localFeed) = @_;
+
 	system(
 		"echo \"Feed $localFeed\" | mail -s \"New feed available\" palmer\@overchat.org"
 	);
+
+	return;
 }
 
 sub banner {
-	my $showLicense = shift;
+	my ($showLicense) = @_;
 	my $doneShbang = 0;
 	my $blankLines = 0;
 
@@ -658,8 +682,7 @@ sub syntax {
 }
 
 sub listHasMember {
-	my $needle = shift;
-	my @hayStack = @_;
+	my ($needle, @hayStack) = @_;
 
 	foreach my $member (@hayStack) {
 		if (!defined($needle) && !defined($member)) {
@@ -670,6 +693,7 @@ sub listHasMember {
 			return 1 if ($needle eq $member);
 		}
 	}
+
 	return 0;
 }
 

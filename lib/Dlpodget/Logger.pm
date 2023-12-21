@@ -37,18 +37,19 @@ use warnings;
 
 extends 'Dlpodget::Base';
 
-use constant LOGLEVEL_FATAL => (9);
-use constant LOGLEVEL_CRIT  => (8);
-use constant LOGLEVEL_ERROR => (7);
-use constant LOGLEVEL_WARN  => (6);
-use constant LOGLEVEL_INFO  => (5);
+# TODO: Log4perl
+#use constant LOGLEVEL_FATAL => (9);
+#use constant LOGLEVEL_CRIT  => (8);
+#use constant LOGLEVEL_ERROR => (7);
+#use constant LOGLEVEL_WARN  => (6);
+#use constant LOGLEVEL_INFO  => (5);
 
 sub log {
-	my ( $self, $level, $format, @args ) = @_;
+	my ($self, $level, $format, @args) = @_;
 	my $ret;
 
 	# TODO: Ignore the log level for now.
-	if ( $self->mock ) {
+	if ($self->mock) {
 		$ret = scalar(@args);
 	} else {
 		$ret = printf($format, @args);

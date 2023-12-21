@@ -48,6 +48,8 @@ extends 'Dlpodget::Base';
 
 =head1 ATTRIBUTES
 
+None
+
 =head1 PRIVATE ATTRIBUTES
 
 =over

@@ -111,14 +111,14 @@ sub top {
 =item C<pop()>
 
 Returns the first available UUID and removes it from the internal queue.
-Returns C<undef> if nothing is available, in which case, use L</create()> as many
+Returns C<undef> if nothing is available, in which case, use L</create([$uuid])> as many
 times as you need.
 
 =cut
 
-sub pop {
+sub pop { ## no critic (ProhibitBuiltinHomonym)
 	my ($self) = @_;
-	return undef unless ($self->top());
+	return unless ($self->top());
 	return shift(@{ $self->__pool });
 }
 
@@ -159,7 +159,7 @@ if necessary.
 
 =cut
 
-sub reset {
+sub reset { ## no critic (ProhibitBuiltinHomonym)
 	my ($self) = @_;
 	@{ $self->__pool } = ( );
 	return;

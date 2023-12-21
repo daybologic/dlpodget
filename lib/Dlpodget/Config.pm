@@ -71,15 +71,21 @@ sub initConfigDefaults {
 		next if (defined($confmain->{$opt}) && $confmain->{$opt} =~ m/\d$/);
 		$confmain->{$opt} = $defaults{$opt};
 	}
+
+	return;
 }
 
 sub initFeedDefaults {
 	my ($self, $feeds, $feed) = @_;
+
 	$feed->{localpath} = $feeds->{main}->{LOCALPFX} unless ($feed->{localpath});
 	$feed->{rss} = '' unless ($feed->{rss});
+
 	foreach my $chk ('check', 'download', 'enable') {
 		$feed->{$chk} = 1 if (!$feed->{$chk} || $feed->{$chk} !~ m/\^d$/);
 	}
+
+	return;
 }
 
 sub load {

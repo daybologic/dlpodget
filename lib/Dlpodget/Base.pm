@@ -50,16 +50,20 @@ has 'cache' => (
 	is => 'ro',
 	required => 1,
 	isa => 'Dlpodget::Cache',
-	default => sub { new Dlpodget::Cache },
+	default => sub {
+		return Dlpodget::Cache->new();
+	},
 );
 
 sub propogate {
-	my $self = shift;
+	my ($self) = @_;
 
-	if ( $self->cache ) {
+	if ($self->cache) {
 		$self->cache->debug($self->debug);
 		#$self->cache->mock($self->mock);
 	}
+
+	return;
 }
 
 1;
