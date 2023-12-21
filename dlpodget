@@ -711,7 +711,7 @@ sub main {
 
 	$feeds{main} = Dlpodget::TagProcessor->new();
 	if ($conf) {
-		my %reserveSec = map {  $_ => 1 } ('main', 'paths'); # Reserved section names
+		my %reserveSec = map { $_ => 1 } ('main', 'paths'); # Reserved section names
 		my (@sections, $secC);
 		@sections = $conf->Sections();
 		$secC = scalar(@sections);
@@ -809,7 +809,7 @@ sub main {
 		} elsif ($feeds{main}->{MAXCHILDREN} < 0 || scalar(keys(%pids)) < $feeds{main}->{MAXCHILDREN}) {
 			sleep($feeds{main}->{CHILDDELAY}) if ($feeds{main}->{CHILDDELAY} && scalar(keys(%pids)));
 			my $pid = fork();
-			die "cannot fork: $!" if (!defined($pid));
+			die("cannot fork: $!") if (!defined($pid));
 			if ($pid == 0) { # Child process
 				$0 = "$proctitle [$feedName]";
 				child($db, $feed_key, \%feeds, $feed);
