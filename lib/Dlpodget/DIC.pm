@@ -43,12 +43,24 @@ application or unit test.
 
 use Moose;
 use MooseX::Singleton;
+use Log::Log4perl;
 use Readonly;
 use Scalar::Util qw(blessed);
 
 =head1 ATTRIBUTES
 
-None
+=over
+
+=item C<logger>
+
+L<Log::Log4perl::Logger>, automatically initialized on first-access via L</_makeLogger()>.
+For the general use of all code.
+
+=cut
+
+has logger => (is => 'rw', isa => 'Log::Log4perl::Logger', lazy => 1, builder => '_makeLogger');
+
+=back
 
 =head1 PRIVATE ATTRIBUTES
 
@@ -123,6 +135,21 @@ sub get {
 	}
 
 	die("DIC object $name was not set, when you attempted to fetch it");
+}
+
+=back
+
+=head1 PROTECTED METHODS
+
+=over
+
+=item C<_makeLogger()>
+
+=cut
+
+sub _makeLogger {
+	Log::Log4perl->init('etc/log4perl.conf');
+	return Log::Log4perl->get_logger('dlpodget.general');
 }
 
 =back

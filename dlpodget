@@ -35,6 +35,7 @@ use lib './lib';
 use Config::IniFiles;
 #use LWP::Protocol::Net::Curl MAX_RECV_SPEED_LARGE => 10240;
 use File::Path qw(make_path);
+use Dlpodget::DIC;
 use Dlpodget::Config;
 use Dlpodget::TagProcessor;
 use Dlpodget::Muadeeb;
@@ -88,6 +89,7 @@ my $OutputHandle = undef;
 my $Quiet = 0;
 my $File = '';
 my $globalTagProcessor = Dlpodget::TagProcessor->new();
+my $dic; # THIS IS THE FUTURE!
 
 sub wanted {
 	my ($dev,$ino,$mode,$nlink,$uid,$gid);
@@ -697,6 +699,11 @@ sub listHasMember {
 	return 0;
 }
 
+sub initDic {
+	$dic = Dlpodget::DIC->new();
+	return;
+}
+
 sub main {
 	my $proctitle = $0; # Save original process title
 	my $conf = Dlpodget::Config->new();
@@ -711,6 +718,7 @@ sub main {
 		"$ENV{HOME}/.dlpodget.rc",
 	);
 
+	initDic();
 	return 1 unless (getopts('C:Lf:qc:dn:h?', \%opts));
 	@confFiles = ($opts{C}) if ($opts{C});
 	$Quiet = 1 if ($opts{q});
@@ -866,7 +874,7 @@ sub main {
 	}
 
 	unless ($streamsDefinedCount) {
-		print "No valid streams defined.\n";
+		$dic->logger->error('No valid streams defined');
 		return 1;
 	}
 
@@ -876,7 +884,7 @@ sub main {
 	}
 
 	unless ($streamsDefinedCount) {
-		print "No valid streams defined.\n";
+		$dic->logger->error('No valid streams defined');
 		return 1;
 	}
 
