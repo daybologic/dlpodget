@@ -43,7 +43,7 @@ use constant LOGLEVEL_ERROR => (7);
 use constant LOGLEVEL_WARN  => (6);
 use constant LOGLEVEL_INFO  => (5);
 
-sub log($$$@) {
+sub log {
 	my ( $self, $level, $format, @args ) = @_;
 	my $ret;
 

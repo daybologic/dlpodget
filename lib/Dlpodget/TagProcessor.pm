@@ -45,7 +45,7 @@ has 'mappings'    => (
 	'default' => sub {{}},
 );
 
-sub assoc($$$) {
+sub assoc {
 	my ($self, $k, $v) = @_;
 
 	$k = uc($k); # All keys are uppercase
@@ -62,7 +62,7 @@ sub assoc($$$) {
 	return $self;
 }
 
-sub value($$) {
+sub value {
 	my ( $self, $k ) = @_;
 
 	$k = uc($k); # All keys are uppercase
@@ -75,7 +75,7 @@ sub value($$) {
 }
 
 # FIXME: BROKEN PRIORITY Does this need to effectively call assoc() itself?!?!
-sub result($$$) {
+sub result {
 	my ( $self, $V ) = @_;
 	$self->debug(1); # FIXME
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
