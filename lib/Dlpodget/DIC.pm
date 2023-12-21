@@ -49,18 +49,7 @@ use Scalar::Util qw(blessed);
 
 =head1 ATTRIBUTES
 
-=over
-
-=item C<logger>
-
-L<Log::Log4perl::Logger>, automatically initialized on first-access via L</_makeLogger()>.
-For the general use of all code.
-
-=cut
-
-has logger => (is => 'rw', isa => 'Log::Log4perl::Logger', lazy => 1, builder => '_makeLogger');
-
-=back
+None
 
 =head1 PRIVATE ATTRIBUTES
 
@@ -137,19 +126,31 @@ sub get {
 	die("DIC object $name was not set, when you attempted to fetch it");
 }
 
-=back
+=item C<logger()>
 
-=head1 PROTECTED METHODS
-
-=over
-
-=item C<_makeLogger()>
+Return the appropriate logger for the caller.
+This is a L<Log::Log4perl::Logger>.
 
 =cut
 
-sub _makeLogger {
-	Log::Log4perl->init('etc/log4perl.conf');
-	return Log::Log4perl->get_logger('dlpodget.general');
+my $__loggerInitialized = 0;
+sub logger {
+	my ($self) = @_;
+
+	unless ($__loggerInitialized) {
+		Log::Log4perl->init('etc/log4perl.conf');
+		$__loggerInitialized = 1;
+	}
+
+	my @callerInfo = caller(1);
+	my $funcName = $callerInfo[3];
+	my @parts = split(m/::/, $funcName);
+	my $classShortName = lc($parts[-2]);
+
+	my $logger = Log::Log4perl->get_logger(join('.', 'dlpodget', $classShortName));
+	return $logger if ($logger);
+
+	return Log::Log4perl->get_logger('dlpodget.main');
 }
 
 =back
