@@ -37,20 +37,20 @@ use warnings;
 
 extends 'Dlpodget::Object';
 
-sub rSleep($$) {
-	my ( $self, $periodSecs ) = @_;
-	return 0 unless ( $periodSecs );
+sub rSleep {
+	my ($self, $periodSecs) = @_;
+	return 0 unless ($periodSecs);
 
-	if ( $periodSecs =~ m/^(\d+)r$/o ) {
+	if ($periodSecs =~ m/^(\d+)r$/o) {
 		$periodSecs = int(rand($1)) + 1;
-	} elsif ( $periodSecs !~ m/^\d+$/o ) {
+	} elsif ($periodSecs !~ m/^\d+$/o) {
 		return -1;
 	}
 
 	$self->logger->log(0, "Sleeping %u seconds\n", $periodSecs)
-		if ( $self->debug );
+	    if ($self->debug);
 
-	$periodSecs = sleep($periodSecs) unless( $self->mock );
+	$periodSecs = sleep($periodSecs) unless($self->mock);
 	return $periodSecs;
 }
 

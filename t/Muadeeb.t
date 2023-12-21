@@ -39,10 +39,10 @@ use Dlpodget::Muadeeb;
 use strict;
 use warnings;
 
-my $Debug = 0; # TODO Need shared getopts() handling!
+my $Debug = 0; # TODO Need shared getopts() handling! -- No, you need log4perl
 
 sub t_rSleep() {
-	my $paul = new Dlpodget::Muadeeb(mock => 1, debug => $Debug);
+	my $paul = Dlpodget::Muadeeb->new(mock => 1, debug => $Debug);
 	is($paul->rSleep(undef), 0, 'rSleep undef 0');
 	is($paul->rSleep(0), 0, 'rSleep 0 0');
 	is($paul->rSleep(1), 1, 'rSleep 1 1');
@@ -53,12 +53,12 @@ sub t_rSleep() {
 
 	# Random tests
 	srand(0); # Ensure we always start from a deterministic point
-	my @sleepTimes = ( qw/2 8 1 9 6/ );
+	my @sleepTimes = (qw/2 8 1 9 6/);
 	is($paul->rSleep('10R'), -1, 'rSleep 10R -1');
-	foreach my $v ( @sleepTimes ) {
+	foreach my $v (@sleepTimes) {
 		is($paul->rSleep('10r'), $v, "rSleep 10r $v");
 	}
 }
 
-exit(t_rSleep()) unless ( caller() );
+exit(t_rSleep()) unless (caller());
 1;
