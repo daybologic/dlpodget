@@ -71,7 +71,7 @@ sub value {
 	}
 
 	$k = '(undef)' unless (defined($k));
-	warn(sprintf('%s: No key %s found', $self, $k));
+	$self->dic->logger->debug(sprintf('%s: No key %s found', $self, $k));
 	return;
 }
 

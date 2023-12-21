@@ -88,7 +88,7 @@ my $Log = undef;
 my $OutputHandle = undef;
 my $Quiet = 0;
 my $File = '';
-my $globalTagProcessor = Dlpodget::TagProcessor->new();
+my $globalTagProcessor = Dlpodget::TagProcessor->new(); # TODO: Automatic via dic?
 my $dic; # THIS IS THE FUTURE!
 
 sub wanted {
@@ -701,6 +701,7 @@ sub listHasMember {
 
 sub initDic {
 	$dic = Dlpodget::DIC->new();
+	$globalTagProcessor->dic($dic);
 	return;
 }
 
@@ -756,7 +757,7 @@ sub main {
 		}
 	}
 
-	$feeds{main} = Dlpodget::TagProcessor->new();
+	$feeds{main} = Dlpodget::TagProcessor->new({ dic => $dic });
 	if ($conf) {
 		my %reserveSec = map { $_ => 1 } ('main', 'paths'); # Reserved section names
 		my (@sections, $secC);

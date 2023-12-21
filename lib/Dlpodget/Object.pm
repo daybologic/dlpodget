@@ -40,10 +40,16 @@ use Dlpodget::Logger;
 
 extends 'Dlpodget::Base';
 
-has 'logger'     => (
+has logger     => ( # TODO nb. this logger is deprecated, use dic->logger instead
 	isa      => 'Dlpodget::Logger',
 	is       => 'rw',
 	default  => sub { Dlpodget::Logger->new(mock => 1) },
+);
+
+has dic => (
+	isa => 'Dlpodget::DIC',
+	#required => 1, # TODO: Hopefully soon!
+	is => 'rw',
 );
 
 1;
