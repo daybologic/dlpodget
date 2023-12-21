@@ -43,7 +43,13 @@ has confFiles => (is => 'ro', isa => 'ArrayRef[Str]', default => sub {
 	return [];
 });
 
-has ini => (is => 'rw', isa => 'Config::IniFiles');
+has ini => (is => 'rw', isa => 'Maybe[Config::IniFiles]');
+
+sub disable {
+	my ($self) = @_;
+	$self->ini(undef);
+	return;
+}
 
 sub initConfigDefaults {
 	my ($self, $feeds) = @_;

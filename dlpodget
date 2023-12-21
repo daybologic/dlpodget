@@ -675,7 +675,7 @@ sub listHasMember {
 
 sub main {
 	my $proctitle = $0; # Save original process title
-	my $conf = Dlpodget::Config->new(); # Replaces $conf
+	my $conf = Dlpodget::Config->new();
 	my @entries = ( );
 	my @defKeys;
 	my %feeds = ( );
@@ -702,10 +702,10 @@ sub main {
 		printf(STDERR "Overridden database with -f %s%s\n", $File, $n)
 	}
 
-	if ($conf && (@defKeys = $conf->Parameters('main'))) {
-		unless ($conf->val('main', 'enable', 1)) {
+	if ($conf->ini && (@defKeys = $conf->ini->Parameters('main'))) {
+		unless ($conf->ini->val('main', 'enable', 1)) {
 			print(STDERR "Configuration disabled.\n") unless ($Quiet);
-			$conf = undef;
+			$conf->disable();
 		}
 	}
 
@@ -713,7 +713,7 @@ sub main {
 	if ($conf) {
 		my %reserveSec = map { $_ => 1 } ('main', 'paths'); # Reserved section names
 		my (@sections, $secC);
-		@sections = $conf->Sections();
+		@sections = $conf->ini->Sections() if ($conf->ini);
 		$secC = scalar(@sections);
 
 		# First load the generation configuration information
@@ -724,9 +724,8 @@ sub main {
 		if (scalar(@defKeys)) {
 			foreach my $mk ( @defKeys ) {
 				# FIXME: This is still busted
-				$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
-				#$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->val('main', $mk)));
-				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->val('main', $mk));
+				#$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->ini->val('main', $mk)));
+				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->ini->val('main', $mk));
 			}
 			# Set debug flag via config if it existed.
 			if ($feeds{main}->value('DEBUG')) {
@@ -738,9 +737,9 @@ sub main {
 		$conf->initConfigDefaults(\%feeds);
 		if (listHasMember('paths', @sections)) { # Has a paths section?
 			my @secKeys;
-			if ((@secKeys = $conf->Parameters('paths'))) {
+			if ((@secKeys = $conf->ini->Parameters('paths'))) {
 				foreach my $pk (@secKeys) {
-					$feeds{main}->assoc(uc($pk), $conf->val('paths', $pk));
+					$feeds{main}->assoc(uc($pk), $conf->ini->val('paths', $pk));
 				}
 				# For backward compatibility, set localpfx with [paths] root
 				if ($feeds{main}->value('root')) {
@@ -752,11 +751,11 @@ sub main {
 		for (my $secI = 0; $secI < $secC; $secI++) {
 			my (@secKeys, $keyC);
 			next if ($opts{n} && $sections[$secI] ne $opts{n});
-			@secKeys = $conf->Parameters($sections[$secI]);
+			@secKeys = $conf->ini->Parameters($sections[$secI]);
 			$keyC = scalar(@secKeys);
 			foreach (my $keyI = 0; $keyI < $keyC; $keyI++) {
 				next if ($reserveSec{$sections[$secI]}); # Skip reserved sections
-				my $v = $conf->val($sections[$secI], $secKeys[$keyI]);
+				my $v = $conf->ini->val($sections[$secI], $secKeys[$keyI]);
 				#$v = processTags(\%feeds, $v);
 				printf(
 					STDERR
