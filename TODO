@@ -1,18 +1,17 @@
-  * Cached RSS XML files to avoid checking every run (https://bitbucket.org/daybologic/dlpodget.arc)
+  * Cached RSS XML files to avoid checking every run
   * GUI
-  * Unit testing (https://bitbucket.org/daybologic/dlpodget.ut)
-  * Download rate limiting - on a per-feed basis (https://bitbucket.org/daybologic/dlpodget.rate)
-  * Email notifications (https://bitbucket.org/daybologic/dlpodget.email)
-  * Transcoding support (https://bitbucket.org/daybologic/dlpodget.codecs)
-  * Back-end database tracking, logging and statistics (https://bitbucket.org/daybologic/dlpodget.db)
+  * Download rate limiting - on a per-feed basis
+  * Email notifications
+  * Transcoding support
+  * Back-end database tracking, logging and statistics
   * Robust handling of default values for incomplete configs (https://bitbucket.org/daybologic/dlpodget.defaults)
-  * Non-RSS feeds (https://bitbucket.org/daybologic/dlpodget.nonrss)
-  * User-defined download order (https://bitbucket.org/daybologic/dlpodget.order)
-  * Full documentation (https://bitbucket.org/daybologic/dlpodget.pod)
-  * Graceful timeout handling (https://bitbucket.org/daybologic/dlpodget.timeouts)
-  * OOP re-write (https://bitbucket.org/daybologic/dlpodget.perloop)
-  * C++ re-write
-  * Archive support - frozen feeds (https://bitbucket.org/daybologic/dlpodget.arc)
+  * Non-RSS feeds
+  * User-defined download order
+  * Full documentation / PoD
+  * Graceful timeout handling
+  * OOP re-write
+  * Java re-write?
+  * Archived feed support (frozen feeds)
   * Quiet mode (-q) for use from crontab
   * Unit test using Dummy::LWP::UserAgent
   * Optional rotation of old downloaded streams, requested by https://bitbucket.org/Aggamemnon
@@ -23,9 +22,6 @@ The following modules should be broken out from the monolithic script:
     * Utils
       * fileFromURI
       * processTags (this should invoke and execute the new TagProcessor
-
-    * Muadeeb
-      * rSleep
 
     * Undecided
       * readFeed
