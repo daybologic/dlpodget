@@ -44,7 +44,7 @@ Representing all feeds via L</__feeds> private attribute
 
 use Dlpodget::Feed;
 
-extends 'Dlpodget::Base';
+extends 'Dlpodget::Object';
 
 =head1 ATTRIBUTES
 

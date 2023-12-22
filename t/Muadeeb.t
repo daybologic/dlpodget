@@ -34,15 +34,18 @@ package main;
 
 use Test::More tests => 13;
 use Devel::Cover;
+use Dlpodget::DIC;
 use Dlpodget::Muadeeb;
 
 use strict;
 use warnings;
 
-my $Debug = 0; # TODO Need shared getopts() handling! -- No, you need log4perl
-
 sub t_rSleep() {
-	my $paul = Dlpodget::Muadeeb->new(mock => 1, debug => $Debug);
+	my $paul = Dlpodget::Muadeeb->new({
+		dic  => Dlpodget::DIC->new(),
+		mock => 1,
+	});
+
 	is($paul->rSleep(undef), 0, 'rSleep undef 0');
 	is($paul->rSleep(0), 0, 'rSleep 0 0');
 	is($paul->rSleep(1), 1, 'rSleep 1 1');

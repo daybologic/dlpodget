@@ -32,7 +32,6 @@
 
 # TODO Question: Would it have been better to implement this as a tie hash container?
 package Dlpodget::TagProcessor;
-# TODO: Should derive from LocalBase or it's successor.
 use Moose;
 use strict;
 use warnings;
@@ -52,9 +51,9 @@ sub assoc {
 	if ( exists($self->mappings->{$k}) ) {
 		my $old = $self->mappings->{$k};
 		$old = '(undef)' unless (defined($old));
-		warn(sprintf(
-			'%s: Key \'%s\' clobered, old value: \'%s\', new value: \'%s\'',
-			$self, $k, $old, $v
+		$self->dic->logger->warn(sprintf(
+			"%s: Key '%s' clobered, old value: '%s', new value: '%s'",
+			$self, $k, $old, $v,
 		));
 	}
 
@@ -78,8 +77,6 @@ sub value {
 # FIXME: BROKEN PRIORITY Does this need to effectively call assoc() itself?!?!
 sub result {
 	my ($self, $V) = @_;
-
-	$self->debug(1); # FIXME
 
 	my $tagRx = qr/^\$([A-Z0-9]+)/o;
 	my $avoid = 0;

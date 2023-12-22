@@ -37,7 +37,7 @@ use Moose;
 use Config::IniFiles;
 use POSIX qw(EXIT_FAILURE EXIT_SUCCESS);
 
-extends 'Dlpodget::Base';
+extends 'Dlpodget::Object';
 
 has confFiles => (is => 'ro', isa => 'ArrayRef[Str]', default => sub {
 	return [];
@@ -97,7 +97,7 @@ sub load {
 		if (my $ini = Config::IniFiles->new(-file => $confFile, -commentchar => ';')) {
 			$self->ini($ini);
 		} else {
-			print(STDERR "Fault with $confFile: " . join(',', @Config::IniFiles::errors) . "\n");
+			$self->dic->logger->error("Fault with $confFile: " . join(',', @Config::IniFiles::errors));
 			return EXIT_FAILURE;
 		}
 

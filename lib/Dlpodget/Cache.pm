@@ -31,18 +31,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 package Dlpodget::Cache; # Exposed via Dlpodget::Base
-
-use Cache::Null;
-use Moose;
-
 use strict;
 use warnings;
+use Moose;
 
-has [ 'debug' ] => (
-	isa     => 'Bool',
-	is      => 'rw',
-	default => 0,
-);
+extends 'Dlpodget::Object';
+
+use Cache::Null;
 
 has 'cache' => (
 	is => 'rw',
@@ -50,21 +45,21 @@ has 'cache' => (
 );
 
 sub cacheKey {
-	my ( $self, $token ) = @_;
+	my ($self, $token) = @_;
 
-	$token = 0 if ( !defined($token) );
+	$token = 0 unless (defined($token));
 	return join('/', ref($self), $token);
 }
 
 sub cacheGet {
-	my ( $self, $token ) = @_;
+	my ($self, $token) = @_;
 	my $key = $self->cacheKey($token);
-	warn(sprintf("cache->get(%s)\n", $key)) if ( $self->debug );
+	$self->dic->logger->trace(sprintf('cache->get(%s)', $key));
 	return $self->cache->get($key);
 }
 
 sub cacheSet {
-	my ( $self, $token, $data, $ttl ) = @_;
+	my ($self, $token, $data, $ttl) = @_;
 
 	$ttl = 0 unless ($ttl); # Ensure numeric zero TTL if unspecified
 	#TODO: Ensure ttl is a value, make function for that
@@ -72,11 +67,10 @@ sub cacheSet {
 	my $key = $self->cacheKey($token);
 	my @setArgs = ( $key, $data );
 	push(@setArgs, $ttl) if ($ttl);
-	warn(sprintf("cache->set(%s)\n", join(', ', @setArgs))) if ( $self->debug );
+	$self->dic->logger->trace(sprintf("cache->set(%s)\n", join(', ', @setArgs)));
 	$self->cache->set(@setArgs);
 
 	return $data;
 }
 
 1;
-

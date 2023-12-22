@@ -47,8 +47,7 @@ sub rSleep {
 		return -1;
 	}
 
-	$self->logger->log(0, "Sleeping %u seconds\n", $periodSecs)
-	    if ($self->debug);
+	$self->dic->logger->trace(sprintf('Sleeping %u seconds', $periodSecs));
 
 	$periodSecs = sleep($periodSecs) unless($self->mock);
 	return $periodSecs;

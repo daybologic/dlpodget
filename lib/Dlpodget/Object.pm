@@ -36,12 +36,23 @@ use Moose;
 use strict;
 use warnings;
 
-extends 'Dlpodget::Base';
+use Dlpodget::DIC;
+
+has mock => (
+	isa     => 'Bool',
+	is      => 'rw',
+	default => 0,
+);
 
 has dic => (
 	isa => 'Dlpodget::DIC',
-	#required => 1, # TODO: Hopefully soon!
+	lazy => 1,
 	is => 'rw',
+	builder => '_makeDIC',
 );
+
+sub _makeDIC {
+	return Dlpodget::DIC->new();
+}
 
 1;

@@ -49,7 +49,17 @@ use Scalar::Util qw(blessed);
 
 =head1 ATTRIBUTES
 
-None
+=over
+
+=item C<cache>
+
+On-demand L<Dlpodget::Cache> object.
+
+=cut
+
+has cache => (is => 'rw', lazy => 1, isa => 'Dlpodget::Cache', default => \&__makeCache);
+
+=back
 
 =head1 PRIVATE ATTRIBUTES
 
@@ -61,7 +71,7 @@ Internal bucket for all objects within the DIC.
 
 =cut
 
-has __bucket => (is => 'ro', isa => 'HashRef[Dlpodget::Base]', default => sub {
+has __bucket => (is => 'ro', isa => 'HashRef[Dlpodget::Object]', default => sub {
 	return { };
 });
 
@@ -78,7 +88,7 @@ If you attempt to do this twice, this is a fatal error.
 The setter stores a reference to the object in the bucket, under the name
 of the object, minus the 'Dlpodget::' prefix.
 
-Attempting to store ab object which is not derived from L<Dlpodget::Base> is
+Attempting to store ab object which is not derived from L<Dlpodget::Object> is
 a fatal error.
 
 This method return a reference to the DIC for chaining several calls together.
@@ -87,7 +97,7 @@ This method return a reference to the DIC for chaining several calls together.
 
 sub set {
 	my ($self, $obj) = @_;
-	Readonly my $BASE => 'Dlpodget::Base';
+	Readonly my $BASE => 'Dlpodget::Object';
 
 	die('No object sent to DIC/set') if (!defined($obj));
 
@@ -169,6 +179,18 @@ or return C<undef>, if the object is not set.
 sub __get {
 	my ($self, $name) = @_;
 	return $self->__bucket->{$name};
+}
+
+=item C<__makeCache()>
+
+=cut
+
+sub __makeCache {
+	my ($self) = @_;
+
+	return Dlpodget::Cache->new({
+		dic => $self,
+	});
 }
 
 =back

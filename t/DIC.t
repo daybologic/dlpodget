@@ -75,7 +75,7 @@ sub testMisuseSet {
 	throws_ok { $self->sut->set({}) } qr@DIC object must be blessed @,
 	    'Non-object passed to set: HASH ref';
 
-	throws_ok { $self->sut->set($self) } qr@DICTests is not derived from Dlpodget::Base @,
+	throws_ok { $self->sut->set($self) } qr@DICTests is not derived from Dlpodget::Object @,
 	    'Cannot insert an object not derived from Dlpodget::Base';
 
 	return EXIT_SUCCESS;

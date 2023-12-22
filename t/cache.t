@@ -32,66 +32,73 @@
 
 package main;
 use POSIX qw/EXIT_SUCCESS/;
-use Dlpodget::Cache;
-use Dlpodget::Base;
 use Cache::MemoryCache;
+use Dlpodget::Cache;
+use Dlpodget::DIC;
+use Dlpodget::Object;
+use Readonly;
 use Test::More;
 use Devel::Cover;
 
 use strict;
 use warnings;
 
-use constant TOKEN => '3db6cd60-f5cf-11e4-a93e-feff0000172f';
-use constant DATA  => '289f33a1-f637-11e4-a93e-feff0000172f';
+Readonly my $TOKEN => '3db6cd60-f5cf-11e4-a93e-feff0000172f';
+Readonly my $DATA  => '289f33a1-f637-11e4-a93e-feff0000172f';
 
-my $obj;
+my $sut;
 
 sub cacheKey {
+	plan tests => 2;
+
 	my $ref = 'Dlpodget::Cache/';
 
-	is($obj->cacheKey(TOKEN), $ref.TOKEN, 'token -> key');
-	is($obj->cacheKey(undef), $ref.'0', 'token undef');
+	is($sut->dic->cache->cacheKey($TOKEN), $ref.$TOKEN, 'token -> key');
+	is($sut->dic->cache->cacheKey(undef), $ref.'0', 'token undef');
 
-	plan tests => 2;
+	return;
 }
 
 sub cacheGet {
-	is($obj->cacheGet(TOKEN), undef, 'get token not stored');
-	$obj->cacheSet(TOKEN, DATA, 2);
-	is($obj->cacheGet(TOKEN), DATA, 'get token just stored');
-	sleep(2);
-	is($obj->cacheGet(TOKEN), undef, 'get token expired');
-
 	plan tests => 3;
+
+	is($sut->dic->cache->cacheGet($TOKEN), undef, 'get token not stored');
+	$sut->dic->cache->cacheSet($TOKEN, $DATA, 2);
+	is($sut->dic->cache->cacheGet($TOKEN), $DATA, 'get token just stored');
+	sleep(2);
+	is($sut->dic->cache->cacheGet($TOKEN), undef, 'get token expired');
+
+	return;
 }
 
 sub xyz {
-	my $base = new Dlpodget::Base;
+	plan tests => 5;
 
-	isa_ok($base, 'Dlpodget::Base');
-	isa_ok($base->cache, 'Dlpodget::Cache');
-	isa_ok($base->cache->cache, 'Cache::Null');
+	isa_ok($sut, 'Dlpodget::Object');
+	isa_ok($sut->dic, 'Dlpodget::DIC');
+	isa_ok($sut->dic->cache, 'Dlpodget::Cache');
+	isa_ok($sut->dic->cache->cache, 'Cache::Null');
 
-	$base->cache->cache(new Cache::MemoryCache);
+	$sut->dic->cache->cache(Cache::MemoryCache->new());
 
-	isa_ok($base->cache->cache, 'Cache::MemoryCache');
+	isa_ok($sut->dic->cache->cache, 'Cache::MemoryCache');
 
-	plan tests => 4;
+	return;
 }
 
 sub main {
-	$obj = new Dlpodget::Cache;
-	$obj->debug(1) if ( $ENV{'TEST_VERBOSE'} );
+	plan tests => 4;
 
-	can_ok($obj, qw/cache cacheKey cacheSet cacheGet/);
-	my $cache = new Cache::MemoryCache;
+	$sut = Dlpodget::Object->new({
+		dic => Dlpodget::DIC->new(),
+	});
 
-	$obj->cache($cache);
+	can_ok($sut->dic->cache, qw/cache cacheKey cacheSet cacheGet/);
+
+	subtest 'xyz' => \&xyz;
 	subtest 'cacheKey' => \&cacheKey;
 	subtest 'cacheGet' => \&cacheGet;
-	subtest 'xyz' => \&xyz;
 
-	plan tests => 4;
 	return EXIT_SUCCESS;
 }
 
