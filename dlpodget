@@ -83,7 +83,6 @@ Readonly my $CODEC_TRANSLATION_OUTPUT_LAST     => 2;
 Readonly my $CODEC_TRANSLATION_ENCODE          => 1;
 Readonly my $CODEC_TRANSLATION_DECODE          => 2;
 
-my $Debug = 0;
 my $Log = undef;
 my $OutputHandle = undef;
 my $Quiet = 0;
@@ -240,7 +239,7 @@ sub FeedCache {
 	my ($resp, $ua);
 	my $cacheFileName = "$ENV{HOME}/.cache/dlpodget/$Name.rss";
 	if (-f $cacheFileName) { # Already cached.
-		warn "Feed $Name has been satisfied by existing cache - $cacheFileName" if ($Debug);
+		$dic->logger->debug("Feed $Name has been satisfied by existing cache - $cacheFileName");
 		return $cacheFileName;
 	}
 
@@ -257,14 +256,16 @@ sub FeedCache {
 			$cacheFileName = undef; # Force URL instead
 		}
 	} else {
-		warn $resp->status_line;
+		$dic->logger->trace($resp->status_line);
 		$cacheFileName = undef;
 	}
+
 	if ($cacheFileName) {
-		warn "Feed $Name has been satisfied by newly written cache file - $cacheFileName" if ($Debug);
+		$dic->logger->debug("Feed $Name has been satisfied by newly written cache file - $cacheFileName");
 		return $cacheFileName;
 	}
-	warn "Feed $Name has no cache available" if ($Debug);
+
+	$dic->logger->debug("Feed $Name has no cache available");
 	return $Url;
 }
 
@@ -309,7 +310,7 @@ sub Chunk {
 	$dic->logger->debug(sprintf(
 		'Now we have %u chunks. This chunk was %u in size',
 		++$chunks, $chunk_len,
-	)) if ($Debug);
+	));
 	$total_size += $chunk_len;
 }
 
@@ -366,11 +367,9 @@ sub downloadStream {
 		show_progress => $is_interactive && !$Quiet,
 		agent => 'dlpodget',
 	);
-	$dic->logger->info(sprintf('Downloading %s ... ', $entry->{uri})) if (!$is_interactive && !$Quiet);
-	if ($Debug) {
-		$dic->logger->debug(sprintf('Setting timeout %u and retries %d',
-		    $Feeds->{main}->{TIMEOUT}, $Feeds->{main}->{MAXTRIES}));
-	}
+	$dic->logger->info(sprintf('Downloading %s ... ', $entry->{uri})) if (!$Quiet);
+	$dic->logger->debug(sprintf('Setting timeout %u and retries %d',
+	    $Feeds->{main}->{TIMEOUT}, $Feeds->{main}->{MAXTRIES}));
 
 	$ua->timeout($Feeds->{main}->{TIMEOUT});
 	$tries = $Feeds->{main}->{MAXTRIES};
@@ -427,7 +426,7 @@ sub downloadStream {
 #		if ( $var =~ $tagRx ) {
 #			#my $v = $Feeds->{main}->{ uc($1) };
 #			#my $v = $globalTagProcessor->value(uc($1));
-#			warn(sprintf('%s -> %s', $1, $v || '(undef)')) if ( 1 || $Debug );
+#			warn(sprintf('%s -> %s', $1, $v || '(undef)'));
 #			if ( !defined($v) ) {
 #				$avoid = $idx+1;
 #				next;
@@ -469,7 +468,7 @@ sub child {
 
 	my @entries = readFeed($Feeds, $Feed);
 	foreach my $entry (@entries) {
-		$dic->logger->debug('Processing entry: ' . Dumper $entry) if ($Debug);
+		$dic->logger->debug('Processing entry: ' . Dumper $entry);
 		cleanupStreams($Feeds, $entry, $Feed->{name});
 		downloadStream($Feeds, $entry, $Feed->{name});
 		dbUpdateStream($DB, $FeedKey, $entry) if ($DB);
