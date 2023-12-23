@@ -41,6 +41,8 @@ application or unit test.
 
 =cut
 
+use Dlpodget::Cache;
+use Dlpodget::Config;
 use Moose;
 use MooseX::Singleton;
 use Log::Log4perl;
@@ -58,6 +60,14 @@ On-demand L<Dlpodget::Cache> object.
 =cut
 
 has cache => (is => 'rw', lazy => 1, isa => 'Dlpodget::Cache', default => \&__makeCache);
+
+=item C<config>
+
+On-demand L<Dlpodget::Config> object.
+
+=cut
+
+has config => (is => 'rw', lazy => 1, isa => 'Dlpodget::Config', default => \&__makeConfig);
 
 =back
 
@@ -189,6 +199,18 @@ sub __makeCache {
 	my ($self) = @_;
 
 	return Dlpodget::Cache->new({
+		dic => $self,
+	});
+}
+
+=item C<__makeConfig()>
+
+=cut
+
+sub __makeConfig {
+	my ($self) = @_;
+
+	return Dlpodget::Config->new({
 		dic => $self,
 	});
 }

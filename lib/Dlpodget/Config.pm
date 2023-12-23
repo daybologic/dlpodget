@@ -39,7 +39,7 @@ use POSIX qw(EXIT_FAILURE EXIT_SUCCESS);
 
 extends 'Dlpodget::Object';
 
-has confFiles => (is => 'ro', isa => 'ArrayRef[Str]', default => sub {
+has confFiles => (is => 'rw', isa => 'ArrayRef[Str]', default => sub {
 	return [];
 });
 
@@ -91,11 +91,21 @@ sub initFeedDefaults {
 sub load {
 	my ($self) = @_;
 
-	foreach my $confFile (@{ $self->confFiles }) {
-		next unless (-f $confFile);
+	my $c = scalar(@{ $self->confFiles });
+	$self->dic->logger->error(sprintf('%d config files available (this is bad)', $c)) if ($c == 0);
+
+	for (my $i = 0; $i < $c; $i++) {
+		my $confFile = $self->confFiles->[$i];
+		unless (-f $confFile) {
+			$self->dic->logger->trace(sprintf("'%s' doesn't exist (%d more files to attempt)",
+			    $confFile, $c - $i - 1));
+
+			next;
+		}
 
 		if (my $ini = Config::IniFiles->new(-file => $confFile, -commentchar => ';')) {
 			$self->ini($ini);
+			$self->dic->logger->debug(sprintf("Selected config file: '%s' (loosely validated)", $confFile));
 		} else {
 			$self->dic->logger->error("Fault with $confFile: " . join(',', @Config::IniFiles::errors));
 			return EXIT_FAILURE;

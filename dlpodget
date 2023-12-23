@@ -690,7 +690,6 @@ sub installSignalHandlers {
 
 sub main {
 	my $proctitle = $0; # Save original process title
-	my $conf = Dlpodget::Config->new();
 	my @entries = ( );
 	my @defKeys;
 	my %feeds = ( );
@@ -704,33 +703,34 @@ sub main {
 
 	initDic();
 	installSignalHandlers();
-	return 1 unless (getopts('C:Lf:qc:dn:h?', \%opts));
+	return 1 unless (getopts('C:Lf:qc:n:h?', \%opts));
 	@confFiles = ($opts{C}) if ($opts{C});
 	$Quiet = 1 if ($opts{q});
 	banner($opts{L}) unless ($Quiet);
 	return syntax() if ($opts{h} || $opts{'?'});
-	$Debug = 1 if ($opts{d});
 	$File  = $opts{f} ? $opts{f} : "$ENV{HOME}/.dlpodget.db";
-	$dic->logger->debug('Explicit debug mode enabled by -d') if ($Debug);
-	$dic->logger->debug('Quiet mode enabled by -q') if ($Debug);
+	$dic->logger->debug('Quiet mode enabled by -q') if ($Quiet);
 	if ($opts{f}) {
 		my $n = ' (null device)';
 		$n = '' if ($File ne $DEV_NULL);
 		$dic->logger->debug("Overridden database with -f $File${n}");
 	}
 
-	if ($conf->ini && (@defKeys = $conf->ini->Parameters('main'))) {
-		unless ($conf->ini->val('main', 'enable', 1)) {
+	$dic->config->confFiles(\@confFiles);
+	$dic->config->load();
+
+	if ($dic->config->ini && (@defKeys = $dic->config->ini->Parameters('main'))) {
+		unless ($dic->config->ini->val('main', 'enable', 1)) {
 			$dic->logger->debug('Configuration disabled.') unless ($Quiet);
-			$conf->disable();
+			$dic->config->disable();
 		}
 	}
 
 	$feeds{main} = Dlpodget::TagProcessor->new({ dic => $dic });
-	if ($conf) {
+	if ($dic->config->ini) {
 		my %reserveSec = map { $_ => 1 } ('main', 'paths'); # Reserved section names
 		my (@sections, $secC);
-		@sections = $conf->ini->Sections() if ($conf->ini);
+		@sections = $dic->config->ini->Sections() if ($dic->config->ini);
 		$secC = scalar(@sections);
 
 		# First load the generation configuration information
@@ -741,22 +741,17 @@ sub main {
 		if (scalar(@defKeys)) {
 			foreach my $mk ( @defKeys ) {
 				# FIXME: This is still busted
-				#$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($conf->ini->val('main', $mk)));
-				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $conf->ini->val('main', $mk));
-			}
-			# Set debug flag via config if it existed.
-			if ($feeds{main}->value('DEBUG')) {
-				$Debug = $feeds{main}->value('DEBUG');
-				$dic->logger->debug("Set Debug via config: $Debug");
+				#$globalTagProcessor->assoc(uc($mk), $globalTagProcessor->result($dic->config->ini->val('main', $mk)));
+				$feeds{main}->{ uc($mk) } = processTags(\%feeds, $dic->config->ini->val('main', $mk));
 			}
 		}
 
-		$conf->initConfigDefaults(\%feeds);
+		$dic->config->initConfigDefaults(\%feeds);
 		if (listHasMember('paths', @sections)) { # Has a paths section?
 			my @secKeys;
-			if ((@secKeys = $conf->ini->Parameters('paths'))) {
+			if ((@secKeys = $dic->config->ini->Parameters('paths'))) {
 				foreach my $pk (@secKeys) {
-					$feeds{main}->assoc(uc($pk), $conf->ini->val('paths', $pk));
+					$feeds{main}->assoc(uc($pk), $dic->config->ini->val('paths', $pk));
 				}
 				# For backward compatibility, set localpfx with [paths] root
 				if ($feeds{main}->value('root')) {
@@ -768,18 +763,18 @@ sub main {
 		for (my $secI = 0; $secI < $secC; $secI++) {
 			my (@secKeys, $keyC);
 			next if ($opts{n} && $sections[$secI] ne $opts{n});
-			@secKeys = $conf->ini->Parameters($sections[$secI]);
+			@secKeys = $dic->config->ini->Parameters($sections[$secI]);
 			$keyC = scalar(@secKeys);
 			foreach (my $keyI = 0; $keyI < $keyC; $keyI++) {
 				next if ($reserveSec{$sections[$secI]}); # Skip reserved sections
-				my $v = $conf->ini->val($sections[$secI], $secKeys[$keyI]);
+				my $v = $dic->config->ini->val($sections[$secI], $secKeys[$keyI]);
 				#$v = processTags(\%feeds, $v);
 				$dic->logger->trace(sprintf(
 					'[%s] %s -> %s',
 					$sections[$secI],
 					$secKeys[$keyI],
 					$v,
-				)) if ($Debug);
+				));
 				$feeds{ $sections[$secI] }->{ $secKeys[$keyI] } = $v;
 			}
 		}
@@ -787,35 +782,33 @@ sub main {
 
 	if (defined($opts{c})) {
 		my $max_children_opt = int($opts{c});
-		if ($Debug) {
-			my $msg;
-			if (defined($feeds{main}->value('maxchildren'))) {
-				$msg = sprintf(
-					"Overriding config maxchildren %u via -c %u\n",
-					$feeds{main}->value('maxchildren'), $max_children_opt
-				);
-			} else {
-				$msg = sprintf("Setting maxchildren via -c %u\n", $max_children_opt);
-			}
-			$dic->logger->debug($msg);
+		my $msg;
+		if (defined($feeds{main}->value('maxchildren'))) {
+			$msg = sprintf(
+				"Overriding config maxchildren %u via -c %u\n",
+				$feeds{main}->value('maxchildren'), $max_children_opt,
+			);
+		} else {
+			$msg = sprintf("Setting maxchildren via -c %u\n", $max_children_opt);
 		}
+		$dic->logger->debug($msg);
 		$feeds{main}->assoc('maxchildren', $max_children_opt);
 	}
 
-	$0 = "$proctitle [MASTER]" if ( $feeds{main}->value('maxchildren') != 0 );
+	$0 = "$proctitle [MASTER]" if ($feeds{main}->value('maxchildren') != 0);
 	my $db = db();
 	foreach my $feedName (keys(%feeds)) {
 		my $feed_key;
 		my $reaped_pid;
 		my $child_limit_reached = 0;
 		my $feed = $feeds{$feedName};
-		$conf->initFeedDefaults(\%feeds, $feed);
+		$dic->config->initFeedDefaults(\%feeds, $feed);
 		$streamsDefinedCount++ if ($feed->{rss});
 		next unless ($feed->{enable});
 		next unless ($feed->{download});
 		$feed->{name} = $feedName;
 		$feed_key = dbUpdateFeed($db, $feed->{name}) if ($db);
-			$streamsEnabledCount++;
+		$streamsEnabledCount++;
 		if ($feeds{main}->{MAXCHILDREN} == 0) { # Master performs downloads
 			$streamsEnabledCount++;
 			$0 = "$proctitle [$feedName]";
