@@ -273,9 +273,17 @@ sub readFeed {
 	my ($Feeds, $Feed) = @_;
 
 	my ($Url, $Name) = ($Feed->{rss}, $Feed->{name});
-	my $feed = XML::Feed->parse(FeedCache($Name, $Url));
-	$Name ||= 'Untitled feed';
+	my $feedCache = FeedCache($Name, $Url);
+	my $feed;
+	eval {
+		$feed = XML::Feed->parse($feedCache);
+	};
+	if (my $evalError = $@) {
+		$dic->logger->error($evalError);
+		return ( );
+	}
 
+	$Name ||= 'Untitled feed';
 	my @entries = ( );
 	if (!$feed) {
 		$dic->logger->error(sprintf('Stream %s error: %s', $Name, $@));
