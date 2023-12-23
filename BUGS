@@ -1,1 +1,2 @@
 Links in documentation don't work
+Autoboom.com exploits some bug in XML::RSS; figure out what this is and work around it.
