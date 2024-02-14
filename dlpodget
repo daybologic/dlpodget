@@ -632,7 +632,7 @@ sub banner {
 }
 
 sub syntax {
-	printf("%s [-C config] [-c n...] [-f <file>] [-n <feed>] -d -q\n\n", $0);
+	printf("%s [-C config] [-c n...] [-f <file>] [-n <feed>] -q\n\n", $0);
 
 	print("-C <config>\n");
 	print("\tSpecify a specific, user-defined config file\n\n");
@@ -652,9 +652,6 @@ sub syntax {
 	print("-h / -?\n");
 	print("\tSyntax help (this)\n\n");
 	# TODO: You want more specific help by using -h and another option.
-
-	print("-d\n");
-	print("\tdebug\n\n");
 
 	return 0;
 }
