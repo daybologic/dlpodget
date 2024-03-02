@@ -5,6 +5,12 @@ package org.overchat.dlpodget.config;
   * in the [main] section.
   */
 class FeedConfig {
+	GeneralConfig general;
+
 	String rssUrl = "";
 	String localpath = "";
+
+	FeedConfig() {
+		general = new GeneralConfig();
+	}
 }

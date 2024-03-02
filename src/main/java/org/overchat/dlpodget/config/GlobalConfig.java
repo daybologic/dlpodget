@@ -5,9 +5,15 @@ package org.overchat.dlpodget.config;
   * per-feed.  The config section is called [main].
   */
 class GlobalConfig {
+	GeneralConfig general;
+
 	boolean debug = false;
 	boolean noop = false;
 	int maxChildren = 0;
 	int childDelay = 0;
 	boolean popCon = false;
+
+	GlobalConfig() {
+		general = new GeneralConfig();
+	}
 }
