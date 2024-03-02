@@ -1,5 +1,7 @@
 package org.overchat.dlpodget.config;
 
+import org.ini4j.Ini;
+
 /**
   * General configuration.
   * This may be global and it can be overridden per-feed.
@@ -16,4 +18,8 @@ class GeneralConfig {
 	boolean download = true;
 	Boolean attach;
 	Codec codec = Codec.DEFAULT;
+
+	GeneralConfig(Ini ini, Ini.Section section) {
+		notify = section.get("notify");
+	}
 }

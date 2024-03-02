@@ -1,5 +1,7 @@
 package org.overchat.dlpodget.config;
 
+import org.ini4j.Ini;
+
 /**
   * Global configuration. This is not feed-specific and cannot be overridden
   * per-feed.  The config section is called [main].
@@ -13,7 +15,11 @@ class GlobalConfig {
 	int childDelay = 0;
 	boolean popCon = false;
 
-	GlobalConfig() {
-		general = new GeneralConfig();
+	GlobalConfig(Ini ini, Ini.Section section) {
+		general = new GeneralConfig(ini, ini.get("main"));
+
+		debug = Utils.makeBoolean(section.get("debug"));
+		noop = Utils.makeBoolean(section.get("noop"));
+		popCon = Utils.makeBoolean(section.get("popcon"));
 	}
 }

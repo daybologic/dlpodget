@@ -13,6 +13,7 @@ public class ConfigFile {
 
 	private File file;
 	private Ini ini;
+	private GlobalConfig main;
 
 	public ConfigFile() {
 		file = new File(FILENAME);
@@ -35,6 +36,7 @@ public class ConfigFile {
 	private void parseMain() {
 		Ini.Section section = ini.get("main");
 		logger.trace(section);
+		main = new GlobalConfig(ini, section);
 	}
 
 	private void parseFeeds() {
@@ -43,6 +45,7 @@ public class ConfigFile {
 		for (String sectionName: sectionNames) {
 			if (sectionName.equals("main")) continue;
 			logger.trace(sectionName);
+			new FeedConfig(ini, ini.get(sectionName)); // TODO
 		}
 	}
 }
