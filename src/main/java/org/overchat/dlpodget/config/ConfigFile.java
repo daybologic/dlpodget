@@ -30,20 +30,36 @@ public class ConfigFile {
 
 	private void parse() {
 		parseMain();
+		parsePaths();
 		parseFeeds();
 	}
 
 	private void parseMain() {
 		Ini.Section section = ini.get("main");
-		logger.trace(section);
 		main = new GlobalConfig(ini, section);
+	}
+
+	private void parsePaths() {
+		Ini.Section section = ini.get("paths");
+		String root = section.get("root");
+		logger.trace("root: " + root);
+		String home = Env.get("HOME");
+		logger.trace("HOME: " + home);
+		Set<String> pathNames = section.keySet();
+		logger.trace(pathNames);
+		for (String pathName: pathNames) {
+			logger.trace("path: " + pathName);
+		}
 	}
 
 	private void parseFeeds() {
 		Set<String> sectionNames = ini.keySet();
 		logger.trace(sectionNames);
 		for (String sectionName: sectionNames) {
+			// Skip over reserved section names
 			if (sectionName.equals("main")) continue;
+			if (sectionName.equals("paths")) continue;
+
 			logger.trace(sectionName);
 			new FeedConfig(ini, ini.get(sectionName)); // TODO
 		}

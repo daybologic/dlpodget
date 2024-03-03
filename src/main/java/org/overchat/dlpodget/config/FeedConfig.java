@@ -23,5 +23,6 @@ class FeedConfig {
 		localpath = section.get("localpath");
 
 		logger.trace("rss: " + rssUrl);
+		logger.trace("localpath: " + localpath);
 	}
 }
