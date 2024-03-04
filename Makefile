@@ -1,4 +1,4 @@
-#!/usr/bin/make
+#!/usr/bin/make -f
 #
 # Daybo Logic Podcast downloader
 # Copyright (C) 2012-2024, Ducan Ross Palmer (M6KVM, 2E0EOL), all rights reserved.
@@ -30,40 +30,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO: Use GNU Autotools
-AUTOMAKE_OPTIONS=subdir-objects
-SUBDIRS = lib t
-ifdef DLPODGET_DOCS
-SUBDIRS += docs
-endif
+SUBDIRS = docs
 
+all: build binary subdirs
 
-all: subdirs
-
-install: install_subdirs
-	uid=`id -u`; \
-	if test "$$uid" -eq "0"; then \
-		install -m 755 dlpodget $$DESTDIR/usr/bin/; \
-	else \
-		install -m 755 dlpodget ~/bin/; \
-	fi
-
-check : test
-test:
-	cover -delete
-	$(SHELL) t/run.sh
-	cover -report html
-	lynx -dump cover_db/coverage.html | ./bin/cover_check
+binary:
 
 clean:
-	rm -rf cover_db
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make clean; \
-		cd ..; \
-	done
+	mvn clean
 
-# nb. we don't presently use Autotools, so we implement AUTOMAKE_OPTIONS ourselves
+build:
+	#mvn javadoc:javadoc
+	mvn -e verify
+	#mv target/*.jar ./
+
 subdirs:
 	for dir in $(SUBDIRS); do \
 		cd $$dir; \
@@ -71,11 +51,4 @@ subdirs:
 		cd ..; \
 	done
 
-install_subdirs:
-	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		make install; \
-		cd ..; \
-	done
-
-.PHONY: all install check test clean subdirs install_subdirs
+.PHONY: all binary build clean subdirs
