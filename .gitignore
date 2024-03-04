@@ -3,3 +3,8 @@ cover_db
 .pdf
 .ident
 .version
+*.jar
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.pdf
