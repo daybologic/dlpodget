@@ -14,6 +14,7 @@ public class ConfigFile {
 	private File file;
 	private Ini ini;
 	private GlobalConfig main;
+	private MacroDictionary macroDictionary;
 
 	public ConfigFile() {
 		file = new File(FILENAME);
@@ -28,6 +29,10 @@ public class ConfigFile {
 		parse();
 	}
 
+	public String resolveMacro(final String input) {
+		return this.macroDictionary.resolve(input);
+	}
+
 	private void parse() {
 		parseMain();
 		parsePaths();
@@ -40,16 +45,35 @@ public class ConfigFile {
 	}
 
 	private void parsePaths() {
-		Ini.Section section = ini.get("paths");
-		String root = section.get("root");
+		macroDictionary = new MacroDictionary();
+
+		Ini.Section paths = ini.get("paths");
+
+		String root = paths.get("root");
 		logger.trace("root: " + root);
+		macroDictionary.set("LOCALPFX", root);
+
 		String home = Env.get("HOME");
 		logger.trace("HOME: " + home);
-		Set<String> pathNames = section.keySet();
+		macroDictionary.set("HOME", home);
+
+		String user = Env.get("USER");
+		logger.trace("USER: " + user);
+		macroDictionary.set("USER", user);
+
+		Set<String> pathNames = paths.keySet();
 		logger.trace(pathNames);
 		for (String pathName: pathNames) {
 			logger.trace("path: " + pathName);
+			macroDictionary.set(pathName, paths.get(pathName));
 		}
+
+		// DEBUGGING
+		logger.trace("Resolving politics: " + macroDictionary.resolve("politics"));
+		logger.trace("Resolving radio: " + macroDictionary.resolve("radio"));
+		logger.trace("Resolving acooke_lfabushjr: " + macroDictionary.resolve("acooke_lfabushjr"));
+		logger.trace("Resolving comedy: " + macroDictionary.resolve("comedy"));
+		//System.exit(0); // FIXME
 	}
 
 	private void parseFeeds() {
@@ -61,7 +85,7 @@ public class ConfigFile {
 			if (sectionName.equals("paths")) continue;
 
 			logger.trace(sectionName);
-			new FeedConfig(ini, ini.get(sectionName)); // TODO
+			new FeedConfig(this, ini, ini.get(sectionName)); // TODO
 		}
 	}
 }

@@ -16,11 +16,11 @@ class FeedConfig {
 	String rssUrl = "";
 	String localpath = "";
 
-	FeedConfig(Ini ini, Ini.Section section) {
+	FeedConfig(ConfigFile configFile, Ini ini, Ini.Section section) {
 		general = new GeneralConfig(ini, ini.get("main"));
 
 		rssUrl = section.get("rss");
-		localpath = section.get("localpath");
+		localpath = configFile.resolveMacro(section.get("localpath"));
 
 		logger.trace("rss: " + rssUrl);
 		logger.trace("localpath: " + localpath);
