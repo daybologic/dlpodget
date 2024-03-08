@@ -31,18 +31,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 SUBDIRS = docs
+TARGET = target/dlpodget-0.0.0-jar-with-dependencies.jar
 
 all: build binary subdirs
 
 binary:
 
 clean:
+	rm -f $(TARGET)
 	mvn clean
 
 build:
-	#mvn javadoc:javadoc
 	mvn -e verify
-	#mv target/*.jar ./
+
+javadoc:
+	mvn javadoc:javadoc
 
 subdirs:
 	for dir in $(SUBDIRS); do \
@@ -51,4 +54,9 @@ subdirs:
 		cd ..; \
 	done
 
-.PHONY: all binary build clean subdirs
+$(TARGET): build
+
+run: $(TARGET)
+	java -jar ./$(TARGET)
+
+.PHONY: all binary build clean docs javadoc run
