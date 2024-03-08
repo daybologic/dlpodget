@@ -20,9 +20,12 @@ class FeedConfig {
 		general = new GeneralConfig(ini, ini.get("main"));
 
 		rssUrl = section.get("rss");
-		localpath = configFile.resolveMacro(section.get("localpath"));
-
 		logger.trace("rss: " + rssUrl);
-		logger.trace("localpath: " + localpath);
+
+		localpath = section.get("localpath");
+		logger.trace("localpath (raw): " + localpath);
+
+		localpath = configFile.resolveMacro(localpath);
+		logger.trace("localpath (cooked): " + localpath);
 	}
 }

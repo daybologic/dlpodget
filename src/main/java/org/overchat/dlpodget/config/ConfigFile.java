@@ -30,6 +30,7 @@ public class ConfigFile {
 	}
 
 	public String resolveMacro(final String input) {
+		this.macroDictionary.depth = 0; // FIXME: Crude hack
 		return this.macroDictionary.resolve(input);
 	}
 
@@ -69,11 +70,13 @@ public class ConfigFile {
 		}
 
 		// DEBUGGING
-		logger.trace("Resolving politics: " + macroDictionary.resolve("politics"));
-		logger.trace("Resolving radio: " + macroDictionary.resolve("radio"));
-		logger.trace("Resolving acooke_lfabushjr: " + macroDictionary.resolve("acooke_lfabushjr"));
-		logger.trace("Resolving comedy: " + macroDictionary.resolve("comedy"));
-		//System.exit(0); // FIXME
+//		logger.trace("Resolving politics: " + macroDictionary.resolve("politics"));
+//		logger.trace("Resolving radio: " + macroDictionary.resolve("radio"));
+//		logger.trace("Resolving acooke_lfabushjr: " + macroDictionary.resolve("acooke_lfabushjr"));
+//		logger.trace("Resolving comedy: " + macroDictionary.resolve("comedy"));
+		final String __s = "$RADIO/sarc";
+		logger.trace(String.format("Resolving %s: \'%s\'", __s, macroDictionary.resolve(__s)));
+//		System.exit(0); // FIXME
 	}
 
 	private void parseFeeds() {
