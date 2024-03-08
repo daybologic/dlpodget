@@ -30,7 +30,6 @@ public class ConfigFile {
 	}
 
 	public String resolveMacro(final String input) {
-		this.macroDictionary.depth = 0; // FIXME: Crude hack
 		return this.macroDictionary.resolve(input);
 	}
 

@@ -35,10 +35,8 @@ class MacroDictionary {
 		return macros.get(key.toUpperCase());
 	}
 
-	public int depth = 0; // TODO: Crude; requires improvement
 	String resolve(String value) {
 		int offset = 0;
-		depth++;
 		do {
 			logger.trace(String.format("value \'%s\', offset %d before indexOf", value, offset));
 			offset = value.indexOf("$", offset);
@@ -63,8 +61,14 @@ class MacroDictionary {
 
 				logger.trace(String.format("matches count %d", matchesDebug));
 			}
-			if (depth < 15) value = resolve(value); // TODO: Crude; requires improvement
 		} while (offset > -1);
+
+		// FIXME: You must control depth if refs reference each other (write a test!)
+		if (value.indexOf("$", 0) > -1) {
+			/* The resolved string contains more references, so call ourselves recursively until
+			 * there is nothing more to find. */
+			value = resolve(value);
+		}
 
 		return value;
 	}
