@@ -7,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ini4j.Ini;
 
+import org.overchat.dlpodget.config.exceptions.MacroCycleException;
+
 public class ConfigFile {
 	private static final Logger logger = LogManager.getLogger(ConfigFile.class);
 	private static final String FILENAME = "dlpodget.rc";
@@ -30,7 +32,15 @@ public class ConfigFile {
 	}
 
 	public String resolveMacro(final String input) {
-		return this.macroDictionary.resolve(input);
+		String resolved = "";
+
+		try {
+			resolved = this.macroDictionary.resolve(input);
+		} catch (MacroCycleException e) {
+			logger.error("Cannot resolve macro", e);
+		}
+
+		return resolved.isEmpty() ? input : resolved;
 	}
 
 	private void parse() {
@@ -68,13 +78,27 @@ public class ConfigFile {
 			macroDictionary.set(pathName, paths.get(pathName));
 		}
 
-		// DEBUGGING
-//		logger.trace("Resolving politics: " + macroDictionary.resolve("politics"));
-//		logger.trace("Resolving radio: " + macroDictionary.resolve("radio"));
-//		logger.trace("Resolving acooke_lfabushjr: " + macroDictionary.resolve("acooke_lfabushjr"));
-//		logger.trace("Resolving comedy: " + macroDictionary.resolve("comedy"));
-		final String __s = "$RADIO/sarc";
-		logger.trace(String.format("Resolving %s: \'%s\'", __s, macroDictionary.resolve(__s)));
+		try {
+			// DEBUGGING
+			logger.trace("Resolving politics: " + macroDictionary.resolve("politics"));
+			logger.trace("Resolving radio: " + macroDictionary.resolve("radio"));
+			logger.trace("Resolving acooke_lfabushjr: " + macroDictionary.resolve("acooke_lfabushjr"));
+			logger.trace("Resolving comedy: " + macroDictionary.resolve("comedy"));
+		}
+		catch (MacroCycleException e) {
+			logger.trace("the macro cycle exception piece (A): ", e);
+		}
+
+		// FIXME: Demonstrates a problem we need to debug
+		/*final String __s = "blah/$LOCALPFX/$USER/$TECH/$RADIO/sarc";
+		String __resolved = "";
+		try {
+			__resolved = macroDictionary.resolve(__s);
+		}
+		catch (MacroCycleException e) {
+			logger.trace("the macro cycle exception piece (B): ", e);
+		}
+		logger.trace(String.format("Resolving %s: \'%s\'", __s, __resolved));*/
 //		System.exit(0); // FIXME
 	}
 
